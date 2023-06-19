@@ -1,0 +1,58 @@
+{
+    "name": "ROS 2 Development Container",
+    "privileged": true,
+    "remoteUser": "nachtaktiverhalbaffe",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "nachtaktiverhalbaffe"
+        }
+    },
+    "workspaceFolder": "/home/ws",
+    "workspaceMount": "src=${localWorkspaceFolder},dst=/home/ws,type=bind",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "althack.ament-task-provider",
+                "betwo.b2-catkin-tools",
+                "DotJoshJohnson.xml",
+                "ms-azuretools.vscode-docker",
+                "ms-iot.vscode-ros",
+                "ms-python.python",
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "redhat.vscode-yaml",
+                "smilerobotics.urdf",
+                "streetsidesoftware.code-spell-checker",
+                "twxs.cmake",
+                "yzhang.markdown-all-in-one",
+                "zachflower.uncrustify"
+            ]
+        }
+    },
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}", // Needed for GUI try ":0" for windows
+        "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+        "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
+        "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
+    },
+    "runArgs": [
+        "--net=host",
+        "-e",
+        "DISPLAY=${env:DISPLAY}",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined",
+        "-v",
+        "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh"
+    ],
+    // "mounts": [
+    //     "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+    //     "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+    //     "source=${localWorkspaceFolder}/cache/iron/build,target=/home/ws/build,type=bind",
+    //     "source=${localWorkspaceFolder}/cache/iron/install,target=/home/ws/install,type=bind",
+    //     "source=${localWorkspaceFolder}/cache/iron/log,target=/home/ws/log,type=bind"
+    // ],
+    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/"
+}
