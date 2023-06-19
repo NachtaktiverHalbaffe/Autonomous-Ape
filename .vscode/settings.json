@@ -1,4 +1,8 @@
 {
     "cmake.sourceDirectory": "/home/ws/src/sopias4_framework",
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none"
 }

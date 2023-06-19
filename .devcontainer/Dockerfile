@@ -18,12 +18,16 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	rm -f /etc/apt/apt.conf.d/docker-clean\
 	&& apt-get update && apt-get upgrade -y \
 	&& apt-get install -y --no-install-recommends python3-pip \
+	doxygen \
 	# Install turtlebot4 dependencies
 	ros-humble-turtlebot4-description \
 	ros-humble-turtlebot4-msgs \ 
 	ros-humble-turtlebot4-navigation \ 
 	ros-humble-turtlebot4-node \
 	ros-humble-turtlebot4-simulator
+# Install rosdoc2
+RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 \
+	&& pip3 install -e /home/rosdoc2
 ENV SHELL /bin/bash
 
 # ********************************************************
