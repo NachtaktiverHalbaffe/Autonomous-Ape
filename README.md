@@ -1,4 +1,6 @@
 # Sopias4   <!-- omit in toc -->
+This is a workspace repository for Turtlebot4 implementation of the laboratory course for software engineering on the IAS of the University of Stuttgart.
+
 ## Table of Contents   <!-- omit in toc -->
 - [Workspace Overview](#workspace-overview)
   - [Sopias4 Application](#sopias4-application)
@@ -9,7 +11,7 @@
   - [Installing ROS2 and necesary applications](#installing-ros2-and-necesary-applications)
     - [Recommended: Running in Docker using Dev Containers (Visual Studio Code)](#recommended-running-in-docker-using-dev-containers-visual-studio-code)
     - [Run directly on host](#run-directly-on-host)
-- [Run the stack](#run-the-stack)
+- [Running the system](#running-the-system)
 - [License](#license)
 
 # Workspace Overview
@@ -123,7 +125,7 @@ echo "source /opt/ros/humble/setup.bash" >>/home/<your linux user>/.bashrc
 echo "if [ -f <path to ros workspace>/install/setup.bash ]; then source <path to ros workspace>/install/setup.bash; fi" >> /home/<your linux user>/.bashrc
 ```
 
-# Run the stack 
+# Running the system
 You can run the stack via launchfiles. These are located in the corresponding `launch/` directories. In the readme's of Sopias4 Application and Sopias4 Map-Server you can get more details of the provides launchfiles of these packages. Following, a short description of the most important launchfiles are given:
 - `graphical_operation`: Used when operated with GUI. In the GUI you can launch the other neccessary parts
 - `cli_operation`: Used when operated with the terminal. Note: You have to interact with the system via the corresponding services over the terminal
