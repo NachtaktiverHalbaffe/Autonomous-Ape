@@ -19,12 +19,13 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	&& apt-get update && apt-get upgrade -y \
 	&& apt-get install -y --no-install-recommends python3-pip \
 	doxygen \
+	figlet \
 	# Install turtlebot4 dependencies
 	ros-humble-turtlebot4-description \
 	ros-humble-turtlebot4-msgs \ 
 	ros-humble-turtlebot4-navigation \ 
 	ros-humble-turtlebot4-node \
-	ros-humble-turtlebot4-simulator
+	ros-humble-turtlebot4-simulator 
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 \
 	&& pip3 install -e /home/rosdoc2
@@ -34,10 +35,13 @@ ENV SHELL /bin/bash
 # * Anything else you want to do like clean up goes here *
 # ********************************************************
 
-# [Optional] Set the default user. Omit if you want to keep the default as root.
-RUN echo 'source /opt/ros/humble/setup.bash' >> /home/.bashrc
-RUN echo "if [ -f ${WORKSPACE}/install/setup.bash ]; then source ${WORKSPACE}/install/setup.bash; fi" >> /home/.bashrc
+# Happy Easter
+RUN echo 'figlet "Linux is great" ' >> /home/nachtaktiverhalbaffe/.bashrc 
+# Autoamtic sourcing of ROS2
+RUN echo 'source /opt/ros/humble/setup.bash' >>  /home/nachtaktiverhalbaffe/.bashrc
+RUN echo "if [ -f ${WORKSPACE}/install/setup.bash ]; then source ${WORKSPACE}/install/setup.bash; fi" >>  /home/nachtaktiverhalbaffe/.bashrc
 
+# [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
 
 CMD ["/bin/bash"]
