@@ -5,7 +5,7 @@
   <version>0.0.1</version>
   <description>TODO: Package description</description>
   <maintainer email="LeMonkay.VTIT@tutanota.com">NachtaktiverHalbaffe</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache-2.0</license>
 
   <!-- Use both ament_cmake and ament_cmake_python to use C++ and Python nodes in same package -->
   <buildtool_depend>ament_cmake</buildtool_depend>
