@@ -5,29 +5,41 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "USERNAME": "nachtaktiverhalbaffe"
+            "USERNAME": "nachtaktiverhalbaffe",
+            "WORKSPACE": "${containerWorkspaceFolder}"
         }
     },
     "workspaceFolder": "/home/ws",
     "workspaceMount": "src=${localWorkspaceFolder},dst=/home/ws,type=bind",
     "customizations": {
         "vscode": {
+            "settings": {
+                "telemetry.telemetryLevel": "off",
+                "python.linting.lintOnSave": true,
+                "source.organizeImports": true,
+                "[python]": {
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": [
+                        "source.organizeImports"
+                    ]
+                }
+            },
             "extensions": [
                 "althack.ament-task-provider",
                 "betwo.b2-catkin-tools",
                 "DotJoshJohnson.xml",
                 "ms-azuretools.vscode-docker",
-                "ms-iot.vscode-ros",
                 "ms-python.python",
                 "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
+                "leonhard-s.python-sphinx-highlight",
                 "redhat.vscode-yaml",
-                "smilerobotics.urdf",
-                "streetsidesoftware.code-spell-checker",
-                "twxs.cmake",
                 "yzhang.markdown-all-in-one",
                 "zachflower.uncrustify",
-                "gruntfuggly.todo-tree"
+                "streetsidesoftware.code-spell-checker",
+                "gruntfuggly.todo-tree",
+                "ms-iot.vscode-ros",
+                "smilerobotics.urdf"
             ]
         }
     },

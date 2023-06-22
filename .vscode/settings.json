@@ -1,8 +1,14 @@
 {
-    "cmake.sourceDirectory": "/home/ws/src/sopias4_framework",
-    "cmake.configureOnOpen": true,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    },
-    "python.formatting.provider": "none"
+    "python.analysis.typeCheckingMode": "basic",
+    "cmake.configureOnOpen": false,
+    "python.autoComplete.extraPaths": [
+        "/home/ws/install/sopias4_framework/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/ws/install/sopias4_framework/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
 }

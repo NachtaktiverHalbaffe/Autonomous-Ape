@@ -6,6 +6,7 @@ This package extends the ROS2 framework with additional tools, definitions and c
 - [Usage](#usage)
   - [PyBridges](#pybridges)
   - [Nodes](#nodes)
+    - [GUI-Node](#gui-node)
   - [Msgs](#msgs)
   - [Tools](#tools)
     - [Development tools](#development-tools)
@@ -38,11 +39,30 @@ It uses ROS2 Services and Actions for bridging. The Nodes package provides Pytho
 
 
 ## Nodes
-As mentioned in the [PyBridges section](#pybridges) the Python Plugin Nodes are included in this module and there you can read for further implementation details. 
+As mentioned in the [PyBridges section](#pybridges) the Python Plugin Nodes are included in this module and there you can read for further implementation details. Also there a base GUI Node is provided which you can use to build your own PyQT GUI. Following, the usage for this is described.
 
-Also there a base GUI Node is provided which you can use to build your own PyQT GUI. For this purpose, create a UI file with QT Designer with which you can design the GUI graphically. After that, run the script TODO which converts it to a Python File, After that, you can inherit from the GUI Node and do the necessary steps:
+### GUI-Node
+For generating a GUI, create a UI file with QT Designer with which you can design the GUI graphically. For this purpose, you can run `designer` in the terminal to open QT-Designer from the Dev-Container environment, otherwise you can install it on your host OS and use it there. After that, save the UI-File in the assets folder in Sopias4 Application and run the script `python generate_ui.py -i <path to ui file> -o <path to directory where the generated Python class should be saved>` which converts it to a Python class. The script is located in `sopias4_framework/tools/scripts` in this ROS2-package. After that, you can inherit from the GUI Node and do the necessary steps:
 ```Python
-# TODO Create final snippet
+class YourImplementationClass(GUINode):
+
+  def __init__(self) ->None:
+    # The script should name the Python object this way, but can vary. Doublecheck the class name
+    # within the generated Python file to be sure
+    ui_file = Ui_MainWindow() 
+    super().__init(self, ui_file)
+
+  def connect_callbacks(self):
+    # You need to overrride this method. Connect your UI elements with the callacks here.
+    # The ui elements are in self.ui field of the GUINode class
+    self.ui.example_button.clicked.connect(self.__foobar)
+  
+  def set_default_values(self):
+      # You need to override this method. Set default values or default choices of your ui elements here
+      self.ui.example_textbox.setText("Hello World")
+
+  def __foobar():
+    print("Hello World!")
 ```
 
 ## Msgs
@@ -71,8 +91,8 @@ This module provides miscellaneous scripts, functions, helpers etc. which are lo
 
 ### Development tools
 These tools are mainly Python Scripts which should support the development process. It provides help for the development and arent used in production code. These are thje provided tools:
-- `generate_docs` (Not 100% working): It generates the documentation for the Sopias4 Framework by parsing the comments of the code e.g. Docstrings
-- 
+- `generate_docs`: It generates the documentation for the Sopias4 Framework by parsing the comments of the code e.g. Docstrings
+- `generate_ui`: It generates the Python class from a given Ui file for the Sopias4 Framework with the help of PyQt5
 <!-- TODO Keep up to date -->
 
 # License

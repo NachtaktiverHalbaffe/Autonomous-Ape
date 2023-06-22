@@ -45,8 +45,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">sopias4_framework</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="sopias4_framework.html">sopias4_framework package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="sopias4_framework.html#subpackages">Subpackages</a><ul class="current">
@@ -54,16 +53,16 @@
 <li class="toctree-l5"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#module-sopias4_framework.nodes.gui_node">sopias4_framework.nodes.gui_node module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode"><code class="docutils literal notranslate"><span class="pre">GUINode</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.closeEvent"><code class="docutils literal notranslate"><span class="pre">GUINode.closeEvent()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.node_name"><code class="docutils literal notranslate"><span class="pre">GUINode.node_name</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.ui"><code class="docutils literal notranslate"><span class="pre">GUINode.ui</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode"><code class="docutils literal notranslate"><span class="pre">GrapficalNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.node_name"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.node_name</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.namespace</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.register_namespace()</span></code></a></li>
 </ul>
 </li>
@@ -89,7 +88,13 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l5"><a class="reference internal" href="sopias4_framework.tools.html#module-sopias4_framework.tools">Module contents</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sopias4_framework.tools.html#module-sopias4_framework.tools">Module contents</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="sopias4_framework.tools.html#tools">Tools</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.html#scripts">Scripts</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -138,16 +143,41 @@
 <dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sopias4_framework.nodes.gui_node.</span></span><span class="sig-name descname"><span class="pre">GUINode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ui</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gui_node'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code></p>
-<p>This class is a Base GUI class which can be used to building a own GUI in the Sopias4 project. This class handles the QT GUI portion of the Node, the ROS2 Node itself     is a class attribute (node) which is instantiated by this class and runs under the hood in another object/Thread.</p>
+<p>This class is a Base GUI class which can be used to building a own GUI in the Sopias4 project. This class handles the QT GUI portion of the Node, the ROS2 Node itself
+is a class attribute (node) which is instantiated by this class and runs under the hood in another object/Thread.</p>
+<p>For generating a GUI, create a UI file with QT Designer with which you can design the GUI graphically. For this purpose, you can run <cite>designer</cite> in the terminal to open
+QT-Designer from the Dev-Container environment, otherwise you can install it on your host OS and use it there. After that, save the UI-File in the assets folder in Sopias4
+Application and run the script <cite>python3 generate_ui.py -i &lt;path to ui file&gt; -o &lt;path to directory where the generated Python class should be saved&gt;</cite> which converts it to a
+Python class. The script is located in <cite>sopias4_framework/tools/scripts</cite> in this ROS2-package. After that, you can inherit from the GUI Node and do the necessary steps:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">YourImplementationClass</span><span class="p">(</span><span class="n">GUINode</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span><span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The script should name the Python object this way, but can vary. Doublecheck the class name</span>
+        <span class="c1"># within the generated Python file to be sure</span>
+        <span class="n">ui_file</span> <span class="o">=</span> <span class="n">Ui_MainWindow</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui_file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">connect_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># You need to overrride this method. Connect your UI elements with the callacks here.</span>
+        <span class="c1"># The ui elements are in self.ui field of the GUINode class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">example_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__foobar</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_default_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># You need to override this method. Set default values or default choices of your ui elements here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">example_textbox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__foobar</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello World!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="simple">
 <dt>Following methods needs to be overriden (look further into documentation for more details):</dt><dd><ul class="simple">
 <li><p>connect_callbacks()</p></li>
 <li><p>set_default_values()</p></li>
 </ul>
 </dd>
-<dt>It also has builtin methods which you can use a callback functiona for certain tasks in Sopias4 (look further into documentation for more details):</dt><dd><ul class="simple">
+<dt>It also has builtin methods which you can use a callback functionas for certain tasks in Sopias4 (look further into documentation for more details):</dt><dd><ul class="simple">
 <li><p>register_namespace(): Register namespace in Sopias4 Map-Server</p></li>
-<li></li>
 </ul>
 </dd>
 <dt>It provides following ROS2-services:</dt><dd><ul class="simple">
@@ -155,46 +185,64 @@
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.closeEvent">
-<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.closeEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.closeEvent" title="Permalink to this definition"></a></dt>
-<dd><p>Executes when the GUI is closed</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.connect_callbacks">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.connect_callbacks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks" title="Permalink to this definition"></a></dt>
-<dd><p>Connect the callback functions from the QT UI elements here.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.ui">
+<span class="sig-name descname"><span class="pre">ui</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.ui" title="Permalink to this definition"></a></dt>
+<dd><p>The Python UI Object which is generated by PyQt5. Should normally be a Ui_MainWindow() instance if using the provided scripts.            node_name (str, optional): Name of the Node. Defaults to gui_node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Ui_MainWindow()</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.namespace">
 <span class="sig-name descname"><span class="pre">namespace</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.namespace" title="Permalink to this definition"></a></dt>
-<dd><p>The namespace of the gui node. Needed in an multi-roboter-environment</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.node_name">
-<span class="sig-name descname"><span class="pre">node_name</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.node_name" title="Permalink to this definition"></a></dt>
-<dd><p>The name of the gui node. Defaults to gui_node if not specified otherwise</p>
+<dd><p>The namespace of the node. It should not be specified by the developer. Instead the User should use the register service and                                                         let the service set the namespace of this class. Defaults to None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str, optional</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.register_namespace">
-<span class="sig-name descname"><span class="pre">register_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.register_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace" title="Permalink to this definition"></a></dt>
-<dd><p>Runs the service to create a namespace. It’s basically a wrapper and calling</p>
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.connect_callbacks">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.connect_callbacks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks" title="Permalink to this definition"></a></dt>
+<dd><p>Connect the callback functions from the QT UI elements here. Needs to be overridden</p>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">connect_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># The ui elements are in self.ui field of the GUINode class</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">example_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hello_world</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.set_default_values">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_default_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.set_default_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.set_default_values" title="Permalink to this definition"></a></dt>
-<dd><p>Set the default values from the QT UI elements here.</p>
+<dd><p>Set the default values from the QT UI elements here. Needs to be overridden</p>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">set_default_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="c1"># Set default values or default choices of your ui elements here</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">example_textbox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.ui">
-<span class="sig-name descname"><span class="pre">ui</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.ui" title="Permalink to this definition"></a></dt>
-<dd><p>The Python GUI object which is autogenerated</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.register_namespace">
+<span class="sig-name descname"><span class="pre">register_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.register_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace" title="Permalink to this definition"></a></dt>
+<dd><p>Runs the service to create a namespace. It’s basically a wrapper and calling the register_namespace
+service client in the underlying node object. If successful, it will restart <cite>self.node</cite> with the namespace.
+This must be done before connecting to the Turtlebot.</p>
+<p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>namespace</strong> (<em>str</em>) – The namespace which should be registered</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -205,6 +253,28 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
 <p>This is the ROS2 Node which runs under the hood in the GUI. To avoid problems by multiple inheritance etc,     the node is done in this separate class which is instantiated as a attribute in the GUI. As a result, this class only
 handles the ROS2 Node specific stuff e.b. implementing services, actions, messages etc.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.node_name">
+<span class="sig-name descname"><span class="pre">node_name</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.node_name" title="Permalink to this definition"></a></dt>
+<dd><p>(optional) Name of the Node. Defaults to gui_node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.namespace">
+<span class="sig-name descname"><span class="pre">namespace</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.namespace" title="Permalink to this definition"></a></dt>
+<dd><p>(optional) The namespace of the node. When not specified, the GUI has to register itself.                                    The namespace should not be set by the developer but instead let the register_namespace service set the namespace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace">
 <span class="sig-name descname"><span class="pre">register_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.register_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace" title="Permalink to this definition"></a></dt>
@@ -228,9 +298,10 @@ On Failure, the user is informed and has a choice to retry</p>
 </section>
 <section id="module-sopias4_framework.nodes">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sopias4_framework.nodes" title="Permalink to this heading"></a></h2>
-<p>Sopias 4 Framework: Nodes
-—
-Lore Ipsum</p>
+<p>The Python Plugin Nodes are included in this module. These plugin nodes which already implemented these
+Actions and Services and you only need to override the plugin-specific implementation methods which you want
+to extend e.g. the path planning.</p>
+<p>Also there a base GUI Node is provided which you can use to build your own PyQT GUI.</p>
 </section>
 </section>
 

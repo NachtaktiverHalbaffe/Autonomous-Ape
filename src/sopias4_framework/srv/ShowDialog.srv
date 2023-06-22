@@ -1,0 +1,41 @@
+# --- Request ---
+# Constants for different icons
+uint16 ICON_INFO = 0
+uint16 ICON_WARNING = 1
+uint16 ICON_ERROR = 2
+uint16 ICON_QUESTION = 3
+# Constants for different interaction options. Each option, sperated by "_" 
+# represents a button with that corresponding text which the user can press
+string CONFIRM = "confirm"
+string CONFIRM_ABORT = "confirm_abort"
+string CONFIRM_CANCEL= "confirm_cancel"
+string CONFIRM_RETRY = "confirm_retry"
+string YES_NO = "yes_no"
+string IGNORE_CANCEL ="ignore_cancel"
+string IGNORE_ABORT = "ignore_abort"
+string IGNORE_RETRY ="ignore_retry"
+
+# The title of the dialog
+string title 
+# The text content of dialog
+string content
+# Icon which should be shown. It is specified by a number which identifies 
+# the corresponding icon. Defaults to 0 (info icon)
+uint16 icon 0
+# Interaction options which are displayed on the dialog. It is specified by a string which identifies 
+# the corresponding option. Defaults to "confirm"
+string interaction_options "confirm"
+---
+# --- Response ---
+# Constants for the selected option from the user
+string CONFIRMED ="confirmed"
+string RETRY = "retry"
+string ABORT = "abort"
+string YES = "yes"
+string NO = "no"
+string IGNORE = "ignore"
+string CANCEL = "cancel"
+
+# Which option in the dialog the user selected. Defaults to "confirmed". It is specified by a string which identifies 
+# the corresponding option
+string selected_option "confirmed"

@@ -8,6 +8,7 @@ endif()
 #######################################
 # ----------- Find dependencies --------------
 #######################################
+find_package(rosidl_default_generators REQUIRED)
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -30,21 +31,31 @@ include_directories(include)
 # Create exectuables. For this purpose, add 
 # following line for each node:
 # add_executable(cpp_exe src/<node file>)
-ament_target_dependencies(cpp_exe rclcpp)
+# ament_target_dependencies(cpp_exe rclcpp)
 # Install C++ executables. For this purpose, add 
 # following line for each node:
-install(TARGETS
-    cpp_exe
-    DESTINATION lib/${PROJECT_NAME}
-)
+# install(TARGETS
+#     cpp_exe
+#     DESTINATION lib/${PROJECT_NAME}
+# )
 
 #------------------ Python ---------------------
 # Install Python modules
-ament_python_install_package(${PROJECT_NAME})
+# ament_python_install_package(${PROJECT_NAME})
 # Install executables
-install(PROGRAMS
-  #scripts/py_node.py
-  DESTINATION lib/${PROJECT_NAME}
+# install(PROGRAMS
+#   #scripts/py_node.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
+
+######################################
+# ----------- ROS specific stuff ---------------
+######################################
+# Service definitions
+rosidl_generate_interfaces(${PROJECT_NAME}
+			srv/ShowDialog.srv
+      srv/Register.srv
 )
 
 if(BUILD_TESTING)

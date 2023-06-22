@@ -8,7 +8,6 @@ Welcome to Sopias4 Framework's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    modules
 

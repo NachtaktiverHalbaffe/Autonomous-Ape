@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ws/install/sopias4_framework/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/ws/src/sopias4_application/include/**",
+        "/home/ws/src/sopias4_framework/include/**",
+        "/home/ws/src/sopias4_map_server/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

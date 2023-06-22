@@ -31,6 +31,7 @@ release = "0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.viewcode", "sphinx.ext.todo"]
+autodoc_member_order = 'bysource'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -60,7 +61,7 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False,
 }
-# html_static_path = ["_static"]
+html_static_path = ["_static"]
 
 # -- Options for rosdoc2 -----------------------------------------------------
 

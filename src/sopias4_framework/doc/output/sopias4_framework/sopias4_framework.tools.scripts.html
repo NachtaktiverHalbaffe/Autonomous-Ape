@@ -44,8 +44,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">sopias4_framework</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="sopias4_framework.html">sopias4_framework package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="sopias4_framework.html#subpackages">Subpackages</a><ul class="current">
@@ -53,16 +52,16 @@
 <li class="toctree-l5"><a class="reference internal" href="sopias4_framework.nodes.html#submodules">Submodules</a></li>
 <li class="toctree-l5"><a class="reference internal" href="sopias4_framework.nodes.html#module-sopias4_framework.nodes.gui_node">sopias4_framework.nodes.gui_node module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode"><code class="docutils literal notranslate"><span class="pre">GUINode</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.closeEvent"><code class="docutils literal notranslate"><span class="pre">GUINode.closeEvent()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.node_name"><code class="docutils literal notranslate"><span class="pre">GUINode.node_name</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.ui"><code class="docutils literal notranslate"><span class="pre">GUINode.ui</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode"><code class="docutils literal notranslate"><span class="pre">GrapficalNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.node_name"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.node_name</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.namespace</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.register_namespace()</span></code></a></li>
 </ul>
 </li>
@@ -88,7 +87,13 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l5"><a class="reference internal" href="sopias4_framework.tools.html#module-sopias4_framework.tools">Module contents</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sopias4_framework.tools.html#module-sopias4_framework.tools">Module contents</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="sopias4_framework.tools.html#tools">Tools</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.html#scripts">Scripts</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -142,7 +147,7 @@ few adjustments to your ROS2 package:</p>
 <li><p>Create a folder <cite>doc/</cite> in your package and cd into it in the terminal</p></li>
 <li><p>Run <cite>sphinx-quickstart</cite> and follow the steps. Make sure to select the option to seperate source and build directories</p></li>
 <li><dl class="simple">
-<dt>Copy the content of the <cite>conf.py</cite> in the Sopias4 Framework, located under <cite>doc/build</cite></dt><dd><ul>
+<dt>Copy the content of the <cite>conf.py</cite> in the Sopias4 Framework, located under <cite>doc/build</cite>:</dt><dd><ul>
 <li><p>You can keep the meta-data specific to the package</p></li>
 <li><p>If during the building an error occurs that some specific module was not found, then place them in <cite>MOCK_MODULES</cite> inside of <cite>conf.py</cite></p></li>
 </ul>
@@ -154,7 +159,11 @@ few adjustments to your ROS2 package:</p>
 <dl class="simple">
 <dt>Then you can use generate_docs to generate the docs, but you have to make following adjustments:</dt><dd><ul class="simple">
 <li><p>Pass the path to the root of the ROS2-package as an argument</p></li>
-<li><p>You can achieve this also by running it over the terminal with following command (passing an argument): <cite>python3 generate_docs.py -p  &lt;path to ROS2-package&gt;</cite></p></li>
+<li><dl class="simple">
+<dt>You can achieve this also by running it over the terminal with following command (passing an argument):</dt><dd><p><cite>python3 generate_docs.py -p  &lt;path to ROS2-package&gt;</cite></p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>

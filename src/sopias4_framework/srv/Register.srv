@@ -1,0 +1,13 @@
+# Request
+# The namespace to register. Following should be avoided: 
+# having whitespaces, using "-" instead of "_", using "/" between to words
+string namespace_canditate
+---
+# Response
+# Predefined Statuscodes
+string UNKOWN_ERROR = "unkown_error"
+string ILLEGAL_NAMESPACE_ERROR = "illegal_namespace"
+string COLLISION_ERROR ="collision_namespace"
+string SUCCESS = "success"
+
+string statuscode "unkown_error"

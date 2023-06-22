@@ -1,5 +1,6 @@
 FROM ros:humble
 ARG USERNAME=nachtaktiverhalbaffe
+ARG WORKSPACE
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -25,12 +26,13 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	ros-humble-turtlebot4-msgs \ 
 	ros-humble-turtlebot4-navigation \ 
 	ros-humble-turtlebot4-node \
-	ros-humble-turtlebot4-simulator 
+	ros-humble-turtlebot4-simulator \
+	qttools5-dev-tools 	qttools5-dev \
+	python3-mock
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 \
-	&& pip3 install -e /home/rosdoc2
+	&& pip3 install -e /home/rosdoc2 
 ENV SHELL /bin/bash
-
 # ********************************************************
 # * Anything else you want to do like clean up goes here *
 # ********************************************************
@@ -39,7 +41,7 @@ ENV SHELL /bin/bash
 RUN echo 'figlet "Linux is great" ' >> /home/nachtaktiverhalbaffe/.bashrc 
 # Autoamtic sourcing of ROS2
 RUN echo 'source /opt/ros/humble/setup.bash' >>  /home/nachtaktiverhalbaffe/.bashrc
-RUN echo "if [ -f ${WORKSPACE}/install/setup.bash ]; then source ${WORKSPACE}/install/setup.bash; fi" >>  /home/nachtaktiverhalbaffe/.bashrc
+RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/nachtaktiverhalbaffe/.bashrc
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
