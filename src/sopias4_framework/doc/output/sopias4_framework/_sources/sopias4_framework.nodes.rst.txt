@@ -1,6 +1,17 @@
 sopias4\_framework.nodes package
 ================================
 
+Submodules
+----------
+
+sopias4\_framework.nodes.gui\_node module
+-----------------------------------------
+
+.. automodule:: sopias4_framework.nodes.gui_node
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

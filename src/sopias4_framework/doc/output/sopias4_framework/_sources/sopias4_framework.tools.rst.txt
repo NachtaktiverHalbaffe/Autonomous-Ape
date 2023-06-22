@@ -1,16 +1,13 @@
 sopias4\_framework.tools package
 ================================
 
-Submodules
-----------
+Subpackages
+-----------
 
-sopias4\_framework.tools.generate\_docs module
-----------------------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: sopias4_framework.tools.generate_docs
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   sopias4_framework.tools.scripts
 
 Module contents
 ---------------

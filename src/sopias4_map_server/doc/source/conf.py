@@ -5,11 +5,11 @@
 import os
 import sys
 
-import mock
+# import mock
 
-MOCK_MODULES = ['sopias4_framework.srv']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+# MOCK_MODULES = ['sopias4_framework.srv']
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = mock.Mock()
 
 
 # -- Path setup --------------------------------------------------------------
@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(f"{PY_PKG_PATH}"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Sopias4 Framework"
+project = "Sopias4 Map-Server"
 copyright = '2023, Apache-2.0'
 author = "Felix Brugger"
 release = "0.1"
