@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(f"{PY_PKG_PATH}"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Sopias4 Framework"
+project = "Sopias4 Application"
 copyright = "2023, Apache-2.0"
 author = "NachtaktiverHalbaffe"
 release = "0.1"
