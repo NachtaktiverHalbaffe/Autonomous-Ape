@@ -30,6 +30,7 @@
                 "DotJoshJohnson.xml",
                 "ms-azuretools.vscode-docker",
                 "ms-python.python",
+                "ms-python.black-formatter",
                 "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
                 "leonhard-s.python-sphinx-highlight",
@@ -67,5 +68,5 @@
     //     "source=${localWorkspaceFolder}/cache/iron/install,target=/home/ws/install,type=bind",
     //     "source=${localWorkspaceFolder}/cache/iron/log,target=/home/ws/log,type=bind"
     // ],
-    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/"
+    "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/"
 }

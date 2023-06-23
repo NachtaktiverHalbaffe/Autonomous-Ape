@@ -60,28 +60,31 @@ class GUINode(QMainWindow):
                                                         let the service set the namespace of this class. Defaults to None
     """
 
-    def __init__(self, ui, node_name : str ="gui_node", namespace:str | None = None) -> None:
+    def __init__(
+        self, ui, node_name: str = "gui_node", namespace: str | None = None
+    ) -> None:
         # General setup
         super().__init__()
         # Class attributes
         self.ui = ui
-        self.node_name:str = node_name
-        self.namespace: str |None = namespace
-        self.node: GrapficalNode =GrapficalNode(node_name=node_name, namespace= namespace)
+        self.node_name: str = node_name
+        self.namespace: str | None = namespace
+        self.node: GrapficalNode = GrapficalNode(
+            node_name=node_name, namespace=namespace
+        )
         # Private class attributes
         self.__restart_flag = Event()
-        self.__nodeThread = Thread(target= self.__runNode, daemon=True)
-  
+        self.__nodeThread = Thread(target=self.__runNode, daemon=True)
+
         # Setup GUI
         self.ui.setupUi(self)
-         # Connecting the ui elements with callbacks and set values        
+        # Connecting the ui elements with callbacks and set values
         self.connect_callbacks()
         self.set_default_values()
 
-        #Create underlying node
-        rclpy.init()        # Run node in a seperate thread
+        # Create underlying node
+        rclpy.init()  # Run node in a seperate thread
         self.__nodeThread.start()
-
 
     @abc.abstractmethod
     def connect_callbacks(self) -> None:
@@ -112,27 +115,27 @@ class GUINode(QMainWindow):
                     self.ui.example_textbox.setText("Hello World")
         """
 
-    def register_namespace(self, namespace:str):
+    def register_namespace(self, namespace: str):
         """
-        Runs the service to create a namespace. It's basically a wrapper and calling the register_namespace 
+        Runs the service to create a namespace. It's basically a wrapper and calling the register_namespace
         service client in the underlying node object. If successful, it will restart `self.node` with the namespace.
-        This must be done before connecting to the Turtlebot. 
-        
+        This must be done before connecting to the Turtlebot.
+
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
 
         Args:
             namespace (str): The namespace which should be registered
         """
         try:
-           if self.node.register_namespace(namespace):
+            if self.node.register_namespace(namespace):
                 self.namespace = namespace
                 # Set restart flag so GUI recognizes the node shutdown as intentional and doesn't close
                 self.__restart_flag.set()
-           else:
-               return
+            else:
+                return
         except Exception as e:
             self.node.get_logger().error(f"Couldnt register name space: {e}")
-        
+
         # Restart node with namespace
         self.node.destroy_node()
         self.node = GrapficalNode(node_name=self.node_name, namespace=self.namespace)
@@ -148,14 +151,15 @@ class GUINode(QMainWindow):
         self.node.destroy_node()
         rclpy.shutdown()
         event.accept()
-    
+
     def __runNode(self):
-        while rclpy.ok():  
+        while rclpy.ok():
             rclpy.spin_once(self.node)
 
-        # Close gui when Node doesn't spin anymore and node wasn't shutdown intentionally 
+        # Close gui when Node doesn't spin anymore and node wasn't shutdown intentionally
         if not self.__restart_flag.is_set():
             self.close()
+
 
 class GrapficalNode(Node):
     """
@@ -168,12 +172,14 @@ class GrapficalNode(Node):
         namespace (str): (optional) The namespace of the node. When not specified, the GUI has to register itself.\
                                     The namespace should not be set by the developer but instead let the register_namespace service set the namespace
     """
-       
-    def __init__(self,  node_name : str ="gui_node", namespace:str | None = None) -> None:
+
+    def __init__(
+        self, node_name: str = "gui_node", namespace: str | None = None
+    ) -> None:
         if namespace is not None:
-            super().__init__(node_name, namespace=namespace) # type: ignore
+            super().__init__(node_name, namespace=namespace)  # type: ignore
         else:
-            super().__init__(node_name) # type: ignore
+            super().__init__(node_name)  # type: ignore
 
         # ---- Setup services -----
         self.show_dialog_service = self.create_service(
@@ -181,17 +187,18 @@ class GrapficalNode(Node):
         )
 
         # --- Setup service clients ---
-        self.mrc_client_register: Client = self.create_client(Register, "register_namespace")
+        self.mrc_client_register: Client = self.create_client(
+            Register, "register_namespace"
+        )
 
-
-    def register_namespace(self, namespace:str):
+    def register_namespace(self, namespace: str):
         """
-        Runs a service client to register the namespace in Sopias4 Map-Server. 
+        Runs a service client to register the namespace in Sopias4 Map-Server.
         On Failure, the user is informed and has a choice to retry
 
         Args:
             namespace (str): The namespace which should be registered
-        
+
         Returns:
             bool: If namespace was registered successfully or not
         """
@@ -214,18 +221,29 @@ class GrapficalNode(Node):
                         match future.result():
                             case Register.Response.COLLISION_ERROR:
                                 msg_2_user.content = "Namespace is already registered. Choose another one"
-                                msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
+                                msg_2_user.interaction_options = (
+                                    ShowDialog.Request.CONFIRM
+                                )
                             case Register.Response.ILLEGAL_NAMESPACE_ERROR:
                                 msg_2_user.content = "Namespace contains illegal characters. Choose another one"
-                                msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
+                                msg_2_user.interaction_options = (
+                                    ShowDialog.Request.CONFIRM
+                                )
                             case Register.Response.UNKOWN_ERROR:
                                 msg_2_user.content = "Unknown error occured"
-                                msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+                                msg_2_user.interaction_options = (
+                                    ShowDialog.Request.CONFIRM_RETRY
+                                )
 
-                        user_response = self.__show_dialog(msg_2_user, ShowDialog.Response())
+                        user_response = self.__show_dialog(
+                            msg_2_user, ShowDialog.Response()
+                        )
 
                         # If user response is to retry, then recursively call this function, otherwise return False
-                        if user_response.selected_option == ShowDialog.Response.CONFIRMED:
+                        if (
+                            user_response.selected_option
+                            == ShowDialog.Response.CONFIRMED
+                        ):
                             return False
                         elif user_response.selected_option == ShowDialog.Response.RETRY:
                             return self.register_namespace(namespace)
@@ -236,7 +254,9 @@ class GrapficalNode(Node):
 
         return False
 
-    def __show_dialog(self, request_data: ShowDialog.Request, response_data: ShowDialog.Response) -> ShowDialog.Response:
+    def __show_dialog(
+        self, request_data: ShowDialog.Request, response_data: ShowDialog.Response
+    ) -> ShowDialog.Response:
         """Callback function for the show_dialog service. It creates a QT dialog, fills it with the values from the service request and shows it.
         Afterwards, if specified it returns the input from the user.
 
@@ -246,7 +266,7 @@ class GrapficalNode(Node):
 
         Returns:
             ShowDialog.Response: It returns response_data in which contains the selected option from the user input
-        
+
         Raises:
             ValueError: If theres invalid data in the response
             NotImplementedError: If the user chooses a interaction option which isn't specified in the service response
@@ -293,7 +313,7 @@ class GrapficalNode(Node):
                 dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Cancel)
             case ShowDialog.Request.IGNORE_ABORT:
                 dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Abort)
-            case  ShowDialog.Request.IGNORE_RETRY:
+            case ShowDialog.Request.IGNORE_RETRY:
                 dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Retry)
             case _:
                 raise ValueError(
@@ -331,7 +351,9 @@ class GrapficalNode(Node):
                 )
 
         return response_data
-    
 
-if __name__=="__main__":
-    print("Only run this node directly for testing purposes. In production this node should be extendend properly")
+
+if __name__ == "__main__":
+    print(
+        "Only run this node directly for testing purposes. In production this node should be extendend properly"
+    )

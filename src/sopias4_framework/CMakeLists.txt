@@ -8,6 +8,8 @@ endif()
 #######################################
 # ----------- Find dependencies --------------
 #######################################
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
@@ -22,6 +24,7 @@ find_package(rclpy REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
 
 ######################################
 # --- Configure executabels/Nodes ---------
@@ -44,7 +47,7 @@ include_directories(include)
 # ament_python_install_package(${PROJECT_NAME})
 # Install executables
 # install(PROGRAMS
-#   #scripts/py_node.py
+#   sopias4_framework/nodes/robot_manager.py
 #   DESTINATION lib/${PROJECT_NAME}
 # )
 
@@ -54,8 +57,14 @@ include_directories(include)
 ######################################
 # Service definitions
 rosidl_generate_interfaces(${PROJECT_NAME}
-			srv/ShowDialog.srv
-      srv/Register.srv
+      "msg/Robot.msg"
+      "srv/ShowDialog.srv"
+      "srv/Register.srv"
+      "srv/EmptyWithStatuscode.srv"
+      "srv/GetRobots.srv"
+      "srv/GetRobotIdentity.srv"
+      "srv/GetNamespaces.srv"
+      DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
 )
 
 if(BUILD_TESTING)

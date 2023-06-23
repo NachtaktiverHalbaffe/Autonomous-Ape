@@ -1,0 +1,8 @@
+# Request
+# The namespace of the robot for which the state is required
+string name_space
+---
+#Response
+# A Robot message containing all neccessary state attributes. 
+# See Robot message definition for more details
+Robot  robot

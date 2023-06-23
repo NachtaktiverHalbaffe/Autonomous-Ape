@@ -1,0 +1,5 @@
+# Empty Request
+---
+# Response
+# A list of Robot msgs which hold the state of all currently registered robots
+Robot[] robots

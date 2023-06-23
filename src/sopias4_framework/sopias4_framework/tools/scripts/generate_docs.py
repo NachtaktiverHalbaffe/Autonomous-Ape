@@ -21,38 +21,72 @@ import subprocess
 import sys
 
 
-def generate_docs(pkg_path:str | None = None):
+def generate_docs(pkg_path: str | None = None):
     """
-    Automatically generate the documentation. The default values are set for running in the Sopias4 Framework package, 
+    Automatically generate the documentation. The default values are set for running in the Sopias4 Framework package,
     however you can pass a pkg_path to run it for your own package
 
     Args:
         pkg_path (str, optional): The path to the root of your ROS2-Pkg. If using default, it will use the path to the Sopias4 Framework package
     """
     if pkg_path is None:
-        PKG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..", ""))
+        PKG_PATH = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../..", "")
+        )
         # Generatie Sphinx files (Python)
-        subprocess.call(["sphinx-apidoc", "-f", "-o", f"{PKG_PATH}/doc/source", f"{PKG_PATH}/sopias4_framework/"])
+        subprocess.call(
+            [
+                "sphinx-apidoc",
+                "-f",
+                "-o",
+                f"{PKG_PATH}/doc/source",
+                f"{PKG_PATH}/sopias4_framework/",
+            ]
+        )
         # Run rosdoc2
-        subprocess.call(["rosdoc2", "build", "-p", f"{PKG_PATH}", "-o", f"{PKG_PATH}/doc/output", "-d", f"{PKG_PATH}/doc/build"])
+        subprocess.call(
+            [
+                "rosdoc2",
+                "build",
+                "-p",
+                f"{PKG_PATH}",
+                "-o",
+                f"{PKG_PATH}/doc/output",
+                "-d",
+                f"{PKG_PATH}/doc/build",
+            ]
+        )
     else:
         # Generatie Sphinx files (Python)
-        subprocess.call(["sphinx-apidoc", "-f", "-o", f"{pkg_path}/doc/source", f"{pkg_path}/sopias4_framework/"])
+        subprocess.call(
+            ["sphinx-apidoc", "-f", "-o", f"{pkg_path}/doc/source", f"{pkg_path}"]
+        )
         # Run rosdoc2
-        subprocess.call(["rosdoc2", "build", "-p", f"{pkg_path}", "-o", f"{pkg_path}/doc/output", "-d", f"{pkg_path}/doc/build"])
+        subprocess.call(
+            [
+                "rosdoc2",
+                "build",
+                "-p",
+                f"{pkg_path}",
+                "-o",
+                f"{pkg_path}/doc/output",
+                "-d",
+                f"{pkg_path}/doc/build",
+            ]
+        )
 
-if __name__=="__main__":
-        # Use rosdoc2 if specified as a cli argument, otherwise use plain sphinx
-        try:
-            opts, args = getopt.getopt(sys.argv[1:],"p",["ros2-pkg-path"])
-        except getopt.GetoptError:
-            print('python3 generate_docs.py -p  <path to ROS2-package>')
-            sys.exit(2)
-        for opt, arg in opts:
-             if opt in ("-p","--ros2-pkg-path"):
-                  generate_docs(arg)
-                  sys.exit()
-        
-        generate_docs()
-        sys.exit()
-        
+
+if __name__ == "__main__":
+    # Use rosdoc2 if specified as a cli argument, otherwise use plain sphinx
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "p:", ["ros2-pkg-path"])
+    except getopt.GetoptError:
+        print("python3 generate_docs.py -p  <path to ROS2-package>")
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-p", "--ros2-pkg-path"):
+            generate_docs(arg)
+            sys.exit()
+
+    generate_docs()
+    sys.exit()

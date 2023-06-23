@@ -40,12 +40,12 @@ find_package(rclpy REQUIRED)
 
 #------------------ Python ---------------------
 # Install Python modules
-# ament_python_install_package(${PROJECT_NAME})
+ament_python_install_package(${PROJECT_NAME})
 # Install executables
-# install(PROGRAMS
-#   #scripts/py_node.py
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(PROGRAMS
+  sopias4_application/robot_manager.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

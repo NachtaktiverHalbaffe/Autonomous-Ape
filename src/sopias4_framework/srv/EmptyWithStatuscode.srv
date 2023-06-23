@@ -1,0 +1,9 @@
+# Empty Request
+---
+# Response
+string SUCCESS = "success"
+string UNKNOWN_ERROR = "unknown_error"
+string ALREADY_RUNNING = "already_running"
+string ALREADY_STOPPED = "already_stopped"
+
+string statuscode "success"
