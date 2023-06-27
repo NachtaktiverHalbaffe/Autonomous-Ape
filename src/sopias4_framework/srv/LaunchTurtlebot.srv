@@ -1,12 +1,11 @@
 # Empty Request
+# If gazebo should be used/the turtlebot should be run in simulation
+bool use_simulation false
 ---
 # Response
 string SUCCESS = "success"
 string UNKNOWN_ERROR = "unknown_error"
 string ALREADY_RUNNING = "already_running"
 string ALREADY_STOPPED = "already_stopped"
-string SAVEING_FAILED = "saving_failed"
-string ALREADY_ACTIVE = "already_active"
-string ALREADY_INACTIVE ="already_inactive"
 
 string statuscode "success"

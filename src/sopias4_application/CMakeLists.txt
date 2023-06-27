@@ -26,7 +26,7 @@ find_package(rclpy REQUIRED)
 # --- Configure executabels/Nodes ---------
 ######################################
 # ------------------- C++ ------------------------
-# include_directories(include)
+include_directories(include)
 # Create exectuables. For this purpose, add 
 # following line for each node:
 # add_executable(cpp_exe src/<node file>)

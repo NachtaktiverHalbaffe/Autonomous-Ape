@@ -64,8 +64,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/GetRobots.srv"
       "srv/GetRobotIdentity.srv"
       "srv/GetNamespaces.srv"
+      "srv/DriveToPos.srv"
+      "srv/LaunchTurtlebot.srv"
       DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
 )
+# Install launch files
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

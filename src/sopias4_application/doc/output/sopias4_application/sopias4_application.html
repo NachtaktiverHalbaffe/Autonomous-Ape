@@ -51,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-sopias4_application.robot_manager">sopias4_application.robot_manager module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager"><code class="docutils literal notranslate"><span class="pre">RobotManager</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.other_robots"><code class="docutils literal notranslate"><span class="pre">RobotManager.other_robots</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.drive_to_pos_action"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_to_pos_action</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.drive_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_service</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.rotate_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.rotate_service</span></code></a></li>
@@ -58,6 +59,11 @@
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.stop_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.stop_service</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.start_mapping_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.start_mapping_service</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.stop_mapping_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.stop_mapping_service</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.__launch_robot"><code class="docutils literal notranslate"><span class="pre">RobotManager.__launch_robot()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.__stop_robot"><code class="docutils literal notranslate"><span class="pre">RobotManager.__stop_robot()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.__start_mapping"><code class="docutils literal notranslate"><span class="pre">RobotManager.__start_mapping()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.__stop_mapping"><code class="docutils literal notranslate"><span class="pre">RobotManager.__stop_mapping()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sopias4_application.robot_manager.RobotManager.destroy_node"><code class="docutils literal notranslate"><span class="pre">RobotManager.destroy_node()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#sopias4_application.robot_manager.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
@@ -109,6 +115,17 @@
 <p>A central aspect of the Robot Manager is to initialise and configure SLAM, AMCL, Navigation2 and Turtlebot4. The main task is to assign the namespace of the robot
 to the nodes and their topics and to start them if necessary. This allows them to be uniquely identified in a multi-robot scenario. Apart from initialisation and configuration,
 this node acts as an interface between the system and the user or GUI.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.other_robots">
+<span class="sig-name descname"><span class="pre">other_robots</span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.other_robots" title="Permalink to this definition"></a></dt>
+<dd><p>A list containing the state of the other robots</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list&lt;Robot&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.drive_to_pos_action">
 <span class="sig-name descname"><span class="pre">drive_to_pos_action</span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.drive_to_pos_action" title="Permalink to this definition"></a></dt>
@@ -185,6 +202,102 @@ takes a Navigation2 Goal. It’s basically a wrapper to pass the action to the N
 <dd class="field-odd"><p>Service</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.__launch_robot">
+<span class="sig-name descname"><span class="pre">__launch_robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LaunchTurtlebot_Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LaunchTurtlebot_Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LaunchTurtlebot_Response</span></span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.__launch_robot" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+<p>Callback function for a service which launches all nodes related to the robot itself. It basically launches AMCL, Turtlebot4, Rviz2         and Navigation 2 node. If the usage of simulation is specified, the a launch description is generated which runs everything inside         a simulation, otherwise a launch description is generated which runs the real world robot. The corresponding launch description         is then run inside a own process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request_data</strong> (<em>LaunchTurtlebot.Request</em>) – The data from the request. Look at service definition in srv/LaunchTurtlebot.srv</p></li>
+<li><p><strong>response_data</strong> (<em>Launchturtlebot.Response</em>) – A response object into which the data for the response is written.                                                                                     Look at service definition in srv/LaunchTurtlebot.srv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response which contains the statuscode of the operation                                                            Look at service definition in srv/LaunchTurtlebot.srv</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>LaunchTurtlebot.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.__stop_robot">
+<span class="sig-name descname"><span class="pre">__stop_robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">EmptyWithStatuscode_Response</span></span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.__stop_robot" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+<p>Callback function for a service which lstops all nodes related to the robot itself. It basically kills each node except the
+robot_manager und gui node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request_data</strong> (<em>EmptyWithStatuscode.Request</em>) – The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+<li><p><strong>response_data</strong> (<em>EmptyWithStatuscode.Response</em>) – A response object into which the data for the response is written.                                                                                     Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response which contains the statuscode of the operation.                                                                     Look at service definition in srv/EmptyWithStatusCode.srv</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmptyWithStatuscode.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.__start_mapping">
+<span class="sig-name descname"><span class="pre">__start_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">EmptyWithStatuscode_Response</span></span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.__start_mapping" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+<p>Callback function for a service which starts the mapping. This is done by setting the amcl node to an         inactive state so it doesn’t operate anymore and starting the slam node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request_data</strong> (<em>EmptyWithStatuscode.Request</em>) – The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+<li><p><strong>response_data</strong> (<em>EmptyWithStatuscode.Response</em>) – A response object into which the data for the response is written.                                                                                     Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response which contains the statuscode of the operation.                                                                      Look at service definition in srv/EmptyWithStatusCode.srv</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmptyWithStatuscode.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.__stop_mapping">
+<span class="sig-name descname"><span class="pre">__stop_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_request_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EmptyWithStatuscode_Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">EmptyWithStatuscode_Response</span></span></span><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.__stop_mapping" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+<p>Callback function for a service which stops the mapping. This is done by setting the amcl node to an         active state so it does operate again and stopping the slam node. Furthermore, the map is saved on Sopias4 Map-Server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request_data</strong> (<em>EmptyWithStatuscode.Request</em>) – The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+<li><p><strong>response_data</strong> (<em>EmptyWithStatuscode.Response</em>) – A response object into which the data for the response is written.                                                                                     Look at service definition in srv/EmptyWithStatusCode.srv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response which contains the statuscode of the operation.                                                                      Look at service definition in srv/EmptyWithStatusCode.srv</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmptyWithStatuscode.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_application.robot_manager.RobotManager.destroy_node">
+<span class="sig-name descname"><span class="pre">destroy_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_application/robot_manager.html#RobotManager.destroy_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_application.robot_manager.RobotManager.destroy_node" title="Permalink to this definition"></a></dt>
+<dd><p>Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
+:meta private:</p>
 </dd></dl>
 
 </dd></dl>

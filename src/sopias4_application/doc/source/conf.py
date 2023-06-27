@@ -7,9 +7,9 @@ import sys
 
 import mock
 
-MOCK_MODULES = ["sopias4_framework.srv"]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+# MOCK_MODULES = ["sopias4_framework.srv"]
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = mock.Mock()
 
 
 # -- Path setup --------------------------------------------------------------

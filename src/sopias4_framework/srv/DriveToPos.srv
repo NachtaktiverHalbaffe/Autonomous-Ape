@@ -1,0 +1,15 @@
+# Request
+# The start position from which the path should be calculated. Is only needed if use_pose=false
+geometry_msgs/PoseStamped start
+# The goal where the robot should drive to
+geometry_msgs/PoseStamped goal 
+# If the robot should use its current pose as start 
+bool use_pose true
+---
+# Response
+string SUCCESS = "Success"
+string UNKOWN_ERROR = "unknown error"
+string GOAL_REJECTED = "goal_rejected"
+
+# Statuscode of the request
+string statuscode "unkown_error"
