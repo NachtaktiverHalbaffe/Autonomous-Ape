@@ -1,4 +1,5 @@
 {
+    // Note that this script is untested
     "name": "ROS 2 Development Container",
     "privileged": true,
     "remoteUser": "nachtaktiverhalbaffe",
@@ -31,10 +32,8 @@
                 "ms-azuretools.vscode-docker",
                 "ms-python.python",
                 "ms-python.black-formatter",
-                "ms-python.isort",
                 "ms-vscode.cpptools",
-                "twxs.cmake",
-                "eamodio.gitlens",
+                "ms-vscode.cmake-tools",
                 "leonhard-s.python-sphinx-highlight",
                 "redhat.vscode-yaml",
                 "yzhang.markdown-all-in-one",
@@ -50,22 +49,28 @@
         "DISPLAY": "${localEnv:DISPLAY}",
         "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
         "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
-        "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "PULSE_SERVER": "${localEnv:PULSE_SERVER}"
         // "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
     "runArgs": [
         "--net=host", // network access to host interfaces, e.g. eth0
-        // "--pid=host", // DDS discovery with host, without --network=host
         "-e",
         "DISPLAY=${env:DISPLAY}",
         "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",
         "--cap-add=SYS_PTRACE", // enable debugging, e.g. gdb
-        "--security-opt=seccomp=unconfined" // enable debugging, e.g. gdb
+        "--security-opt", // enable debugging, e.g. gdb
+        "seccomp=unconfined" // enable debugging, e.g. gdb
+        "-v",
+        "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh",
+        "--privileged",
+        "-e",
+        "NVIDIA_VISIBLE_DEVICES=all",
+        "-e",
+        "NVIDIA_DRIVER_CAPABILITIES=all"
     ],
     "mounts": [
-        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+        // "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/",
-    "initializeCommand": "xhost +local:root"
+    "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/"
 }
