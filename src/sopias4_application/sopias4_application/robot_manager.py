@@ -117,9 +117,9 @@ class RobotManager(Node):
                         PythonLaunchDescriptionSource(
                             PathJoinSubstitution(
                                 [
-                                    FindPackageShare("slam_toolbox"),
+                                    FindPackageShare("sopias4_framework"),
                                     "launch",
-                                    "online_sync_launch.py",
+                                    "slam.launch.py",
                                 ]
                             )
                         )
@@ -490,11 +490,21 @@ class RobotManager(Node):
             )
         ld.add_action(turtlebot4)
 
-        amcl = launch_ros.actions.Node(
-            package="nav2_amcl",
-            executable="amcl",
-            name="amcl",
-            namespace=self.get_namespace(),
+        amcl = GroupAction(
+            [
+                PushRosNamespace(self.get_namespace()),
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare("sopias4_framework"),
+                                "launch",
+                                "amcl.launch.py",
+                            ]
+                        )
+                    ),
+                ),
+            ]
         )
         ld.add_action(amcl)
 
@@ -513,16 +523,12 @@ class RobotManager(Node):
                     PythonLaunchDescriptionSource(
                         PathJoinSubstitution(
                             [
-                                FindPackageShare("nav2_bringup"),
+                                FindPackageShare("sopias4_framework"),
                                 "launch",
-                                "navigation_launch.py",
+                                "nav2.launch.py",
                             ]
                         )
-                    ),
-                    launch_arguments={
-                        "use_composition": "False",
-                        # "params_file": LaunchConfiguration("params_file"),
-                    }.items(),
+                    )
                 ),
             ]
         )

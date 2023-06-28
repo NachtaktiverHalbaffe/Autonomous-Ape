@@ -22,6 +22,12 @@
   <!-- Python dependencies -->
   <depend>rclpy</depend>
 
+  <!-- Package dependencies -->
+  <depend>slam_toolbox</depend>
+  <depend>nav2_bringup</depend>
+  <depend>nav2_amcl</depend>
+  <depend>python3-pyqt5</depend>
+
   <!-- Message, service and action definition generators -->
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
