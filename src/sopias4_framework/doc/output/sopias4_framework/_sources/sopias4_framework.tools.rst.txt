@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   sopias4_framework.tools.ros2
    sopias4_framework.tools.scripts
 
 Module contents

@@ -69,6 +69,7 @@ class RobotManager(Node):
         self.start_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "start_mapping", self.__start_mapping
         )
+        # TODO maybe own service definition with custom map
         self.stop_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "stop_mapping", self.__stop_mapping
         )
@@ -134,6 +135,8 @@ class RobotManager(Node):
         self.__runRobot = Process(target=self.__ls_robot.run, daemon=True)
         self.__runMapping = Process(target=self.__ls_mapping.run, daemon=True)
 
+        self.get_logger().info("[Robot Manager] Started node")
+
     def __drive__to_pos(
         self, pose: DriveToPos.Request, response: DriveToPos.Response
     ) -> DriveToPos.Response:
@@ -161,7 +164,7 @@ class RobotManager(Node):
 
         # Wait until action server is up
         while not self.__nav2_aclient_driveToPos.wait_for_server(timeout_sec=1.0):
-            self.get_logger().info(
+            self.get_logger().debug(
                 "[ROBOT MANAGER] Waiting for nav2 action server startup..."
             )
             pass
@@ -532,11 +535,19 @@ class RobotManager(Node):
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
         :meta private:
         """
+        # Release service clients
         self.__mrc_sclient_namespaces.destroy()
         self.__mrc_sclient_robot_identity.destroy()
         self.__mrc_sclient_robots.destroy()
         self.__amcl_sclient_lifecycle.destroy()
         self.__nav2_aclient_driveToPos.destroy()
+        # Release services
+        self.launch_service.destroy()
+        self.stop_service.destroy()
+        self.start_mapping_service.destroy()
+        self.stop_mapping_service.destroy()
+        self.drive_to_pos_action.destroy()
+        self.get_logger().info("[Robot Manager] Shutting down node")
         super().destroy_node()
 
 

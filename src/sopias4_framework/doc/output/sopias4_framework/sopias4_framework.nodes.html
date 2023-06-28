@@ -55,15 +55,26 @@
 <li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode"><code class="docutils literal notranslate"><span class="pre">GUINode</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.ui"><code class="docutils literal notranslate"><span class="pre">GUINode.ui</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.turtlebot_running"><code class="docutils literal notranslate"><span class="pre">GUINode.turtlebot_running</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.is_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.is_mapping</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.launch_robot"><code class="docutils literal notranslate"><span class="pre">GUINode.launch_robot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.stop_robot"><code class="docutils literal notranslate"><span class="pre">GUINode.stop_robot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.start_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.start_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GUINode.stop_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.stop_mapping()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode"><code class="docutils literal notranslate"><span class="pre">GrapficalNode</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.node_name"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.node_name</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.namespace</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.register_namespace()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.launch_turtlebot"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.launch_turtlebot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.stop_turtlebot"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.stop_turtlebot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.start_mapping"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.start_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.stop_mapping"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.stop_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.gui_node.GrapficalNode.destroy_node"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.destroy_node()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -73,6 +84,10 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="sopias4_framework.tools.html">sopias4_framework.tools package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="sopias4_framework.tools.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="sopias4_framework.tools.ros2.html">sopias4_framework.tools.ros2 package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l6"><a class="reference internal" href="sopias4_framework.tools.scripts.html">sopias4_framework.tools.scripts package</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.scripts.html#submodules">Submodules</a></li>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.scripts.html#module-sopias4_framework.tools.scripts.generate_docs">sopias4_framework.tools.scripts.generate_docs module</a><ul>
@@ -178,6 +193,8 @@ Python class. The script is located in <cite>sopias4_framework/tools/scripts</ci
 </dd>
 <dt>It also has builtin methods which you can use a callback functionas for certain tasks in Sopias4 (look further into documentation for more details):</dt><dd><ul class="simple">
 <li><p>register_namespace(): Register namespace in Sopias4 Map-Server</p></li>
+<li><p>launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot</p></li>
+<li><p>stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot</p></li>
 </ul>
 </dd>
 <dt>It provides following ROS2-services:</dt><dd><ul class="simple">
@@ -203,6 +220,28 @@ Python class. The script is located in <cite>sopias4_framework/tools/scripts</ci
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.turtlebot_running">
+<span class="sig-name descname"><span class="pre">turtlebot_running</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.turtlebot_running" title="Permalink to this definition"></a></dt>
+<dd><p>If the nodes which are interacting with the Turtlebot are running (True) or not (False). Defaults to False on startup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.is_mapping">
+<span class="sig-name descname"><span class="pre">is_mapping</span></span><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.is_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>If the mapping process is running (True) or not (False). Defaults to False on startup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -233,8 +272,8 @@ Python class. The script is located in <cite>sopias4_framework/tools/scripts</ci
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.register_namespace">
-<span class="sig-name descname"><span class="pre">register_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.register_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace" title="Permalink to this definition"></a></dt>
-<dd><p>Runs the service to create a namespace. It’s basically a wrapper and calling the register_namespace
+<span class="sig-name descname"><span class="pre">register_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.register_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.register_namespace" title="Permalink to this definition"></a></dt>
+<dd><p>Register a namespace on the Sopias4 Map-Server. It’s basically a wrapper and calling the register_namespace
 service client in the underlying node object. If successful, it will restart <cite>self.node</cite> with the namespace.
 This must be done before connecting to the Turtlebot.</p>
 <p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
@@ -243,6 +282,43 @@ This must be done before connecting to the Turtlebot.</p>
 <dd class="field-odd"><p><strong>namespace</strong> (<em>str</em>) – The namespace which should be registered</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.launch_robot">
+<span class="sig-name descname"><span class="pre">launch_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.launch_robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.launch_robot" title="Permalink to this definition"></a></dt>
+<dd><p>Launches all the nodes in Sopias4 Application so the system is connected to the Turtlebot. It’s basically
+a wrapper and calling the launcg service client in the underlying node object. Before running this, a namespace
+must already be registered and the gui node needs to be running under this namespace. If the operation was
+successful, then it sets <cite>self.turtlebot_running</cite> to <cite>True</cite></p>
+<p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.stop_robot">
+<span class="sig-name descname"><span class="pre">stop_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.stop_robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.stop_robot" title="Permalink to this definition"></a></dt>
+<dd><p>Stops all the nodes in Sopias4 Application so the system is disconnected to the Turtlebot. It’s basically
+a wrapper and calling the launch service client in the underlying node object. If the operation was
+successful, then it sets <cite>self.turtlebot_running</cite> to <cite>True</cite></p>
+<p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.start_mapping">
+<span class="sig-name descname"><span class="pre">start_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.start_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.start_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Starts the mapping process. This can only be done if Sopias4 Application is fully running, otherwise
+will directly abort this process. It’s basically a wrapper and calling the start_mapping service client
+in the underlying node object. If the operation was successful, then it sets <cite>self.is_mapping</cite> to <cite>True</cite></p>
+<p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GUINode.stop_mapping">
+<span class="sig-name descname"><span class="pre">stop_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GUINode.stop_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GUINode.stop_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Stops the mapping process. This can only be done if Sopias4 Application and the mapping process is fully running,
+otherwise itwill directly abort this process. It’s basically a wrapper and calling the start_mapping service
+client in the underlying node object. If the operation was successful, then it sets <cite>self.is_mapping</cite> to <cite>False</cite></p>
+<p>Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed</p>
 </dd></dl>
 
 </dd></dl>
@@ -291,6 +367,73 @@ On Failure, the user is informed and has a choice to retry</p>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.launch_turtlebot">
+<span class="sig-name descname"><span class="pre">launch_turtlebot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.launch_turtlebot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.launch_turtlebot" title="Permalink to this definition"></a></dt>
+<dd><p>Runs a service client to start the nodes in Sopias4 Application so the system is connected
+to the robot and ready for operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If operation was successful</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.stop_turtlebot">
+<span class="sig-name descname"><span class="pre">stop_turtlebot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.stop_turtlebot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.stop_turtlebot" title="Permalink to this definition"></a></dt>
+<dd><p>Runs a service client to stop the nodes in Sopias4 Application so the system is disconnected
+from the robot and ready for operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If operation was successful</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.start_mapping">
+<span class="sig-name descname"><span class="pre">start_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.start_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.start_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Runs a service client to start the mapping process. The Sopias4 Application should
+be fully launched before running this service</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If operation was successful</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.stop_mapping">
+<span class="sig-name descname"><span class="pre">stop_mapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.stop_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.stop_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Runs a service client to stop the mapping process. The Sopias4 Application should
+be fully launched and the mapping process running before running this service</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If operation was successful</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.gui_node.GrapficalNode.destroy_node">
+<span class="sig-name descname"><span class="pre">destroy_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.destroy_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.destroy_node" title="Permalink to this definition"></a></dt>
+<dd><p>Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
+:meta private:</p>
 </dd></dl>
 
 </dd></dl>

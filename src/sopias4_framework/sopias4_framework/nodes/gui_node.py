@@ -1,4 +1,5 @@
 import abc
+from multiprocessing import Process
 from threading import Event, Thread
 
 import rclpy
@@ -6,7 +7,13 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
 from rclpy.node import Node
 
-from sopias4_framework.srv import Register, ShowDialog
+from sopias4_framework.srv import (
+    DriveToPos,
+    EmptyWithStatuscode,
+    LaunchTurtlebot,
+    Register,
+    ShowDialog,
+)
 
 
 class GUINode(QMainWindow):
@@ -49,6 +56,8 @@ class GUINode(QMainWindow):
     
     It also has builtin methods which you can use a callback functionas for certain tasks in Sopias4 (look further into documentation for more details):
         - register_namespace(): Register namespace in Sopias4 Map-Server
+        - launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
+        - stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot
 
     It provides following ROS2-services:
         - show_dialog: Show a dialog with the users. Also interaction options can be specified
@@ -58,6 +67,8 @@ class GUINode(QMainWindow):
             node_name (str, optional): Name of the Node. Defaults to gui_node
             namespace (str, optional): The namespace of the node. It should not be specified by the developer. Instead the User should use the register service and \
                                                         let the service set the namespace of this class. Defaults to None
+            turtlebot_running (bool): If the nodes which are interacting with the Turtlebot are running (True) or not (False). Defaults to False on startup
+            is_mapping (bool): If the mapping process is running (True) or not (False). Defaults to False on startup
     """
 
     def __init__(
@@ -69,12 +80,14 @@ class GUINode(QMainWindow):
         self.ui = ui
         self.node_name: str = node_name
         self.namespace: str | None = namespace
+        self.turtlebot_running: bool = False
+        self.is_mapping: bool = False
         self.node: GrapficalNode = GrapficalNode(
             node_name=node_name, namespace=namespace
         )
         # Private class attributes
         self.__restart_flag = Event()
-        self.__nodeThread = Thread(target=self.__runNode, daemon=True)
+        self.__nodeProcess = Process(target=self.__runNode, daemon=True)
 
         # Setup GUI
         self.ui.setupUi(self)
@@ -84,7 +97,7 @@ class GUINode(QMainWindow):
 
         # Create underlying node
         rclpy.init()  # Run node in a seperate thread
-        self.__nodeThread.start()
+        self.__nodeProcess.start()
 
     @abc.abstractmethod
     def connect_callbacks(self) -> None:
@@ -115,9 +128,9 @@ class GUINode(QMainWindow):
                     self.ui.example_textbox.setText("Hello World")
         """
 
-    def register_namespace(self, namespace: str):
+    def register_namespace(self, namespace: str) -> None:
         """
-        Runs the service to create a namespace. It's basically a wrapper and calling the register_namespace
+        Register a namespace on the Sopias4 Map-Server. It's basically a wrapper and calling the register_namespace
         service client in the underlying node object. If successful, it will restart `self.node` with the namespace.
         This must be done before connecting to the Turtlebot.
 
@@ -134,13 +147,170 @@ class GUINode(QMainWindow):
             else:
                 return
         except Exception as e:
-            self.node.get_logger().error(f"Couldnt register name space: {e}")
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Could'nt register name space: {e}")
+            raise e
+
+        # Set namespace of physical turtlebot
+        # TODO send ssh command to turtlebGrot
+        # SSH command "turtlebot4-setup"
 
         # Restart node with namespace
+        self.__nodeProcess.terminate()
         self.node.destroy_node()
         self.node = GrapficalNode(node_name=self.node_name, namespace=self.namespace)
-        self.__nodeThread = Thread(target=self.__runNode, daemon=True)
-        self.__nodeThread.start()
+        self.__nodeProcess = Process(target=self.__runNode, daemon=True)
+        self.__nodeProcess.start()
+
+    def launch_robot(self) -> None:
+        """
+        Launches all the nodes in Sopias4 Application so the system is connected to the Turtlebot. It's basically
+        a wrapper and calling the launcg service client in the underlying node object. Before running this, a namespace
+        must already be registered and the gui node needs to be running under this namespace. If the operation was
+        successful, then it sets `self.turtlebot_running` to `True`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        #  Error message for user in Case something goes wrong
+        msg_request = ShowDialog.Request()
+        msg_request.title = "Couldn't launch robot"
+        msg_request.icon = ShowDialog.Request.ICON_ERROR
+        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+        msg_request.content = "Couldn't launch robot. Check if the Turtlebot4\
+                    nodes inside Sopias4 Application aren't running and that the physical \
+                    robot is started and connected to the network"
+        try:
+            status_response = self.node.launch_turtlebot()
+
+            if status_response:
+                self.turtlebot_running = True
+                self.node.get_logger().debug("[GUI] Launched robot")
+            else:
+                self.turtlebot_running = False
+                self.node.get_logger().error(
+                    f"[GUI] Could'nt launch robot. Turtlebot is either already running or is'nt reachable"
+                )
+                self.__inform_and_retry(msg_request, self.launch_robot)
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Couldnt launch robot: {e}")
+            raise e
+
+    def stop_robot(self) -> None:
+        """
+        Stops all the nodes in Sopias4 Application so the system is disconnected to the Turtlebot. It's basically
+        a wrapper and calling the launch service client in the underlying node object. If the operation was
+        successful, then it sets `self.turtlebot_running` to `True`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        #  Error message for user in Case something goes wrong
+        msg_request = ShowDialog.Request()
+        msg_request.title = "Couldn't stop robot"
+        msg_request.icon = ShowDialog.Request.ICON_ERROR
+        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+        msg_request.content = "Couldn't stop Robot. Check if the Turtlebot4\
+                    nodes inside Sopias4 Application are already stopped"
+        try:
+            status_response = self.node.stop_turtlebot()
+
+            if status_response:
+                self.turtlebot_running = False
+                self.node.get_logger().debug("[GUI] Stopped robot")
+            else:
+                self.turtlebot_running = True
+                self.node.get_logger().error(
+                    "[GUI] Couldnt stop robot: Nodes are either already stopped or error is unknown"
+                )
+                self.__inform_and_retry(msg_request, self.stop_robot)
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Couldnt stop robot: {e}")
+            raise e
+
+    def start_mapping(self) -> None:
+        """
+        Starts the mapping process. This can only be done if Sopias4 Application is fully running, otherwise
+        will directly abort this process. It's basically a wrapper and calling the start_mapping service client
+        in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        #  Error message for user in Case something goes wrong
+        msg_request = ShowDialog.Request()
+        msg_request.title = "Couldn't start mapping"
+        msg_request.icon = ShowDialog.Request.ICON_ERROR
+        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+        msg_request.content = "Couldn't start mapping. Check if the Turtlebot4\
+                    Nodes inside Sopias4 Application are running and thats theres no mapping already in progress"
+        try:
+            if self.turtlebot_running and not self.is_mapping:
+                status_response = self.node.start_mapping()
+
+                if status_response:
+                    self.is_mapping = True
+                    self.node.get_logger().debug("[GUI] Started mapping")
+                else:
+                    self.is_mapping = False
+                    self.node.get_logger().error(
+                        "[GUI] Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
+                    )
+                    # Inform user about failure and see for it's response
+                    self.__inform_and_retry(msg_request, self.start_mapping)
+            else:
+                self.node.get_logger().warning(
+                    "[GUI] Couldnt start mapping: Mapping already in process or Turtlebot is offline"
+                )
+                # Inform user about failure and see for it's response
+                self.__inform_and_retry(msg_request, self.start_mapping)
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Couldnt start mapping: {e}")
+            raise e
+
+    def stop_mapping(self) -> None:
+        """
+        Stops the mapping process. This can only be done if Sopias4 Application and the mapping process is fully running,
+        otherwise itwill directly abort this process. It's basically a wrapper and calling the start_mapping service
+        client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `False`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        #  Error message for user in Case something goes wrong
+        request_informUser = ShowDialog.Request()
+        request_informUser.title = "Couldn't stop mapping"
+        request_informUser.icon = ShowDialog.Request.ICON_ERROR
+        request_informUser.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+        request_informUser.content = "Couldn't stop mapping. Check if the Turtlebot4\
+                    nodes inside Sopias4 Application are running and thats theres a mapping already in progress"
+        try:
+            if self.turtlebot_running and self.is_mapping:
+                status_response = self.node.stop_mapping()
+                if status_response:
+                    self.turtlebot_running = True
+                    self.node.get_logger().debug("[GUI] Stopped Mapping")
+                else:
+                    self.turtlebot_running = False
+                    self.node.get_logger().error(
+                        "[GUI] Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
+                    )
+                    # Inform user about failure and see for it's response
+                    self.__inform_and_retry(request_informUser, self.stop_mapping)
+            else:
+                self.node.get_logger().warning(
+                    "[GUI] Couldn't stop mapping: Mapping is already stopped or Turtlebot is offline"
+                )
+                # Inform user about failure and see for it's response
+                self.__inform_and_retry(request_informUser, self.stop_mapping)
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Couldnt stop mapping: {e}")
+            raise e
 
     def closeEvent(self, event):
         """
@@ -148,17 +318,38 @@ class GUINode(QMainWindow):
 
         :meta private:
         """
+        self.node.get_logger().info("[GUI] Shutting down node")
         self.node.destroy_node()
         rclpy.shutdown()
         event.accept()
 
     def __runNode(self):
+        """
+        Runs the node itself so its spinning. Should be run inside a own Process
+        """
         while rclpy.ok():
             rclpy.spin_once(self.node)
 
         # Close gui when Node doesn't spin anymore and node wasn't shutdown intentionally
         if not self.__restart_flag.is_set():
             self.close()
+
+    def __inform_and_retry(self, msg: ShowDialog.Request, retry_fn):
+        """
+        It creates a message which is shown to the user and if the user\
+        chooses to retry operation calls the passed function
+
+        Args:
+            msg (ShowDialog.Request): The message which should be shown to the user
+            retry_fn (function): The function which should be executed in case the user\
+                                             chooses to retry the operation. If the function takes arguments,\
+                                             then pass this function as a lambda e.g. `__inform_and_rety(msg, lambda: foo("bar"))`
+        """
+        user_response = self.node.__show_dialog(msg, ShowDialog.Response())
+
+        if user_response == ShowDialog.Response.RETRY:
+            self.node.get_logger().debug(f"[GUI] User chose to retry {retry_fn}")
+            retry_fn()
 
 
 class GrapficalNode(Node):
@@ -179,7 +370,12 @@ class GrapficalNode(Node):
         if namespace is not None:
             super().__init__(node_name, namespace=namespace)  # type: ignore
         else:
-            super().__init__(node_name)  # type: ignore
+            # TODO Generate random namespace
+            ns = ""
+            super().__init__(node_name, namespace=ns)  # type: ignore
+        self.get_logger().info(
+            f"[GUI] Node started with namespace {self.get_namespace()}"
+        )
 
         # ---- Setup services -----
         self.show_dialog_service = self.create_service(
@@ -187,8 +383,29 @@ class GrapficalNode(Node):
         )
 
         # --- Setup service clients ---
-        self.mrc_client_register: Client = self.create_client(
+        # This service registers the namespace in the multi robot coordinator
+        # inside the Sopias4 Map-server
+        self.__mrc_sclient_register: Client = self.create_client(
             Register, "register_namespace"
+        )
+        # This service launches/connects to the corresponding Turtlebot
+        # by launching the nodes of Sopias4 Application
+        self.__rm_sclient_launch: Client = self.create_client(
+            LaunchTurtlebot, f"{self.get_namespace()}/launch"
+        )
+        # This service stops the running nodes of Sopias4 Application
+        # so that the system isn't connected anymore to the physical robot
+        self.__rm_sclient_stop_robot: Client = self.create_client(
+            EmptyWithStatuscode, f"{self.get_namespace()}/stop"
+        )
+        # This service starts the mapping process
+        self.__rm_sclient_start_mapping: Client = self.create_client(
+            EmptyWithStatuscode, f"{self.get_namespace()}/start_mapping"
+        )
+        # This service stops the mapping provess
+        # TODO maybe own service definition with custom map path?
+        self.__rm_sclient_stop_mapping: Client = self.create_client(
+            EmptyWithStatuscode, f"{self.get_namespace()}/stop_mapping"
         )
 
     def register_namespace(self, namespace: str):
@@ -204,7 +421,7 @@ class GrapficalNode(Node):
         """
         request: Register.Request = Register.Request()
         request.namespace_canditate = namespace
-        future = self.mrc_client_register.call_async(request)
+        future = self.__mrc_sclient_register.call_async(request)
 
         # Make sure the node itself is spinnig
         while rclpy.ok():
@@ -220,16 +437,25 @@ class GrapficalNode(Node):
 
                         match future.result():
                             case Register.Response.COLLISION_ERROR:
+                                self.get_logger().error(
+                                    "[GUI] Couldn't register namespace: Already registered"
+                                )
                                 msg_2_user.content = "Namespace is already registered. Choose another one"
                                 msg_2_user.interaction_options = (
                                     ShowDialog.Request.CONFIRM
                                 )
                             case Register.Response.ILLEGAL_NAMESPACE_ERROR:
+                                self.get_logger().error(
+                                    "[GUI] Couldn't register namespace: Namespace contains illegal characters"
+                                )
                                 msg_2_user.content = "Namespace contains illegal characters. Choose another one"
                                 msg_2_user.interaction_options = (
                                     ShowDialog.Request.CONFIRM
                                 )
                             case Register.Response.UNKOWN_ERROR:
+                                self.get_logger().error(
+                                    "[GUI] Couldn't register namespace: Unkown error"
+                                )
                                 msg_2_user.content = "Unknown error occured"
                                 msg_2_user.interaction_options = (
                                     ShowDialog.Request.CONFIRM_RETRY
@@ -249,6 +475,102 @@ class GrapficalNode(Node):
                             return self.register_namespace(namespace)
                         else:
                             return False
+                except Exception as e:
+                    raise e
+
+        return False
+
+    def launch_turtlebot(self) -> bool:
+        """
+        Runs a service client to start the nodes in Sopias4 Application so the system is connected
+        to the robot and ready for operation.
+
+        Returns:
+            bool: If operation was successful
+        """
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_launch.call_async(request)
+
+        # Check response
+        while rclpy.ok():
+            if future.done():
+                try:
+                    if future.result() == Register.Response.SUCCESS:
+                        return True
+                    else:
+                        return False
+                except Exception as e:
+                    raise e
+
+        return False
+
+    def stop_turtlebot(self) -> bool:
+        """
+        Runs a service client to stop the nodes in Sopias4 Application so the system is disconnected
+        from the robot and ready for operation.
+
+        Returns:
+            bool: If operation was successful
+        """
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_stop_robot.call_async(request)
+
+        # Check response
+        while rclpy.ok():
+            if future.done():
+                try:
+                    if future.result() == Register.Response.SUCCESS:
+                        return True
+                    else:
+                        return False
+                except Exception as e:
+                    raise e
+
+        return False
+
+    def start_mapping(self) -> bool:
+        """
+        Runs a service client to start the mapping process. The Sopias4 Application should
+        be fully launched before running this service
+
+        Returns:
+            bool: If operation was successful
+        """
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_start_mapping.call_async(request)
+
+        # Check response
+        while rclpy.ok():
+            if future.done():
+                try:
+                    if future.result() == Register.Response.SUCCESS:
+                        return True
+                    else:
+                        return False
+                except Exception as e:
+                    raise e
+
+        return False
+
+    def stop_mapping(self) -> bool:
+        """
+        Runs a service client to stop the mapping process. The Sopias4 Application should
+        be fully launched and the mapping process running before running this service
+
+        Returns:
+            bool: If operation was successful
+        """
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_stop_mapping.call_async(request)
+
+        # Check response
+        while rclpy.ok():
+            if future.done():
+                try:
+                    if future.result() == Register.Response.SUCCESS:
+                        return True
+                    else:
+                        return False
                 except Exception as e:
                     raise e
 
@@ -322,6 +644,7 @@ class GrapficalNode(Node):
                                     {ShowDialog.Request.CONFIRM_CANCEL}, {ShowDialog.Request.CONFIRM_RETRY} and {ShowDialog.Request.YES_NO}"
                 )
 
+        self.get_logger().debug(f'[GUI] Showing dialog "{request_data.title}"')
         # Show dialog and get the pressed button
         selected_option = dlg.exec()
 
@@ -351,6 +674,23 @@ class GrapficalNode(Node):
                 )
 
         return response_data
+
+    def destroy_node(self):
+        """
+        Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
+        :meta private:
+        """
+        # Release service clients
+        self.__rm_sclient_launch.destroy()
+        self.__rm_sclient_stop_robot.destroy()
+        self.__rm_sclient_start_mapping.destroy()
+        self.__rm_sclient_stop_mapping.destroy()
+        self.__mrc_sclient_register.destroy()
+        self.show_dialog_service.destroy()
+        # Release services
+        self.get_logger().info("[GUI] Shutting down node")
+
+        super().destroy_node()
 
 
 if __name__ == "__main__":
