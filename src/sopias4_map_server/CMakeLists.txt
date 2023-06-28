@@ -8,6 +8,8 @@ endif()
 #######################################
 # ----------- Find dependencies --------------
 #######################################
+find_package(sopias4_framework REQUIRED)
+
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -20,23 +22,25 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclpy REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
-# find_package(<dependency> REQUIRED)
+
 
 ######################################
 # --- Configure executabels/Nodes ---------
 ######################################
 # ------------------- C++ ------------------------
-# include_directories(include)
+include_directories(include)
 # Create exectuables. For this purpose, add 
 # following line for each node:
-# add_executable(cpp_exe src/<node file>)
-# ament_target_dependencies(cpp_exe rclcpp)
+add_executable(multi_robot_coordinator src/multi_robot_coordinator.cpp)
+ament_target_dependencies(multi_robot_coordinator
+  sopias4_framework
+  rclcpp)
 # Install C++ executables. For this purpose, add 
 # following line for each node:
-# install(TARGETS
-#     cpp_exe
-#     DESTINATION lib/${PROJECT_NAME}
-# )
+install(TARGETS
+    multi_robot_coordinator
+    DESTINATION lib/${PROJECT_NAME}
+)
 
 #------------------ Python ---------------------
 # Install Python modules
@@ -46,6 +50,12 @@ find_package(rclpy REQUIRED)
 #   #scripts/py_node.py
 #   DESTINATION lib/${PROJECT_NAME}
 # )
+
+# Install launch files, configs
+install(
+  DIRECTORY launch config maps
+  DESTINATION share/${PROJECT_NAME}
+  )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

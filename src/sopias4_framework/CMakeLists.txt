@@ -66,6 +66,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/GetNamespaces.srv"
       "srv/DriveToPos.srv"
       "srv/LaunchTurtlebot.srv"
+      "srv/Unregister.srv"
+      "srv/SetRobotPath.srv"
       DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
 )
 # Install launch files, configs

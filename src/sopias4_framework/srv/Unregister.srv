@@ -1,0 +1,11 @@
+# Request
+# The namespace of the robot which should be unregistered
+string name_space
+---
+#Response
+string SUCCESS = "success"
+string UNKNOWN_ERROR ="unknown_error"
+string NS_NOT_FOUND = "ns_not_found"
+
+# status code of request
+string statuscode "unknown error"
