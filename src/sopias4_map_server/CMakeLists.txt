@@ -8,32 +8,25 @@ endif()
 #######################################
 # ----------- Find dependencies --------------
 #######################################
-find_package(sopias4_framework REQUIRED)
-
-# ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sopias4_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-
-#------------------ Python ---------------------
-find_package(ament_cmake_python REQUIRED)
-find_package(rclpy REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
 
 
 ######################################
 # --- Configure executabels/Nodes ---------
 ######################################
-# ------------------- C++ ------------------------
 include_directories(include)
 # Create exectuables. For this purpose, add 
 # following line for each node:
 add_executable(multi_robot_coordinator src/multi_robot_coordinator.cpp)
 ament_target_dependencies(multi_robot_coordinator
-  sopias4_framework
+  sopias4_msgs
+  geometry_msgs
   rclcpp)
 # Install C++ executables. For this purpose, add 
 # following line for each node:
@@ -42,14 +35,6 @@ install(TARGETS
     DESTINATION lib/${PROJECT_NAME}
 )
 
-#------------------ Python ---------------------
-# Install Python modules
-# ament_python_install_package(${PROJECT_NAME})
-# Install executables
-# install(PROGRAMS
-#   #scripts/py_node.py
-#   DESTINATION lib/${PROJECT_NAME}
-# )
 
 # Install launch files, configs
 install(

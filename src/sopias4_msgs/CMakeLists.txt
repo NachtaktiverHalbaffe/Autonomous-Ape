@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(sopias4_framework)
+project(sopias4_msgs)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -18,48 +18,24 @@ find_package(rclcpp REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-#------------------ Python ---------------------
-find_package(ament_cmake_python REQUIRED)
-find_package(rclpy REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-
-
-######################################
-# --- Configure executabels/Nodes ---------
-######################################
-# ------------------- C++ ------------------------
-include_directories(include)
-# Create exectuables. For this purpose, add 
-# following line for each node:
-# add_executable(cpp_exe src/<node file>)
-# ament_target_dependencies(cpp_exe rclcpp)
-# Install C++ executables. For this purpose, add 
-# following line for each node:
-# install(TARGETS
-#     cpp_exe
-#     DESTINATION lib/${PROJECT_NAME}
-# )
-
-#------------------ Python ---------------------
-# Install Python modules
-ament_python_install_package(${PROJECT_NAME})
-# Install executables
-install(PROGRAMS
-  sopias4_framework/nodes/robot_manager.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-
 ######################################
 # ----------- ROS specific stuff ---------------
 ######################################
-# Install launch files, configs
-install(
-  DIRECTORY launch config
-  DESTINATION share/${PROJECT_NAME}
-  )
+# Service definitions
+rosidl_generate_interfaces(${PROJECT_NAME}
+      "msg/Robot.msg"
+      "srv/ShowDialog.srv"
+      "srv/Register.srv"
+      "srv/EmptyWithStatuscode.srv"
+      "srv/GetRobots.srv"
+      "srv/GetRobotIdentity.srv"
+      "srv/GetNamespaces.srv"
+      "srv/DriveToPos.srv"
+      "srv/LaunchTurtlebot.srv"
+      "srv/Unregister.srv"
+      "srv/SetRobotPath.srv"
+      DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

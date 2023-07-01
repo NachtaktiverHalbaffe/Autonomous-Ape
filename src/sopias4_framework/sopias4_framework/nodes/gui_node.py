@@ -7,12 +7,13 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
 from rclpy.node import Node
 
-from sopias4_framework.srv import (
+from sopias4_msgs.srv import (
     DriveToPos,
     EmptyWithStatuscode,
     LaunchTurtlebot,
     Register,
     ShowDialog,
+    Unregister,
 )
 
 
@@ -96,7 +97,6 @@ class GUINode(QMainWindow):
         self.set_default_values()
 
         # Create underlying node
-        rclpy.init()  # Run node in a seperate thread
         self.__nodeProcess.start()
 
     @abc.abstractmethod
@@ -162,6 +162,17 @@ class GUINode(QMainWindow):
         self.node = GrapficalNode(node_name=self.node_name, namespace=self.namespace)
         self.__nodeProcess = Process(target=self.__runNode, daemon=True)
         self.__nodeProcess.start()
+
+    def unregister_namespace(self, namespace: str) -> None:
+        """
+        Unregister a namespace on the Sopias4 Map-Server. It's basically a wrapper and calling the unregister_namespace
+        service client in the underlying node object. If successful, it will stop `self.node`.
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+
+        Args:
+            namespace (str): The namespace which should be unregistered
+        """
 
     def launch_robot(self) -> None:
         """
@@ -371,7 +382,7 @@ class GrapficalNode(Node):
             super().__init__(node_name, namespace=namespace)  # type: ignore
         else:
             # TODO Generate random namespace
-            ns = ""
+            ns = "adfasdfa"
             super().__init__(node_name, namespace=ns)  # type: ignore
         self.get_logger().info(
             f"[GUI] Node started with namespace {self.get_namespace()}"
@@ -477,6 +488,8 @@ class GrapficalNode(Node):
                             return False
                 except Exception as e:
                     raise e
+                finally:
+                    break
 
         return False
 
@@ -501,6 +514,8 @@ class GrapficalNode(Node):
                         return False
                 except Exception as e:
                     raise e
+                finally:
+                    break
 
         return False
 
@@ -512,8 +527,9 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
-        request = EmptyWithStatuscode.Request()
-        future = self.__rm_sclient_stop_robot.call_async(request)
+        # --- Stop the nodes ---
+        stop_request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_stop_robot.call_async(stop_request)
 
         # Check response
         while rclpy.ok():
@@ -525,6 +541,8 @@ class GrapficalNode(Node):
                         return False
                 except Exception as e:
                     raise e
+                finally:
+                    break
 
         return False
 
@@ -549,6 +567,8 @@ class GrapficalNode(Node):
                         return False
                 except Exception as e:
                     raise e
+                finally:
+                    break
 
         return False
 
@@ -573,6 +593,8 @@ class GrapficalNode(Node):
                         return False
                 except Exception as e:
                     raise e
+                finally:
+                    break
 
         return False
 

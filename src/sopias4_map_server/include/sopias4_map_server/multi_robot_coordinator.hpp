@@ -1,11 +1,14 @@
 #include <memory>
 #include <vector>
 #include "rclcpp/rclcpp.hpp"
-#include "sopias4_framework/srv/get_namespaces.hpp"
-#include "sopias4_framework/srv/get_robots.hpp"
-#include "sopias4_framework/srv/get_robot_identity.hpp"
-#include "sopias4_framework/srv/register.hpp"
-#include "sopias4_framework/msg/robot.hpp"
+#include "sopias4_msgs/srv/get_namespaces.hpp"
+#include "sopias4_msgs/srv/get_robots.hpp"
+#include "sopias4_msgs/srv/get_robot_identity.hpp"
+#include "sopias4_msgs/srv/register.hpp"
+#include "sopias4_msgs/srv/unregister.hpp"
+#include "sopias4_msgs/srv/set_robot_path.hpp"
+#include "sopias4_msgs/msg/robot.hpp"
+
 
 namespace sopias4_map_server {
     /**

@@ -9,12 +9,11 @@
 
   <!-- Use both ament_cmake and ament_cmake_python to use C++ and Python nodes in same package -->
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <!-- C++ dependencies -->
   <depend>rclcpp</depend>
-  <!-- Python dependencies -->
-  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sopias4_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -43,7 +43,7 @@ include_directories(include)
 ament_python_install_package(${PROJECT_NAME})
 # Install executables
 install(PROGRAMS
-  sopias4_application/robot_manager.py
+  sopias4_application/gui.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
