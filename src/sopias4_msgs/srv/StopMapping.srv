@@ -1,0 +1,15 @@
+# Request
+string map_name "map_default"
+string map_topic "/map"
+string map_mode "trinary"
+string image_format
+float32 occupied_thres 0.65
+float32 free_thres 0.25
+---
+# Response
+string SUCCESS = "success"
+string UNKNOWN_ERROR = "unknown_error"
+string ALREADY_STOPPED = "already_stopped"
+string SAVING_FAILED ="saving_failed"
+
+string statuscode "unknown_error"

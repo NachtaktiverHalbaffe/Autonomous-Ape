@@ -2,18 +2,22 @@ import abc
 from multiprocessing import Process
 from threading import Event, Thread
 
+import launch_ros
 import rclpy
+from geometry_msgs.msg import Twist
+from launch import LaunchDescription, LaunchService
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
+from rclpy.impl.logging_severity import LoggingSeverity
 from rclpy.node import Node
+from sopias4_framework.tools.ros2 import drive_tools
 
 from sopias4_msgs.srv import (
-    DriveToPos,
+    Drive,
     EmptyWithStatuscode,
     LaunchTurtlebot,
     Register,
     ShowDialog,
-    Unregister,
 )
 
 
@@ -35,6 +39,7 @@ class GUINode(QMainWindow):
                 def __init__(self) ->None:
                     # The script should name the Python object this way, but can vary. Doublecheck the class name
                     # within the generated Python file to be sure
+                    self.ui: Ui_MainWindow # To enable auto-completion
                     ui_file = Ui_MainWindow() 
                     super().__init(self, ui_file)
 
@@ -72,6 +77,8 @@ class GUINode(QMainWindow):
             is_mapping (bool): If the mapping process is running (True) or not (False). Defaults to False on startup
     """
 
+    __metaclass__ = abc.ABCMeta
+
     def __init__(
         self, ui, node_name: str = "gui_node", namespace: str | None = None
     ) -> None:
@@ -86,18 +93,16 @@ class GUINode(QMainWindow):
         self.node: GrapficalNode = GrapficalNode(
             node_name=node_name, namespace=namespace
         )
+        # A thread which runs the robot manager once the namespace is set
+        self.__rm_thread = Process()
         # Private class attributes
         self.__restart_flag = Event()
-        self.__nodeProcess = Process(target=self.__runNode, daemon=True)
 
         # Setup GUI
         self.ui.setupUi(self)
         # Connecting the ui elements with callbacks and set values
         self.connect_callbacks()
         self.set_default_values()
-
-        # Create underlying node
-        self.__nodeProcess.start()
 
     @abc.abstractmethod
     def connect_callbacks(self) -> None:
@@ -160,8 +165,8 @@ class GUINode(QMainWindow):
         self.__nodeProcess.terminate()
         self.node.destroy_node()
         self.node = GrapficalNode(node_name=self.node_name, namespace=self.namespace)
-        self.__nodeProcess = Process(target=self.__runNode, daemon=True)
-        self.__nodeProcess.start()
+        # Start robot manager
+        self.__start_rm()
 
     def unregister_namespace(self, namespace: str) -> None:
         """
@@ -229,6 +234,7 @@ class GUINode(QMainWindow):
 
             if status_response:
                 self.turtlebot_running = False
+                self.namespace = None
                 self.node.get_logger().debug("[GUI] Stopped robot")
             else:
                 self.turtlebot_running = True
@@ -241,6 +247,9 @@ class GUINode(QMainWindow):
             # appear on production if carefully tested
             self.node.get_logger().error(f"[GUI] Couldnt stop robot: {e}")
             raise e
+
+        if self.__rm_thread.is_alive():
+            self.__rm_thread.terminate()
 
     def start_mapping(self) -> None:
         """
@@ -323,27 +332,66 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"[GUI] Couldnt stop mapping: {e}")
             raise e
 
+    def drive(
+        self,
+        twist_msg: Twist | None = None,
+        direction: str = "stop",
+        vel_rel: float = 1.0,
+    ) -> None:
+        """
+        Lets the Turtlebot drive. This can only be done if Sopias4 Application is fully running, otherwise it will directly\
+        abort this process. It's basically a wrapper and calling the sdrive service client in the underlying node object. 
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+
+        Args:
+            twist_msg (Twist, optional): The twist message which specifies how the Turtlebot should drive. If None (default), \
+                                                            when a appropriate Twist message will be generated (Important: In this casem direction and vel_rel must be provided). 
+            direction (str, optional): The direction which the Turtlebot should drive. Can be either forward, backward, left, \
+                                                     right, rotate_left, rotate_right and stop. Defaults to stop
+            vel_rel (float, optional): The relative velocity. The value is normed to the maximum speed of the Turtlebot,\
+                                                     so e.g. 1.0 is maximum speed and 0 is standing still. Defaults to 1.0
+        """
+        #  Error message for user in Case something goes wrong
+        request_informUser = ShowDialog.Request()
+        request_informUser.title = "Couldn't send drive command"
+        request_informUser.icon = ShowDialog.Request.ICON_ERROR
+        request_informUser.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+        request_informUser.content = "Couldn't send drive command. Check if the Turtlebot4\
+                    nodes inside Sopias4 Application are running"
+        try:
+            if self.turtlebot_running:
+                status_response = self.node.drive(twist_msg, direction, vel_rel)
+                if status_response:
+                    self.node.get_logger().debug(
+                        "[GUI] Successfully send drive command to Turtlebot"
+                    )
+                else:
+                    self.node.get_logger().error(
+                        "[GUI] Couldnt send drive command to Turtlebot du to unknown error"
+                    )
+                    # Inform user about failure and see for it's response
+                    self.__inform_and_retry(request_informUser, self.stop_mapping)
+            else:
+                self.node.get_logger().warning(
+                    "[GUI] Couldn't send drive command to Turtlebot: Turtlebot is offline"
+                )
+                # Inform user about failure and see for it's response
+                self.__inform_and_retry(request_informUser, self.stop_mapping)
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"[GUI] Couldnt stop mapping: {e}")
+            raise e
+
     def closeEvent(self, event):
         """
         Executes when the GUI is closed
 
         :meta private:
         """
-        self.node.get_logger().info("[GUI] Shutting down node")
         self.node.destroy_node()
-        rclpy.shutdown()
         event.accept()
-
-    def __runNode(self):
-        """
-        Runs the node itself so its spinning. Should be run inside a own Process
-        """
-        while rclpy.ok():
-            rclpy.spin_once(self.node)
-
-        # Close gui when Node doesn't spin anymore and node wasn't shutdown intentionally
-        if not self.__restart_flag.is_set():
-            self.close()
 
     def __inform_and_retry(self, msg: ShowDialog.Request, retry_fn):
         """
@@ -356,11 +404,31 @@ class GUINode(QMainWindow):
                                              chooses to retry the operation. If the function takes arguments,\
                                              then pass this function as a lambda e.g. `__inform_and_rety(msg, lambda: foo("bar"))`
         """
-        user_response = self.node.__show_dialog(msg, ShowDialog.Response())
-
+        user_response = self.node._show_dialog(msg, ShowDialog.Response())
         if user_response == ShowDialog.Response.RETRY:
             self.node.get_logger().debug(f"[GUI] User chose to retry {retry_fn}")
             retry_fn()
+
+    def __start_rm(self):
+        """
+        Starts the robot manager once the namespace is registered
+        """
+        # Generate launch description
+        ld = LaunchDescription()
+        rm = launch_ros.actions.Node(
+            package="turtlebot4_node",
+            executable="robot_manager.py",
+            name="robot_manager",
+            namespace=self.namespace,
+        )
+        ld.add_action(rm)
+
+        # generate launchservice which runs the robot manager
+        ls = LaunchService()
+        ls.include_launch_description(ld)
+        # Run the launch service in own thread so it is non-blocking
+        self.__rm_thread = Process(target=ls.run, daemon=True)
+        self.__rm_thread.start()
 
 
 class GrapficalNode(Node):
@@ -384,13 +452,16 @@ class GrapficalNode(Node):
             # TODO Generate random namespace
             ns = "adfasdfa"
             super().__init__(node_name, namespace=ns)  # type: ignore
+
+        # Log level 10 is debug
+        self.get_logger().set_level(10)
         self.get_logger().info(
             f"[GUI] Node started with namespace {self.get_namespace()}"
         )
 
         # ---- Setup services -----
         self.show_dialog_service = self.create_service(
-            ShowDialog, "show_dialog", self.__show_dialog
+            ShowDialog, "show_dialog", self._show_dialog
         )
 
         # --- Setup service clients ---
@@ -418,6 +489,10 @@ class GrapficalNode(Node):
         self.__rm_sclient_stop_mapping: Client = self.create_client(
             EmptyWithStatuscode, f"{self.get_namespace()}/stop_mapping"
         )
+        # This service sends a manual drive command to the robot
+        self.__rm_sclient_drive: Client = self.create_client(
+            Drive, f"{self.get_namespace()}/drive"
+        )
 
     def register_namespace(self, namespace: str):
         """
@@ -430,15 +505,26 @@ class GrapficalNode(Node):
         Returns:
             bool: If namespace was registered successfully or not
         """
+        self.get_logger().debug(
+            f"[GUI] Sending service request to register namespace {namespace}"
+        )
         request: Register.Request = Register.Request()
         request.namespace_canditate = namespace
         future = self.__mrc_sclient_register.call_async(request)
+        self.get_logger().debug(
+            "[GUI] Service request for rrrregistering namespace sent.Waiting for response"
+        )
 
         # Make sure the node itself is spinnig
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
+                self.get_logger().debug(
+                    f"[GUI] Got service response {future.result().statuscode} from register_namespace service"
+                )
                 try:
-                    if future.result() == Register.Response.SUCCESS:
+                    response: Register.Response | None = future.result()
+                    if response.statuscode == Register.Response.SUCCESS:
                         return True
                     else:
                         # Inform user about error
@@ -446,7 +532,7 @@ class GrapficalNode(Node):
                         msg_2_user.title = "Error while registering namespace"
                         msg_2_user.icon = ShowDialog.Request.ICON_ERROR
 
-                        match future.result():
+                        match response.statuscode:
                             case Register.Response.COLLISION_ERROR:
                                 self.get_logger().error(
                                     "[GUI] Couldn't register namespace: Already registered"
@@ -472,7 +558,7 @@ class GrapficalNode(Node):
                                     ShowDialog.Request.CONFIRM_RETRY
                                 )
 
-                        user_response = self.__show_dialog(
+                        user_response = self._show_dialog(
                             msg_2_user, ShowDialog.Response()
                         )
 
@@ -501,14 +587,23 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
+        self.get_logger().debug("[GUI] Sending service request to launch Turtlebot")
         request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_launch.call_async(request)
 
+        self.get_logger().debug(
+            "[GUI] Sent service request to launch Turtlebot. Waiting for response"
+        )
         # Check response
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
+                response: EmptyWithStatuscode.Response | None = future.result()
+                self.get_logger().debug(
+                    f"[GUI] Got service response {response.statuscode} for service launch_turtlebot"
+                )
                 try:
-                    if future.result() == Register.Response.SUCCESS:
+                    if response.statuscode == Register.Response.SUCCESS:
                         return True
                     else:
                         return False
@@ -528,14 +623,24 @@ class GrapficalNode(Node):
             bool: If operation was successful
         """
         # --- Stop the nodes ---
+        self.get_logger().debug(
+            "[GUI] Stops Turtlebot. Sending service request to stop nodes"
+        )
         stop_request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_stop_robot.call_async(stop_request)
-
+        self.get_logger().debug(
+            "[GUI] Service request to stop nodes sent. Waiting for response"
+        )
         # Check response
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
+                response: EmptyWithStatuscode.Response | None = future.result()
+                self.get_logger().debug(
+                    f"[GUI] Got response {response.statuscode} for service request to stop turtlebot nodes"
+                )
                 try:
-                    if future.result() == Register.Response.SUCCESS:
+                    if response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
                         return True
                     else:
                         return False
@@ -554,14 +659,23 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
+        self.get_logger().debug("[GUI] Send service request to start mapping")
         request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_start_mapping.call_async(request)
 
+        self.get_logger().debug(
+            "[GUI] Service request to start mapping sent. Waiting for response"
+        )
         # Check response
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
+                response: EmptyWithStatuscode.Response | None = future.result()
+                self.get_logger().debug(
+                    f"[GUI] Got response {response.statuscode} for service start_mapping"
+                )
                 try:
-                    if future.result() == Register.Response.SUCCESS:
+                    if response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
                         return True
                     else:
                         return False
@@ -580,25 +694,65 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
+        self.get_logger().debug("[GUI] Sending service request to stop mapping")
         request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_stop_mapping.call_async(request)
-
+        self.get_logger().debug(
+            "[GUI] Service request to start mapping sent. Waiting for response"
+        )
         # Check response
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
                 try:
-                    if future.result() == Register.Response.SUCCESS:
+                    response: EmptyWithStatuscode.Response | None = future.result()
+                    if response == EmptyWithStatuscode.Response.SUCCESS:
                         return True
                     else:
                         return False
                 except Exception as e:
                     raise e
-                finally:
-                    break
 
         return False
 
-    def __show_dialog(
+    def drive(
+        self,
+        twist_msgs: Twist | None = None,
+        direction: str = "stop",
+        vel_rel: float = 1.0,
+    ) -> bool:
+        """
+        Runs a service client to send a driving command to the Turtlebot. The Sopias4 Application
+        should be fully launched and the mapping process running before running this service
+
+        Returns:
+            bool: If operation was successful
+        """
+        request = Drive.Request()
+        if twist_msgs is None:
+            request.twist = drive_tools.generate_twist_msg(
+                direction=direction, vel_rel=vel_rel
+            )
+        else:
+            request.twist = twist_msgs
+        future = self.__rm_sclient_drive.call_async(request)
+
+        while rclpy.ok():
+            rclpy.spin_once(self)
+            if future.done():
+                try:
+                    response: Drive.Response | None = future.result()
+
+                    if response.statuscode == Drive.Response.SUCCESS:
+                        return True
+                    else:
+                        return False
+                except Exception as e:
+                    raise e
+
+        return False
+
+    def _show_dialog(
         self, request_data: ShowDialog.Request, response_data: ShowDialog.Response
     ) -> ShowDialog.Response:
         """Callback function for the show_dialog service. It creates a QT dialog, fills it with the values from the service request and shows it.
@@ -615,6 +769,9 @@ class GrapficalNode(Node):
             ValueError: If theres invalid data in the response
             NotImplementedError: If the user chooses a interaction option which isn't specified in the service response
         """
+        self.get_logger().info(
+            f"[GUI] Got service request to display dialog with title {request_data.title}"
+        )
         dlg = QMessageBox()
         # Set static data that doesn't need validation
         dlg.setWindowTitle(request_data.title)
@@ -675,7 +832,7 @@ class GrapficalNode(Node):
         match selected_option:
             case QMessageBox.Ok:
                 response_data.selected_option = ShowDialog.Response.CONFIRMED
-            case QMessageBox.ABORT:
+            case QMessageBox.Abort:
                 response_data.selected_option = ShowDialog.Response.ABORT
             case QMessageBox.Retry:
                 response_data.selected_option = ShowDialog.Response.RETRY

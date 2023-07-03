@@ -9,30 +9,48 @@ import sys
 
 
 # Generate Sphinx files (Python)
-def generate_ui_object(path_ui_file:str,path_dst:str, file_name:str ="ui_object.py"):
-    subprocess.call(["pyqt5-uic", path_ui_file ,f"{path_dst}/{file_name}"])
+def generate_ui_object(
+    path_ui_file: str, path_dst: str, file_name: str = "ui_object.py"
+):
+    subprocess.call(
+        [
+            "python3",
+            "-m",
+            "PyQt5.uic.pyuic",
+            path_ui_file,
+            "-o",
+            f"{path_dst}/{file_name}",
+        ]
+    )
+
 
 if __name__ == "__main__":
     inputfile = ""
-    outputfile= ""
+    outputfile = ""
     file_name = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hi:o:n:",["ifile=", "ofile=","name"])
+        opts, args = getopt.getopt(
+            sys.argv[1:], "hi:o:n:", ["ifile=", "ofile=", "name"]
+        )
     except getopt.GetoptError:
-        print('generate_ui.py -i <inputfile> -o <path of outputfile> -n <name of outputfile>')
+        print(
+            "generate_ui.py -i <inputfile> -o <path of outputfile> -n <name of outputfile>"
+        )
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-h":
-            print('generate_ui.py -i <inputfile> -o <path of outputfile> -n <name of outputfile>')
-            sys.exit() 
+            print(
+                "generate_ui.py -i <inputfile> -o <path of outputfile> -n <name of outputfile>"
+            )
+            sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
-        elif opt in ("-o","--ifile"):
-            outputfile = arg 
-        elif opt in ("-n","--name"):
+        elif opt in ("-o", "--ifile"):
+            outputfile = arg
+        elif opt in ("-n", "--name"):
             file_name = arg
-    
+
     if not os.path.isfile(inputfile):
         print(f"Input file {inputfile} not found")
         sys.exit()
@@ -41,7 +59,6 @@ if __name__ == "__main__":
         sys.exit()
 
     if file_name is not None:
-        generate_ui_object(inputfile, outputfile,file_name)
+        generate_ui_object(inputfile, outputfile, file_name)
     else:
-        generate_ui_object(inputfile, outputfile)      
-        
+        generate_ui_object(inputfile, outputfile)

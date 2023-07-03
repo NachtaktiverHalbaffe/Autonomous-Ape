@@ -34,6 +34,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/LaunchTurtlebot.srv"
       "srv/Unregister.srv"
       "srv/SetRobotPath.srv"
+      "srv/Drive.srv"
+      "srv/StopMapping.srv"
       DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
 )
 

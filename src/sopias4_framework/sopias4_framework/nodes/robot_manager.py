@@ -5,6 +5,7 @@ from time import sleep
 
 import launch_ros.actions
 import rclpy
+from geometry_msgs.msg import Twist
 from launch import LaunchDescription, LaunchService
 from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -21,6 +22,7 @@ from rclpy.node import Node
 from rclpy.service import Service
 
 from sopias4_msgs.srv import (
+    Drive,
     DriveToPos,
     EmptyWithStatuscode,
     GetNamespaces,
@@ -28,6 +30,7 @@ from sopias4_msgs.srv import (
     GetRobots,
     LaunchTurtlebot,
     ShowDialog,
+    StopMapping,
     Unregister,
 )
 
@@ -56,10 +59,14 @@ class RobotManager(Node):
         self.other_robots: list = []
         self.__goal_handle = None
         self.__result_future = None
+        print(self.get_namespace())
 
         # ------------------- Service server --------------------
         self.drive_to_pos_action: Service = self.create_service(
             DriveToPos, "drive_to_pos", self.__drive__to_pos
+        )
+        self.drive_serive: Service = self.create_service(
+            Drive, "drive", self.__drive_callback
         )
         self.launch_service: Service = self.create_service(
             LaunchTurtlebot, "launch", self.__launch_robot
@@ -72,7 +79,7 @@ class RobotManager(Node):
         )
         # TODO maybe own service definition with custom map
         self.stop_mapping_service: Service = self.create_service(
-            EmptyWithStatuscode, "stop_mapping", self.__stop_mapping
+            StopMapping, "stop_mapping", self.__stop_mapping
         )
 
         # ------------------- Service clients--------------------
@@ -104,6 +111,11 @@ class RobotManager(Node):
         )
         # This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver
         self.__mrc__sclient__unregister = self.create_client(Unregister, "unregister")
+
+        # ---------- Publishers ----------------
+        self.__cmd_vel_pub = self.create_publisher(
+            Twist, f"{self.get_namespace()}/cmd_vel", 10
+        )
 
         # ---------- Launch services to launch nodes----------
         # Turtlebot launch description and service for launching corresponding node
@@ -157,8 +169,6 @@ class RobotManager(Node):
         
         Returns:
             DriveToPos.Response: The statuscode of the operation
-        
-           
         """
         # Generate action goal
         goal_msg = NavigateToPose.Goal()
@@ -196,6 +206,30 @@ class RobotManager(Node):
         Feedback callback for the nav2 action client. Currently unused
         """
         pass
+
+    def __drive_callback(
+        self, request_data: Drive.Request, response_data: Drive.Response
+    ) -> Drive.Response:
+        """ 
+         :meta public:
+        Callback function for a service which sends a driving command to the Turtlebot. It basically takes an Twist-Message and publishes it 
+        to the right topic with the right namespace.
+
+        Args:
+            request_data (Drive.Request): The data from the request. Look at service definition in srv/Drive.srv
+            response_data (Drive.Response): A response object into which the data for the response is written. \
+                                                                                    Look at service definition in srv/Drive.srv
+        
+        Returns:
+            Drive.Response: A response which contains the statuscode of the operation\
+                                        Look at service definition in srv/Drive.srv
+        """
+        try:
+            self.__cmd_vel_pub.publish(request_data.twist)
+            response_data.statuscode = Drive.Response.SUCCESS
+        except Exception as e:
+            response_data.statuscode = Drive.Response.UNKNOWN_ERROR
+        return response_data
 
     def __launch_robot(
         self,
@@ -258,7 +292,7 @@ class RobotManager(Node):
     ) -> EmptyWithStatuscode.Response:
         """
         :meta public:
-        Callback function for a service which lstops all nodes related to the robot itself. It basically kills each node except the 
+        Callback function for a service which stops all nodes related to the robot itself. It basically kills each node except the 
         robot_manager und gui node.
 
         Args:
@@ -298,6 +332,7 @@ class RobotManager(Node):
         future = self.__mrc__sclient__unregister.call_async(unregister_request)
 
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
                 try:
                     if future.result() == Unregister.Response.SUCCESS:
@@ -339,6 +374,7 @@ class RobotManager(Node):
 
         # Make sure the node itself is spinnig
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
                 try:
                     if future.result():
@@ -362,29 +398,29 @@ class RobotManager(Node):
 
     def __stop_mapping(
         self,
-        _request_data: EmptyWithStatuscode.Request,
-        response_data: EmptyWithStatuscode.Response,
-    ) -> EmptyWithStatuscode.Response:
+        request_data: StopMapping.Request,
+        response_data: StopMapping.Response,
+    ) -> StopMapping.Response:
         """
         :meta public:
         Callback function for a service which stops the mapping. This is done by setting the amcl node to an \
         active state so it does operate again and stopping the slam node. Furthermore, the map is saved on Sopias4 Map-Server
 
         Args:
-            request_data (EmptyWithStatuscode.Request): The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv
-            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \
-                                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+            request_data (StopMappingRequest): The data from the request. Look at service definition in srv/StopMapping.srv
+            response_data (StopMapping.Response): A response object into which the data for the response is written. \
+                                                                                    Look at service definition in srv/StopMapping.srv
         
         Returns:
-            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \
-                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+            StopMapping.Response: A response which contains the statuscode of the operation.  \
+                                                     Look at service definition in srv/StopMapping.srv
         """
         # ------ Stop slam toolbox ---------
         if self.__runMapping.is_alive():
             self.__runMapping.kill()
-            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+            response_data.statuscode = StopMapping.Response.SUCCESS
         else:
-            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_STOPPED
+            response_data.statuscode = StopMapping.Response.ALREADY_STOPPED
 
         # ------ Set AMCL in active state -------
         request: ChangeState.Request = ChangeState.Request()
@@ -393,6 +429,7 @@ class RobotManager(Node):
 
         # Make sure the node itself is spinnig
         while rclpy.ok():
+            rclpy.spin_once(self)
             if future.done():
                 try:
                     if future.result():
@@ -406,13 +443,13 @@ class RobotManager(Node):
                     raise e
 
         #  Save map
-        response_data = self.__save_map(response_data)  # type: ignore
+        response_data = self.__save_map(request_data, response_data)  # type: ignore
 
         return response_data
 
     def __save_map(
-        self, response_data: EmptyWithStatuscode.Response
-    ) -> EmptyWithStatuscode.Response:
+        self, save_params: StopMapping.Request, response_data: StopMapping.Response
+    ) -> StopMapping.Response:
         """
         Handles the map saving process itself. If an error occurs, it informs the user and ask if it should be retried
 
@@ -426,24 +463,26 @@ class RobotManager(Node):
         """
         # TODO Change to constants from Sopias4 Map Server
         save_map_requ = SaveMap.Request()
-        save_map_requ.map_topic = "/map"
-        save_map_requ.map_url = "my_map"
-        save_map_requ.map_mode = "trinary"
-        save_map_requ.free_thresh = 0.25
-        save_map_requ.occupied_thresh = 0.65
-        # save_map_requ.image_format = ""
+        save_map_requ.map_topic = save_params.map_topic
+        save_map_requ.map_url = save_params.map_name
+        save_map_requ.map_mode = save_params.map_mode
+        save_map_requ.free_thresh = save_params.free_thres
+        save_map_requ.occupied_thresh = save_params.occupied_thres
+        # save_map_requ.image_format = save_params.image_format
 
         future = self.__ms_sclient_saveMap.call_async(save_map_requ)
-        # Check if map was saved successfully
+
         while rclpy.ok():
+            rclpy.spin_once(self)
+
             if future.done():
                 try:
-                    if future.result():
-                        response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+                    response: SaveMap.Response | None = future.result()
+                    # Check if map was saved successfully
+                    if response.result:
+                        response_data.statuscode = StopMapping.Response.SUCCESS
                     else:
-                        response_data.statuscode = (
-                            EmptyWithStatuscode.Response.SAVEING_FAILED
-                        )
+                        response_data.statuscode = StopMapping.Response.SAVING_FAILED
 
                         #  Inform user
                         dialog_request = ShowDialog.Request()
@@ -456,22 +495,20 @@ class RobotManager(Node):
                             ShowDialog.Request.IGNORE_RETRY
                         )
 
-                        self.__gui_sclient_showDialog.call_async(dialog_request)
-                        while rclpy.ok():
-                            if future.done():
-                                try:
-                                    # User chose to retry operation
-                                    if future.result() == ShowDialog.Response.RETRY:
-                                        #  Call function recursively to retry save operation
-                                        return self.__save_map(response_data)
-                                    #  User chose to ignore error
-                                    else:
-                                        response_data.statuscode = (
-                                            EmptyWithStatuscode.Response.SAVEING_FAILED
-                                        )
-                                        return response_data
-                                except Exception as e:
-                                    raise e
+                        user_response: ShowDialog.Response = (
+                            self.__gui_sclient_showDialog.call(dialog_request)
+                        )
+
+                        # User chose to retry operation
+                        if user_response.selected_option == ShowDialog.Response.RETRY:
+                            #  Call function recursively to retry save operation
+                            return self.__save_map(save_params, response_data)
+                        #  User chose to ignore error
+                        else:
+                            response_data.statuscode = (
+                                StopMapping.Response.SAVING_FAILED
+                            )
+                            return response_data
 
                 except Exception as e:
                     raise e
