@@ -9,7 +9,8 @@
     "python.analysis.extraPaths": [
         "/home/ws/install/sopias4_framework/local/lib/python3.10/dist-packages",
         "/opt/ros/humble/lib/python3.10/site-packages",
-        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "./src/sopias4_framework"
     ],
     "files.associations": {
         "functional": "cpp",

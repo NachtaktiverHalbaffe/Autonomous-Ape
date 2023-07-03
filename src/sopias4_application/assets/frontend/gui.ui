@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1008</width>
+    <width>1580</width>
     <height>772</height>
    </rect>
   </property>
@@ -645,12 +645,25 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11">
               <item>
-               <widget class="QwtKnob" name="Knob_speed">
-                <property name="upperBound">
-                 <double>0.310000000000000</double>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
-                <property name="markerStyle">
-                 <enum>QwtKnob::Dot</enum>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QSlider" name="horizontalSlider_velocity">
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -666,6 +679,19 @@
                  <set>Qt::AlignCenter</set>
                 </property>
                </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -693,13 +719,6 @@
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtKnob</class>
-   <extends>QWidget</extends>
-   <header>qwt_knob.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
