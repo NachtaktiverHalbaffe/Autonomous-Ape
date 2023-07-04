@@ -54,12 +54,14 @@ class RobotManager(Node):
     """
 
     # TODO Keep doc up to date
-    def __init__(self, node_name="robot_manager") -> None:
-        super().__init__(node_name)  # type: ignore
+    def __init__(self, node_name="robot_manager", namespace: str | None = None) -> None:
+        if namespace is None:
+            super().__init__(node_name)  # type: ignore
+        else:
+            super().__init__(node_name, namespace=namespace)  # type: ignore
         self.other_robots: list = []
         self.__goal_handle = None
         self.__result_future = None
-        print(self.get_namespace())
 
         # ------------------- Service server --------------------
         self.drive_to_pos_action: Service = self.create_service(
@@ -77,40 +79,51 @@ class RobotManager(Node):
         self.start_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "start_mapping", self.__start_mapping
         )
-        # TODO maybe own service definition with custom map
         self.stop_mapping_service: Service = self.create_service(
             StopMapping, "stop_mapping", self.__stop_mapping
         )
 
         # ------------------- Service clients--------------------
+        # Create own sub node for service clients so they can spin independently
+        self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients", namespace=self.get_namespace())  # type: ignore
         # This service requests the states of the robot from the multi robot coordinator inside Sopias4 Map-Server
-        self.__mrc_sclient_robots: Client = self.create_client(GetRobots, "get_robots")
-        self.__mrc_sclient_robot_identity: Client = self.create_client(
-            GetRobotIdentity, "get_robot_identity"
+        self.__mrc_sclient_robots: Client = self.__service_client_node.create_client(
+            GetRobots, "/get_robots"
+        )
+        self.__mrc_sclient_robot_identity: Client = (
+            self.__service_client_node.create_client(
+                GetRobotIdentity, "/get_robot_identity"
+            )
         )
         # This service requests all registered namespaces of multi robot coordinator inside Sopias4 Map-Server
-        self.__mrc_sclient_namespaces: Client = self.create_client(
-            GetNamespaces, "get_namespaces"
+        self.__mrc_sclient_namespaces: Client = (
+            self.__service_client_node.create_client(GetNamespaces, "/get_namespaces")
         )
         # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
         # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
-        self.__amcl_sclient_lifecycle: Client = self.create_client(
-            ChangeState, f"{self.get_namespace()}/amcl/change_state"
+        self.__amcl_sclient_lifecycle: Client = (
+            self.__service_client_node.create_client(
+                ChangeState, f"{self.get_namespace()}/amcl/change_state"
+            )
         )
         # This action lets the robot drive autonomously to an goal position
         self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
             self, NavigateToPose, "navigate_to_pose"
         )
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
-        self.__ms_sclient_saveMap: Client = self.create_client(
+        self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
             SaveMap, "map_server/save_map"
         )
         #  This service allows the robot manager to show a dialog with which the user can interact
-        self.__gui_sclient_showDialog: Client = self.create_client(
-            ShowDialog, f"{self.get_namespace()}/show_dialog"
+        self.__gui_sclient_showDialog: Client = (
+            self.__service_client_node.create_client(
+                ShowDialog, f"{self.get_namespace()}/show_dialog"
+            )
         )
         # This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver
-        self.__mrc__sclient__unregister = self.create_client(Unregister, "unregister")
+        self.__mrc__sclient__unregister = self.__service_client_node.create_client(
+            Unregister, "/unregister_namespace"
+        )
 
         # ---------- Publishers ----------------
         self.__cmd_vel_pub = self.create_publisher(
@@ -330,21 +343,15 @@ class RobotManager(Node):
         unregister_request.name_space = self.get_namespace()
 
         future = self.__mrc__sclient__unregister.call_async(unregister_request)
+        rclpy.spin_until_future_complete(self.__service_client_node, future)
 
-        while rclpy.ok():
-            rclpy.spin_once(self)
-            if future.done():
-                try:
-                    if future.result() == Unregister.Response.SUCCESS:
-                        response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-                    else:
-                        response_data.statuscode = (
-                            EmptyWithStatuscode.Response.ALREADY_STOPPED
-                        )
-                except Exception as e:
-                    raise e
-                finally:
-                    break
+        response: Unregister.Response | None = future.result()
+        if response is None:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+        elif response.statuscode == Unregister.Response.SUCCESS:
+            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+        else:
+            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_STOPPED
 
         return response_data
 
@@ -372,20 +379,14 @@ class RobotManager(Node):
         request.transition = Transition.TRANSITION_DEACTIVATE
         future = self.__amcl_sclient_lifecycle.call_async(request)
 
-        # Make sure the node itself is spinnig
-        while rclpy.ok():
-            rclpy.spin_once(self)
-            if future.done():
-                try:
-                    if future.result():
-                        response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-                    else:
-                        response_data.statuscode = (
-                            EmptyWithStatuscode.Response.ALREADY_ACTIVE
-                        )
-                        return response_data
-                except Exception as e:
-                    raise e
+        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        response: ChangeState.Response | None = future.result()
+        if response is None:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+        elif response.success:
+            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+        else:
+            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
 
         # ------ start slam toolbox ---------
         if not self.__runMapping.is_alive():
@@ -427,20 +428,15 @@ class RobotManager(Node):
         request.transition = Transition.TRANSITION_ACTIVATE
         future = self.__amcl_sclient_lifecycle.call_async(request)
 
-        # Make sure the node itself is spinnig
-        while rclpy.ok():
-            rclpy.spin_once(self)
-            if future.done():
-                try:
-                    if future.result():
-                        response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-                    else:
-                        response_data.statuscode = (
-                            EmptyWithStatuscode.Response.ALREADY_ACTIVE
-                        )
-                        return response_data
-                except Exception as e:
-                    raise e
+        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        response: ChangeState.Response | None = future.result()
+        if response is None:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+        elif response.success:
+            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+        else:
+            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
+            return response_data
 
         #  Save map
         response_data = self.__save_map(request_data, response_data)  # type: ignore
@@ -461,7 +457,6 @@ class RobotManager(Node):
             EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
-        # TODO Change to constants from Sopias4 Map Server
         save_map_requ = SaveMap.Request()
         save_map_requ.map_topic = save_params.map_topic
         save_map_requ.map_url = save_params.map_name
@@ -471,47 +466,36 @@ class RobotManager(Node):
         # save_map_requ.image_format = save_params.image_format
 
         future = self.__ms_sclient_saveMap.call_async(save_map_requ)
+        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        response: SaveMap.Response | None = future.result()
+        # Check if map was saved successfully
+        if response is None:
+            response_data.statuscode = StopMapping.Response.UNKNOWN_ERROR
+        elif response.result:
+            response_data.statuscode = StopMapping.Response.SUCCESS
+        else:
+            response_data.statuscode = StopMapping.Response.SAVING_FAILED
 
-        while rclpy.ok():
-            rclpy.spin_once(self)
+            #  Inform user
+            dialog_request = ShowDialog.Request()
+            dialog_request.title = "Saving map failed"
+            dialog_request.content = (
+                "The map couldn't be saved. Check Sopias4 Map-Server"
+            )
+            dialog_request.icon = ShowDialog.Request.ICON_ERROR
+            dialog_request.interaction_options = ShowDialog.Request.IGNORE_RETRY
 
-            if future.done():
-                try:
-                    response: SaveMap.Response | None = future.result()
-                    # Check if map was saved successfully
-                    if response.result:
-                        response_data.statuscode = StopMapping.Response.SUCCESS
-                    else:
-                        response_data.statuscode = StopMapping.Response.SAVING_FAILED
+            user_response: ShowDialog.Response = self.__gui_sclient_showDialog.call(
+                dialog_request
+            )
 
-                        #  Inform user
-                        dialog_request = ShowDialog.Request()
-                        dialog_request.title = "Saving map failed"
-                        dialog_request.content = (
-                            "The map couldn't be saved. Check Sopias4 Map-Server"
-                        )
-                        dialog_request.icon = ShowDialog.Request.ICON_ERROR
-                        dialog_request.interaction_options = (
-                            ShowDialog.Request.IGNORE_RETRY
-                        )
-
-                        user_response: ShowDialog.Response = (
-                            self.__gui_sclient_showDialog.call(dialog_request)
-                        )
-
-                        # User chose to retry operation
-                        if user_response.selected_option == ShowDialog.Response.RETRY:
-                            #  Call function recursively to retry save operation
-                            return self.__save_map(save_params, response_data)
-                        #  User chose to ignore error
-                        else:
-                            response_data.statuscode = (
-                                StopMapping.Response.SAVING_FAILED
-                            )
-                            return response_data
-
-                except Exception as e:
-                    raise e
+            # User chose to retry operation
+            if user_response.selected_option == ShowDialog.Response.RETRY:
+                #  Call function recursively to retry save operation
+                return self.__save_map(save_params, response_data)
+            #  User chose to ignore error
+            else:
+                response_data.statuscode = StopMapping.Response.SAVING_FAILED
 
         return response_data
 
@@ -602,12 +586,17 @@ class RobotManager(Node):
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
         :meta private:
         """
+        # Unregister namespace
+        request = Unregister.Request()
+        request.name_space = self.get_namespace()
+        self.__mrc__sclient__unregister.call_async(request)
         # Release service clients
         self.__mrc_sclient_namespaces.destroy()
         self.__mrc_sclient_robot_identity.destroy()
         self.__mrc_sclient_robots.destroy()
         self.__amcl_sclient_lifecycle.destroy()
         self.__nav2_aclient_driveToPos.destroy()
+        self.__service_client_node.destroy_node()
         # Release services
         self.launch_service.destroy()
         self.stop_service.destroy()

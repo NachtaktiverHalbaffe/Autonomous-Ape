@@ -24,7 +24,7 @@ class GUI(GUINode):
             ).start()
         )
         self.ui.pushButton_launch_turtlebot.clicked.connect(
-            lambda: Thread(target=self.launch_robot).start()
+            lambda: Thread(target=self.launch_robot, args=[True]).start()
         )
         self.ui.pushButton_stop_turtlebot.clicked.connect(
             lambda: Thread(target=self.stop_robot).start()
@@ -109,10 +109,7 @@ class GUI(GUINode):
 
 
 if __name__ == "__main__":
-    rclpy.init()
-
     app = QApplication(sys.argv)
     widget = GUI()
     widget.show()
-    rclpy.shutdown()
     sys.exit(app.exec())

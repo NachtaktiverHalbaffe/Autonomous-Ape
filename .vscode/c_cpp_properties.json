@@ -7,10 +7,12 @@
       },
       "includePath": [
         "/home/ws/install/sopias4_framework/include/**",
+        "/home/ws/install/sopias4_msgs/include/**",
         "/opt/ros/humble/include/**",
         "/home/ws/src/sopias4_application/include/**",
         "/home/ws/src/sopias4_framework/include/**",
         "/home/ws/src/sopias4_map_server/include/**",
+        "/home/ws/src/sopias4_msgs/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",
