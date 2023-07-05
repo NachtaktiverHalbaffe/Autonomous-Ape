@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 import asyncio
-from multiprocessing import Process
-from time import sleep
+import os
+import signal
+import subprocess
 
-import launch_ros.actions
 import rclpy
 from geometry_msgs.msg import Twist
-from launch import LaunchDescription, LaunchService
-from launch.actions import GroupAction, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import PushRosNamespace
-from launch_ros.substitutions import FindPackageShare
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from nav2_msgs.action import NavigateToPose
@@ -37,16 +31,15 @@ from sopias4_msgs.srv import (
 
 class RobotManager(Node):
     """
-    A central aspect of the Robot Manager is to initialise and configure SLAM, AMCL, Navigation2 and Turtlebot4. The main task is to assign the namespace of the robot
-    to the nodes and their topics and to start them if necessary. This allows them to be uniquely identified in a multi-robot scenario. Apart from initialisation and configuration,
-    this node acts as an interface between the system and the user or GUI.
+    A central aspect of the Robot Manager is to initialise and configure SLAM, AMCL, Navigation2 and Turtlebot4. The main task is to assign the namespace of the robot\
+    to the nodes and their topics and to start them if necessary. This allows them to be uniquely identified in a multi-robot scenario. Apart from initialization and configuration,\
+    this node acts as an interface between the system and the user or GUI. Running tasks is done with the help of services, so this node entirely communicates via ROS2 services.
 
     Attributes:
         other_robots (list<Robot>): A list containing the state of the other robots
-        drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action "drive_to_pos" (remember to add the namespace) and
+        drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action "drive_to_pos" (remember to add the namespace) and\
                                                                         takes a Navigation2 Goal. It's basically a wrapper to pass the action to the Nav2 stack
         drive_service (Service):  A service to send a drive command to the Turtlebot. The service can be accessed via the service "<namespace>/drive"
-        rotate_service (Service): A service to send a rotatecommand to the Turtlebot. The service can be accessed via the service "<namespace>/rotate"
         launch_service (Service): A service to start/connect to the Turtlebot. The service can be accessed via the service "<namespace>/launch"
         stop_service (Service): A service to stop/disconnect from the Turtlebot. The service can be accessed via the service "<namespace>/stop"
         start_mapping_service (Service): A service to start the mapping. The service can be accessed via the service "<namespace>/start_mapping". It uses the lifecycles in the background to set the slam node into an active state
@@ -130,40 +123,13 @@ class RobotManager(Node):
             Twist, f"{self.get_namespace()}/cmd_vel", 10
         )
 
-        # ---------- Launch services to launch nodes----------
-        # Turtlebot launch description and service for launching corresponding node
-        self.__ld_robot = self.__generate_launch_description()
-        self.__ls_robot = LaunchService()
+        # ---------- Shell processes to run nodes ----------
+        # The necessary turtlebot and mapping nodes are run inside shell processes via subprocess.popen,
+        # because so they can be shutdown cleanly during runtime and they run non-blocking
+        self.__turtlebot_shell_process: subprocess.Popen | None = None
+        self.__mapping_shell_process: subprocess.Popen | None = None
 
-        # SLAM/Mapping launch description and service for launching slam node
-        self.__ld_mapping = LaunchDescription()
-        self.__ld_mapping.add_action(
-            GroupAction(
-                [
-                    PushRosNamespace(self.get_namespace()),
-                    IncludeLaunchDescription(
-                        PythonLaunchDescriptionSource(
-                            PathJoinSubstitution(
-                                [
-                                    FindPackageShare("sopias4_framework"),
-                                    "launch",
-                                    "slam.launch.py",
-                                ]
-                            )
-                        )
-                    ),
-                ]
-            )
-        )
-        self.__ls_mapping = LaunchService()
-        self.__ls_mapping.include_launch_description(self.__ld_mapping)
-
-        # Running the launchfiles is done via processes because they can be killed and are non-blocking.
-        # This gives us the control to shutdown the corresponding nodes without shutting down the robot manager itself
-        self.__runRobot = Process(target=self.__ls_robot.run, daemon=True)
-        self.__runMapping = Process(target=self.__ls_mapping.run, daemon=True)
-
-        self.get_logger().info("[Robot Manager] Started node")
+        self.get_logger().info("Started node")
 
     def __drive__to_pos(
         self, pose: DriveToPos.Request, response: DriveToPos.Response
@@ -190,9 +156,7 @@ class RobotManager(Node):
 
         # Wait until action server is up
         while not self.__nav2_aclient_driveToPos.wait_for_server(timeout_sec=1.0):
-            self.get_logger().debug(
-                "[ROBOT MANAGER] Waiting for nav2 action server startup..."
-            )
+            self.get_logger().debug(" Waiting for nav2 action server startup...")
             pass
 
         # Send action goal to action server
@@ -265,21 +229,10 @@ class RobotManager(Node):
             LaunchTurtlebot.Response: A response which contains the statuscode of the operation\
                                                             Look at service definition in srv/LaunchTurtlebot.srv
         """
-        if not self.__runRobot.is_alive():
-            # Generate launch files
-            if request_data.use_simulation:
-                # Use simulation/gazebo
-                self.__ld_robot = self.__generate_launch_description(use_gazebo=True)
-            else:
-                # Use real turtlebot
-                self.__ld_robot = self.__generate_launch_description(use_gazebo=False)
-
+        if self.__turtlebot_shell_process is None:
             # Launch launchfile
-            self.__ls_robot = LaunchService()
-            self.__ls_robot.include_launch_description(self.__ld_robot)
-            self.__runRobot = Process(target=self.__ls_robot.run, daemon=True)
-            self.__runRobot.start()
-
+            cmd = f'ros2 launch sopias4_framework bringup_turtlebot.launch.py namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
+            self.__turtlebot_shell_process = subprocess.Popen(cmd.split(" "))
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             # Robot is already running
@@ -318,8 +271,8 @@ class RobotManager(Node):
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
         # Kill turtlebot nodes by killing the process which runs these
-        if self.__runRobot.is_alive():
-            self.__runRobot.terminate()
+
+        if self.__shutdown_shell_process(self.__turtlebot_shell_process):
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_STOPPED
@@ -330,13 +283,13 @@ class RobotManager(Node):
             dialog_request.icon = ShowDialog.Request.ICON_INFO
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
-            self.__gui_sclient_showDialog.call_async(dialog_request)
+            future = self.__gui_sclient_showDialog.call_async(dialog_request)
+            rclpy.spin_until_future_complete(self.__service_client_node, future)
             # Because we only confirm the user, we doen't need to check the response
 
         # Kill slam nodes by killing the process which runs these. Because slam is not running every time,
         # no error status response is generated when node is already stopped
-        if self.__runMapping.is_alive():
-            self.__runMapping.terminate()
+        self.__shutdown_shell_process(self.__mapping_shell_process)
 
         #  Unregister namespace so it can be used again
         unregister_request = Unregister.Request()
@@ -376,7 +329,7 @@ class RobotManager(Node):
         """
         # ------ Set AMCL in Inactive state -------
         request: ChangeState.Request = ChangeState.Request()
-        request.transition = Transition.TRANSITION_DEACTIVATE
+        request.transition.id = Transition.TRANSITION_DEACTIVATE
         future = self.__amcl_sclient_lifecycle.call_async(request)
 
         rclpy.spin_until_future_complete(self.__service_client_node, future)
@@ -389,8 +342,9 @@ class RobotManager(Node):
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
 
         # ------ start slam toolbox ---------
-        if not self.__runMapping.is_alive():
-            self.__runMapping.start()
+        if self.__mapping_shell_process is not None:
+            cmd = f"ros2 launch sopiaf4_framework slam.launch.py namespace:={self.get_namespace()}"
+            self.__mapping_shell_process = subprocess.Popen(cmd.split(" "))
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_RUNNING
@@ -417,15 +371,14 @@ class RobotManager(Node):
                                                      Look at service definition in srv/StopMapping.srv
         """
         # ------ Stop slam toolbox ---------
-        if self.__runMapping.is_alive():
-            self.__runMapping.kill()
+        if self.__shutdown_shell_process(self.__mapping_shell_process):
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
             response_data.statuscode = StopMapping.Response.ALREADY_STOPPED
 
         # ------ Set AMCL in active state -------
         request: ChangeState.Request = ChangeState.Request()
-        request.transition = Transition.TRANSITION_ACTIVATE
+        request.transition.id = Transition.TRANSITION_ACTIVATE
         future = self.__amcl_sclient_lifecycle.call_async(request)
 
         rclpy.spin_until_future_complete(self.__service_client_node, future)
@@ -499,90 +452,27 @@ class RobotManager(Node):
 
         return response_data
 
-    def __generate_launch_description(self, use_gazebo=False) -> LaunchDescription:
+    def __shutdown_shell_process(self, shell_process: subprocess.Popen | None) -> bool:
         """
-        It generates a launch description which includes all nodes needed to run Sopias4 Application
-        execept SLAM, Robot-Manager and GUI because these are started on other places
+        Shutdown a process which runs over a shell i.e. was called with `subprocess.Popen()`
+
+        Args:
+            shell_process (Popen or None): The shell process which should be should down
+
+        Returns:
+            bool: Indicating if process was shutdown successfully or not
         """
-
-        ld = LaunchDescription()
-
-        if use_gazebo:
-            # Run turtlebot in gazebo/simulation
-            turtlebot4 = GroupAction(
-                [
-                    PushRosNamespace(self.get_namespace()),
-                    IncludeLaunchDescription(
-                        PythonLaunchDescriptionSource(
-                            PathJoinSubstitution(
-                                [
-                                    FindPackageShare("turtlebot4_ignition_bringup"),
-                                    "launch",
-                                    "turtlebot4_ignition.launch.py",
-                                ]
-                            )
-                        ),
-                    ),
-                ]
-            )
+        if shell_process is not None:
+            shell_process.send_signal(signal.SIGINT)
+            shell_process.wait()
+            shell_process = None
+            return True
         else:
-            # Connect to real turtlebot
-            turtlebot4 = launch_ros.actions.Node(
-                package="turtlebot4_node",
-                executable="turtlebot4_node",
-                name="turtlebot4_node",
-                namespace=self.get_namespace(),
-            )
-        ld.add_action(turtlebot4)
-
-        amcl = GroupAction(
-            [
-                PushRosNamespace(self.get_namespace()),
-                IncludeLaunchDescription(
-                    PythonLaunchDescriptionSource(
-                        PathJoinSubstitution(
-                            [
-                                FindPackageShare("sopias4_framework"),
-                                "launch",
-                                "amcl.launch.py",
-                            ]
-                        )
-                    ),
-                ),
-            ]
-        )
-        ld.add_action(amcl)
-
-        rviz2 = launch_ros.actions.Node(
-            package="rviz2",
-            executable="rviz2",
-            name="rviz2",
-            namespace=self.get_namespace(),
-        )
-        ld.add_action(rviz2)
-
-        nav2 = GroupAction(
-            [
-                PushRosNamespace(self.get_namespace()),
-                IncludeLaunchDescription(
-                    PythonLaunchDescriptionSource(
-                        PathJoinSubstitution(
-                            [
-                                FindPackageShare("sopias4_framework"),
-                                "launch",
-                                "nav2.launch.py",
-                            ]
-                        )
-                    )
-                ),
-            ]
-        )
-        ld.add_action(nav2)
-
-        return ld
+            return False
 
     def destroy_node(self):
         """
+        self.__service_client_node.destroy_node()
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
         :meta private:
         """
@@ -603,7 +493,11 @@ class RobotManager(Node):
         self.start_mapping_service.destroy()
         self.stop_mapping_service.destroy()
         self.drive_to_pos_action.destroy()
-        self.get_logger().info("[Robot Manager] Shutting down node")
+        # Shutdown processes
+        self.__shutdown_shell_process(self.__turtlebot_shell_process)
+        self.__shutdown_shell_process(self.__mapping_shell_process)
+
+        self.get_logger().info("Shutting down node")
         super().destroy_node()
 
 
