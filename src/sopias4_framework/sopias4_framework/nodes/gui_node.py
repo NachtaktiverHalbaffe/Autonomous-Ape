@@ -10,7 +10,7 @@ from geometry_msgs.msg import Twist
 from launch import LaunchDescription, LaunchService
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
 from sopias4_framework.tools.ros2 import drive_tools
@@ -43,18 +43,22 @@ class GUINode(QMainWindow):
                 def __init__(self) ->None:
                     # The script should name the Python object this way, but can vary. Doublecheck the class name
                     # within the generated Python file to be sure
-                    self.ui: Ui_MainWindow # To enable auto-completion
+                    self.ui: Ui_MainWindow # To enable auto-completion in IDE
                     ui_file = Ui_MainWindow() 
                     super().__init(self, ui_file)
 
                 def connect_callbacks(self):
                     # You need to overrride this method. Connect your UI elements with the callacks here.
                     # The ui elements are in self.ui field of the GUINode class
-                    self.ui.example_button.clicked.connect(self.__foobar)
+                    self.ui.example_button.clicked.connect(lambda: Thread(target=self.__foobar).start())
 
                 def set_default_values(self):
                     # You need to override this method. Set default values or default choices of your ui elements here
                     self.ui.example_textbox.setText("Hello World")
+                
+                def set_initial_enabled_elements(self):
+                    # Disable the desired elements here
+                    self.ui.pushButton_example.setEnabled(False)
 
                 def __foobar():
                     print("Hello World!")
@@ -63,6 +67,7 @@ class GUINode(QMainWindow):
     Following methods needs to be overriden (look further into documentation for more details):
         - connect_callbacks()
         - set_default_values()
+        - set_initial_enabled_elements()
     
     It also has builtin methods which you can use a callback functionas for certain tasks in Sopias4 (look further into documentation for more details):
         - register_namespace(): Register namespace in Sopias4 Map-Server
@@ -103,6 +108,7 @@ class GUINode(QMainWindow):
         # Connecting the ui elements with callbacks and set values
         self.connect_callbacks()
         self.set_default_values()
+        self.set_initial_disabled_elements()
 
         rclpy.init()
         self.node: GrapficalNode = GrapficalNode(
@@ -124,7 +130,7 @@ class GUINode(QMainWindow):
 
                     def connect_callbacks(self):
                         # The ui elements are in self.ui field of the GUINode class
-                        self.ui.example_button.clicked.connect(self.hello_world)
+                        self.ui.example_button.clicked.connect( lambda: Thread(target=self.hello_world).start())
 
         """
 
@@ -140,6 +146,20 @@ class GUINode(QMainWindow):
                   def set_default_values(self):
                     # Set default values or default choices of your ui elements here
                     self.ui.example_textbox.setText("Hello World")
+        """
+
+    @abc.abstractmethod
+    def set_initial_disabled_elements(self) -> None:
+        """
+        Sets which QT elements should initially be disabled at startup. All elements which aren't disabled here are enabled by default. Needs to be overridden
+
+        Example:
+            .. highlight:: python
+            .. code-block:: python
+
+                    def set_initial_enabled_elements(self):
+                        # Disable the desired elements here
+                        self.ui.pushButton_example.setEnabled(False)
         """
 
     def register_namespace(self, namespace: str) -> None:
@@ -163,7 +183,7 @@ class GUINode(QMainWindow):
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Could'nt register name space: {e}")
+            self.node.get_logger().error(f"Could'nt register name space: {e}")
             raise e
 
         # Set namespace of physical turtlebot
@@ -202,17 +222,17 @@ class GUINode(QMainWindow):
 
             if status_response:
                 self.turtlebot_running = True
-                self.node.get_logger().debug("[GUI] Launched robot")
+                self.node.get_logger().debug("Launched robot")
             else:
                 self.turtlebot_running = False
                 self.node.get_logger().error(
-                    f"[GUI] Could'nt launch robot. Turtlebot is either already running or is'nt reachable"
+                    f"Could'nt launch robot. Turtlebot is either already running or is'nt reachable"
                 )
                 self.__inform_and_retry(msg_request, self.launch_robot)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Couldnt launch robot: {e}")
+            self.node.get_logger().error(f"Couldnt launch robot: {e}")
             raise e
 
     def stop_robot(self) -> None:
@@ -236,17 +256,17 @@ class GUINode(QMainWindow):
             if status_response:
                 self.turtlebot_running = False
                 self.namespace = None
-                self.node.get_logger().debug("[GUI] Stopped robot")
+                self.node.get_logger().debug("Stopped robot")
             else:
                 self.turtlebot_running = True
                 self.node.get_logger().error(
-                    "[GUI] Couldnt stop robot: Nodes are either already stopped or error is unknown"
+                    "Couldnt stop robot: Nodes are either already stopped or error is unknown"
                 )
                 self.__inform_and_retry(msg_request, self.stop_robot)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Couldnt stop robot: {e}")
+            self.node.get_logger().error(f"Couldnt stop robot: {e}")
             raise e
 
     def start_mapping(self) -> None:
@@ -270,24 +290,24 @@ class GUINode(QMainWindow):
 
                 if status_response:
                     self.is_mapping = True
-                    self.node.get_logger().debug("[GUI] Started mapping")
+                    self.node.get_logger().debug("Started mapping")
                 else:
                     self.is_mapping = False
                     self.node.get_logger().error(
-                        "[GUI] Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
+                        "Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
                     )
                     # Inform user about failure and see for it's response
                     self.__inform_and_retry(msg_request, self.start_mapping)
             else:
                 self.node.get_logger().warning(
-                    "[GUI] Couldnt start mapping: Mapping already in process or Turtlebot is offline"
+                    "Couldnt start mapping: Mapping already in process or Turtlebot is offline"
                 )
                 # Inform user about failure and see for it's response
                 self.__inform_and_retry(msg_request, self.start_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Couldnt start mapping: {e}")
+            self.node.get_logger().error(f"Couldnt start mapping: {e}")
             raise e
 
     def stop_mapping(self) -> None:
@@ -310,24 +330,24 @@ class GUINode(QMainWindow):
                 status_response = self.node.stop_mapping()
                 if status_response:
                     self.turtlebot_running = True
-                    self.node.get_logger().debug("[GUI] Stopped Mapping")
+                    self.node.get_logger().debug("Stopped Mapping")
                 else:
                     self.turtlebot_running = False
                     self.node.get_logger().error(
-                        "[GUI] Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
+                        "Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
                     )
                     # Inform user about failure and see for it's response
                     self.__inform_and_retry(request_informUser, self.stop_mapping)
             else:
                 self.node.get_logger().warning(
-                    "[GUI] Couldn't stop mapping: Mapping is already stopped or Turtlebot is offline"
+                    "Couldn't stop mapping: Mapping is already stopped or Turtlebot is offline"
                 )
                 # Inform user about failure and see for it's response
                 self.__inform_and_retry(request_informUser, self.stop_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Couldnt stop mapping: {e}")
+            self.node.get_logger().error(f"Couldnt stop mapping: {e}")
             raise e
 
     def drive(
@@ -362,24 +382,24 @@ class GUINode(QMainWindow):
                 status_response = self.node.drive(twist_msg, direction, vel_rel)
                 if status_response:
                     self.node.get_logger().debug(
-                        "[GUI] Successfully send drive command to Turtlebot"
+                        "Successfully send drive command t>o Turtlebot"
                     )
                 else:
                     self.node.get_logger().error(
-                        "[GUI] Couldnt send drive command to Turtlebot du to unknown error"
+                        "Couldnt send drive command to Turtlebot du to unknown error"
                     )
                     # Inform user about failure and see for it's response
                     self.__inform_and_retry(request_informUser, self.stop_mapping)
             else:
                 self.node.get_logger().warning(
-                    "[GUI] Couldn't send drive command to Turtlebot: Turtlebot is offline"
+                    "Couldn't send drive command to Turtlebot: Turtlebot is offline"
                 )
                 # Inform user about failure and see for it's response
                 self.__inform_and_retry(request_informUser, self.stop_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"[GUI] Couldnt stop mapping: {e}")
+            self.node.get_logger().error(f"Couldnt stop mapping: {e}")
             raise e
 
     def closeEvent(self, event):
@@ -406,7 +426,7 @@ class GUINode(QMainWindow):
         """
         user_response = self.node._show_dialog(msg, ShowDialog.Response())
         if user_response == ShowDialog.Response.RETRY:
-            self.node.get_logger().debug(f"[GUI] User chose to retry {retry_fn}")
+            self.node.get_logger().debug(f"User chose to retry {retry_fn}")
             retry_fn()
 
 
@@ -433,9 +453,7 @@ class GrapficalNode(Node):
 
         # Log level 10 is debug
         self.get_logger().set_level(10)
-        self.get_logger().info(
-            f"[GUI] Node started with namespace {self.get_namespace()}"
-        )
+        self.get_logger().info(f"Node started with namespace {self.get_namespace()}")
 
         # ---- Setup services -----
         self.show_dialog_service = self.create_service(
@@ -489,13 +507,13 @@ class GrapficalNode(Node):
             bool: If namespace was registered successfully or not
         """
         self.get_logger().debug(
-            f"[GUI] Sending service request to register namespace {namespace}"
+            f"Sending service request to register namespace {namespace}"
         )
         request: Register.Request = Register.Request()
         request.namespace_canditate = f"/{namespace}"
         future = self.__mrc_sclient_register.call_async(request)
         self.get_logger().debug(
-            "[GUI] Service request for registering namespace sent. Waiting for response"
+            "Service request for registering namespace sent. Waiting for response"
         )
 
         # Make sure the node itself is spinnig
@@ -515,7 +533,7 @@ class GrapficalNode(Node):
             match response.statuscode:
                 case Register.Response.COLLISION_ERROR:
                     self.get_logger().error(
-                        "[GUI] Couldn't register namespace: Already registered"
+                        "Couldn't register namespace: Already registered"
                     )
                     msg_2_user.content = (
                         "Namespace is already registered. Choose another one"
@@ -523,16 +541,14 @@ class GrapficalNode(Node):
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
                 case Register.Response.ILLEGAL_NAMESPACE_ERROR:
                     self.get_logger().error(
-                        "[GUI] Couldn't register namespace: Namespace contains illegal characters"
+                        "Couldn't register namespace: Namespace contains illegal characters"
                     )
                     msg_2_user.content = (
                         "Namespace contains illegal characters. Choose another one"
                     )
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
                 case Register.Response.UNKOWN_ERROR:
-                    self.get_logger().error(
-                        "[GUI] Couldn't register namespace: Unkown error"
-                    )
+                    self.get_logger().error("Couldn't register namespace: Unkown error")
                     msg_2_user.content = "Unknown error occured"
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
 
@@ -554,13 +570,13 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
-        self.get_logger().debug("[GUI] Sending service request to launch Turtlebot")
+        self.get_logger().debug("Sending service request to launch Turtlebot")
         request = LaunchTurtlebot.Request()
         request.use_simulation = use_simulation
         future = self.__rm_sclient_launch.call_async(request)
 
         self.get_logger().debug(
-            "[GUI] Sent service request to launch Turtlebot. Waiting for response"
+            "Sent service request to launch Turtlebot. Waiting for response"
         )
         rclpy.spin_until_future_complete(self.__service_client_node, future)
 
@@ -583,13 +599,13 @@ class GrapficalNode(Node):
         """
         # --- Stop the nodes ---
         self.get_logger().debug(
-            "[GUI] Stops Turtlebot. Sending service request to stop nodes"
+            "Stops Turtlebot. Sending service request to stop nodes"
         )
         stop_request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_stop_robot.call_async(stop_request)
 
         self.get_logger().debug(
-            "[GUI] Service request to stop nodes sent. Waiting for response"
+            "Service request to stop nodes sent. Waiting for response"
         )
         rclpy.spin_until_future_complete(self.__service_client_node, future)
 
@@ -611,12 +627,12 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
-        self.get_logger().debug("[GUI] Send service request to start mapping")
+        self.get_logger().debug("Send service request to start mapping")
         request = EmptyWithStatuscode.Request()
         future = self.__rm_sclient_start_mapping.call_async(request)
 
         self.get_logger().debug(
-            "[GUI] Service request to start mapping sent. Waiting for response"
+            "Service request to start mapping sent. Waiting for response"
         )
         rclpy.spin_until_future_complete(self.__service_client_node, future)
 
@@ -637,12 +653,12 @@ class GrapficalNode(Node):
         Returns:
             bool: If operation was successful
         """
-        self.get_logger().debug("[GUI] Sending service request to stop mapping")
+        self.get_logger().debug("Sending service request to stop mapping")
         request = StopMapping.Request()
         future = self.__rm_sclient_stop_mapping.call_async(request)
 
         self.get_logger().debug(
-            "[GUI] Service request to start mapping sent. Waiting for response"
+            "Service request to start mapping sent. Waiting for response"
         )
         rclpy.spin_until_future_complete(self.__service_client_node, future)
 
@@ -657,7 +673,7 @@ class GrapficalNode(Node):
 
     def drive(
         self,
-        twist_msgs: Twist | None = None,
+        twist_msg: Twist | None = None,
         direction: str = "stop",
         vel_rel: float = 1.0,
     ) -> bool:
@@ -665,16 +681,24 @@ class GrapficalNode(Node):
         Runs a service client to send a driving command to the Turtlebot. The Sopias4 Application
         should be fully launched and the mapping process running before running this service
 
+        Args:
+            twist_msg (Twist, optional): The twist message which specifies how the Turtlebot should drive. If None (default), \
+                                                            when a appropriate Twist message will be generated (Important: In this casem direction and vel_rel must be provided). 
+            direction (str, optional): The direction which the Turtlebot should drive. Can be either forward, backward, left, \
+                                                     right, rotate_left, rotate_right and stop. Defaults to stop
+            vel_rel (float, optional): The relative velocity. The value is normed to the maximum speed of the Turtlebot,\
+                                                     so e.g. 1.0 is maximum speed and 0 is standing still. Defaults to 1.0
+
         Returns:
             bool: If operation was successful
         """
         request = Drive.Request()
-        if twist_msgs is None:
+        if twist_msg is None:
             request.twist = drive_tools.generate_twist_msg(
                 direction=direction, vel_rel=vel_rel
             )
         else:
-            request.twist = twist_msgs
+            request.twist = twist_msg
         future = self.__rm_sclient_drive.call_async(request)
 
         rclpy.spin_until_future_complete(self.__service_client_node, future)
@@ -705,7 +729,7 @@ class GrapficalNode(Node):
             NotImplementedError: If the user chooses a interaction option which isn't specified in the service response
         """
         self.get_logger().info(
-            f"[GUI] Got service request to display dialog with title {request_data.title}"
+            f"Got service request to display dialog with title {request_data.title}"
         )
         dlg = QMessageBox()
         # Set static data that doesn't need validation
@@ -758,7 +782,7 @@ class GrapficalNode(Node):
                                     {ShowDialog.Request.CONFIRM_CANCEL}, {ShowDialog.Request.CONFIRM_RETRY} and {ShowDialog.Request.YES_NO}"
                 )
 
-        self.get_logger().debug(f'[GUI] Showing dialog "{request_data.title}"')
+        self.get_logger().debug(f'Showing dialog "{request_data.title}"')
         # Show dialog and get the pressed button
         selected_option = dlg.exec()
 
@@ -803,7 +827,7 @@ class GrapficalNode(Node):
         self.__service_client_node.destroy_node()
         # Release services
         self.show_dialog_service.destroy()
-        self.get_logger().info("[GUI] Shutting down node")
+        self.get_logger().info("Shutting down node")
 
         super().destroy_node()
 

@@ -22,6 +22,7 @@ def generate_ui_object(
             f"{path_dst}/{file_name}",
         ]
     )
+    subprocess.call(["colcon", "build"])
 
 
 if __name__ == "__main__":

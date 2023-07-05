@@ -14,7 +14,7 @@
 
 
 
-class MultiRobotCoordinator : public rclcpp:: Node {
+class MultiRobotCoordinator : public rclcpp::Node {
 public:
 explicit MultiRobotCoordinator(const std::string & nodeName) : Node(nodeName){
 	get_namespaces_service =create_service<sopias4_msgs::srv::GetNamespaces>("get_namespaces", std::bind(&MultiRobotCoordinator::get_namespace_callback, this, std::placeholders::_1, std::placeholders::_2));
@@ -24,7 +24,7 @@ explicit MultiRobotCoordinator(const std::string & nodeName) : Node(nodeName){
 	unregister_service = create_service<sopias4_msgs::srv::Unregister>("unregister_namespace", std::bind(&MultiRobotCoordinator::unregister_callback, this, std::placeholders::_1, std::placeholders::_2));
 	set_robot_path_service = create_service<sopias4_msgs::srv::SetRobotPath>("set_robot_path", std::bind(&MultiRobotCoordinator::set_robot_path_callback, this, std::placeholders::_1, std::placeholders::_2));
 
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Started node");
+    RCLCPP_INFO(logger, "Started node");
 	logger.set_level(rclcpp::Logger::Level::Debug);
 }
 private:
@@ -45,34 +45,34 @@ rclcpp::Service<sopias4_msgs::srv::Unregister>::SharedPtr unregister_service;
 rclcpp::Service<sopias4_msgs::srv::SetRobotPath>::SharedPtr set_robot_path_service;
 
 void get_namespace_callback(const sopias4_msgs::srv::GetNamespaces::Request::SharedPtr request, sopias4_msgs::srv::GetNamespaces::Response::SharedPtr response ){
-	RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Got request to get all registered namespaces");
+	RCLCPP_INFO(logger, "Got request to get all registered namespaces");
 	response->name_spaces = registered_namespaces;
 	return;
 }
 
 void get_robot_identity_callback(const sopias4_msgs::srv::GetRobotIdentity::Request::SharedPtr request, sopias4_msgs::srv::GetRobotIdentity::Response::SharedPtr response){
-    RCLCPP_INFO(logger,"[MULTI ROBOT COORDINATOR] Got request to get the state of the Turtlebot with the namespace %s", request -> name_space.c_str());
+    RCLCPP_INFO(logger,"Got request to get the state of the Turtlebot with the namespace %s", request -> name_space.c_str());
 	// Search through all robot states
 	for(auto element = robot_states.begin(); element != robot_states.end(); ++element) {
 		// Robot is identified by namespace
 		if( element->name_space == request->name_space) {
 			response->robot = *element;
-            RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Found state for T urtlebot with namespace %s", request -> name_space.c_str());
+            RCLCPP_DEBUG(logger, "Found state for T urtlebot with namespace %s", request -> name_space.c_str());
 			break;
 		}
 	}
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Returned state of Turtlebot with namespace %s", request -> name_space.c_str());
+    RCLCPP_INFO(logger, "Returned state of Turtlebot with namespace %s", request -> name_space.c_str());
 	return;
 }
 
 void get_robots_callback(const sopias4_msgs::srv::GetRobots::Request::SharedPtr request, sopias4_msgs::srv::GetRobots::Response::SharedPtr response){
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Got request to return states of all robots");
+    RCLCPP_INFO(logger, "Got request to return states of all robots");
 	response->robots = robot_states;
 	return;
 }
 
 void register_callback(const sopias4_msgs::srv::Register::Request::SharedPtr request, sopias4_msgs::srv::Register::Response::SharedPtr response){
-	RCLCPP_INFO(logger,"[MULTI ROBOT COORDINATOR] Got request to register namespace %s", request->namespace_canditate.c_str());
+	RCLCPP_INFO(logger,"Got request to register namespace %s", request->namespace_canditate.c_str());
 	// --- Validate namespace ---
 	int validation_result;
 	size_t invalid_index;
@@ -80,7 +80,7 @@ void register_callback(const sopias4_msgs::srv::Register::Request::SharedPtr req
 	rmw_ret_t rmw_ret =
 		rmw_validate_namespace(request->namespace_canditate.c_str(), &validation_result, &invalid_index);
 
-	RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Validate namespace %s: Validate if validation itself failed", request->namespace_canditate.c_str());
+	RCLCPP_DEBUG(logger, "Validate namespace %s: Validate if validation itself failed", request->namespace_canditate.c_str());
 	// Check if validation itself failed
 	if (rmw_ret != RMW_RET_OK) {
 		if (rmw_ret == RMW_RET_INVALID_ARGUMENT) {
@@ -88,20 +88,20 @@ void register_callback(const sopias4_msgs::srv::Register::Request::SharedPtr req
 		}
 		rclcpp::exceptions::throw_from_rcl_error(RCL_RET_ERROR, "failed to validate subnode namespace");
 	}
-	RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Validate namespace %s: Validate if namespace is legal", request->namespace_canditate.c_str());
+	RCLCPP_DEBUG(logger, "Validate namespace %s: Validate if namespace is legal", request->namespace_canditate.c_str());
 	// Check result from validatiom
 	if (validation_result != RMW_NAMESPACE_VALID) {
-		RCLCPP_WARN(logger, "[MULTI ROBOT COORDINATOR] Namespace %s isn't legal: Validation response %d", request->namespace_canditate.c_str(), validation_result);
+		RCLCPP_WARN(logger, "Namespace %s isn't legal: Validation response %d", request->namespace_canditate.c_str(), validation_result);
 		response->statuscode = sopias4_msgs::srv::Register::Response::ILLEGAL_NAMESPACE_ERROR;
 		return;
 	}
-	RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Validate namespace %s: Validate if namespace isn't already registered", request->namespace_canditate.c_str());
+	RCLCPP_DEBUG(logger, "Validate namespace %s: Validate if namespace isn't already registered", request->namespace_canditate.c_str());
 	// --- Check if namespace is already registered --
 	if (std::find(registered_namespaces.begin(), registered_namespaces.end(), request->namespace_canditate) != registered_namespaces.end()) {
 		response->statuscode = sopias4_msgs::srv::Register::Response::COLLISION_ERROR;
 		return;
 	}
-	RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Validated namespace %s", request->namespace_canditate.c_str());
+	RCLCPP_DEBUG(logger, "Validated namespace %s", request->namespace_canditate.c_str());
 
 	// --- Register namespace ---
 	registered_namespaces.push_back(request->namespace_canditate);
@@ -113,11 +113,11 @@ void register_callback(const sopias4_msgs::srv::Register::Request::SharedPtr req
 	this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->namespace_canditate+ std::string("/amcl_pose"), 10, callback_fcn);
 	this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->namespace_canditate+ std::string("/pose"), 10, callback_fcn);
 
-	RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Successfully registered namespace %s", request->namespace_canditate.c_str());
+	RCLCPP_INFO(logger, "Successfully registered namespace %s", request->namespace_canditate.c_str());
 }
 
 void unregister_callback(const sopias4_msgs::srv::Unregister::Request::SharedPtr request, sopias4_msgs::srv::Unregister::Response::SharedPtr response){
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Got request to unregister namespace %s", request ->name_space.c_str());
+    RCLCPP_INFO(logger, "Got request to unregister namespace %s", request ->name_space.c_str());
 	response->statuscode = sopias4_msgs::srv::Unregister::Response::UNKNOWN_ERROR;
 	// --- Delete namespace --
 	for(auto element = registered_namespaces.begin(); element != registered_namespaces.end(); ++element) {
@@ -128,7 +128,7 @@ void unregister_callback(const sopias4_msgs::srv::Unregister::Request::SharedPtr
 			break;
 		}
 	}
-    RCLCPP_DEBUG(logger,"[MULTI ROBOT COORDINATOR] Deleted namespace %s from the internal list", request ->name_space.c_str());
+    RCLCPP_DEBUG(logger,"Deleted namespace %s from the internal list", request ->name_space.c_str());
 
 	// --- Delete state of robot ---
 	for(auto element = robot_states.begin(); element != robot_states.end(); ++element) {
@@ -138,13 +138,13 @@ void unregister_callback(const sopias4_msgs::srv::Unregister::Request::SharedPtr
 			break;
 		}
 	}
-    RCLCPP_DEBUG(logger, "[MULTI ROBOT COORDINATOR] Deleted state of robot with namespace %s", request -> name_space.c_str());
+    RCLCPP_DEBUG(logger, "Deleted state of robot with namespace %s", request -> name_space.c_str());
 
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Successfully unregistered namespace %s", request -> name_space.c_str());
+    RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request -> name_space.c_str());
 }
 
 void set_robot_path_callback(const sopias4_msgs::srv::SetRobotPath::Request::SharedPtr request, sopias4_msgs::srv::SetRobotPath::Response::SharedPtr response){
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Got request to set path for robot with namespace %s", request ->name_space.c_str());
+    RCLCPP_INFO(logger, "Got request to set path for robot with namespace %s", request ->name_space.c_str());
 	for(auto element = robot_states.begin(); element != robot_states.end(); ++element) {
 		response->statuscode = sopias4_msgs::srv::SetRobotPath::Response::ROBOT_NOT_FOUND;
 		if( element->name_space == request->name_space) {
@@ -154,7 +154,7 @@ void set_robot_path_callback(const sopias4_msgs::srv::SetRobotPath::Request::Sha
 		}
 	}
 
-    RCLCPP_INFO(logger, "[MULTI ROBOT COORDINATOR] Successfully set path for robot with namespace %s", request ->name_space.c_str());
+    RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", request ->name_space.c_str());
 	return;
 }
 
