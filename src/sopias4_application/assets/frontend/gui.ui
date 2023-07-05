@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1580</width>
-    <height>772</height>
+    <height>767</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,6 +123,13 @@
            <widget class="QLabel" name="label_8">
             <property name="text">
              <string>Before launching the Turtlebot, make sure the name space is registered</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_use_simulation">
+            <property name="text">
+             <string>Use simulation</string>
             </property>
            </widget>
           </item>

@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1580, 772)
+        MainWindow.resize(1580, 767)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -75,6 +75,9 @@ class Ui_MainWindow(object):
         self.label_8 = QtWidgets.QLabel(self.tab_conf_init)
         self.label_8.setObjectName("label_8")
         self.verticalLayout_4.addWidget(self.label_8)
+        self.checkBox_use_simulation = QtWidgets.QCheckBox(self.tab_conf_init)
+        self.checkBox_use_simulation.setObjectName("checkBox_use_simulation")
+        self.verticalLayout_4.addWidget(self.checkBox_use_simulation)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.pushButton_launch_turtlebot = QtWidgets.QPushButton(self.tab_conf_init)
@@ -85,9 +88,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.pushButton_stop_turtlebot)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addLayout(self.verticalLayout_4)
-        spacerItem = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
         self.tabWidget.addTab(self.tab_conf_init, "")
         self.tab_2 = QtWidgets.QWidget()
@@ -245,15 +246,11 @@ class Ui_MainWindow(object):
         self.label_29.setObjectName("label_29")
         self.gridLayout_4.addWidget(self.label_29, 2, 2, 1, 1)
         self.doubleSpinBox_free_tttttttthres = QtWidgets.QDoubleSpinBox(self.tab)
-        self.doubleSpinBox_free_tttttttthres.setObjectName(
-            "doubleSpinBox_free_tttttttthres"
-        )
+        self.doubleSpinBox_free_tttttttthres.setObjectName("doubleSpinBox_free_tttttttthres")
         self.gridLayout_4.addWidget(self.doubleSpinBox_free_tttttttthres, 2, 3, 1, 1)
         self.verticalLayout_9.addLayout(self.gridLayout_4)
         self.verticalLayout_10.addLayout(self.verticalLayout_9)
-        spacerItem1 = QtWidgets.QSpacerItem(
-            20, 446, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem1 = QtWidgets.QSpacerItem(20, 446, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_10.addItem(spacerItem1)
         self.tabWidget.addTab(self.tab, "")
         self.tab_3 = QtWidgets.QWidget()
@@ -293,9 +290,7 @@ class Ui_MainWindow(object):
         self.pushButton_back = QtWidgets.QPushButton(self.tab_4)
         self.pushButton_back.setObjectName("pushButton_back")
         self.gridLayout_5.addWidget(self.pushButton_back, 2, 2, 1, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout_5.addItem(spacerItem2, 1, 0, 1, 1)
         self.pushButton_forward = QtWidgets.QPushButton(self.tab_4)
         self.pushButton_forward.setObjectName("pushButton_forward")
@@ -303,24 +298,16 @@ class Ui_MainWindow(object):
         self.pushButton_rotate_right = QtWidgets.QPushButton(self.tab_4)
         self.pushButton_rotate_right.setObjectName("pushButton_rotate_right")
         self.gridLayout_5.addWidget(self.pushButton_rotate_right, 1, 3, 1, 1)
-        spacerItem3 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_5.addItem(spacerItem3, 3, 2, 1, 1)
-        spacerItem4 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_5.addItem(spacerItem4, 0, 2, 1, 1)
-        spacerItem5 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout_5.addItem(spacerItem5, 1, 4, 1, 1)
         self.horizontalLayout_4.addLayout(self.gridLayout_5)
         self.verticalLayout_11 = QtWidgets.QVBoxLayout()
         self.verticalLayout_11.setObjectName("verticalLayout_11")
-        spacerItem6 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem6 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_11.addItem(spacerItem6)
         self.horizontalSlider_velocity = QtWidgets.QSlider(self.tab_4)
         self.horizontalSlider_velocity.setMaximum(100)
@@ -332,16 +319,12 @@ class Ui_MainWindow(object):
         self.label_31.setAlignment(QtCore.Qt.AlignCenter)
         self.label_31.setObjectName("label_31")
         self.verticalLayout_11.addWidget(self.label_31)
-        spacerItem7 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem7 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_11.addItem(spacerItem7)
         self.horizontalLayout_4.addLayout(self.verticalLayout_11)
         self.verticalLayout_12.addLayout(self.horizontalLayout_4)
         self.verticalLayout_13.addLayout(self.verticalLayout_12)
-        spacerItem8 = QtWidgets.QSpacerItem(
-            20, 330, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
+        spacerItem8 = QtWidgets.QSpacerItem(20, 330, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_13.addItem(spacerItem8)
         self.tabWidget.addTab(self.tab_4, "")
         self.verticalLayout.addWidget(self.tabWidget)
@@ -354,42 +337,19 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(
-            _translate("MainWindow", "# Initialization and Configuration")
-        )
+        self.label.setText(_translate("MainWindow", "# Initialization and Configuration"))
         self.label_2.setText(_translate("MainWindow", "## Register a namespace"))
-        self.label_3.setText(
-            _translate(
-                "MainWindow",
-                "Register a unique namespace in the system. The name space is used to identify the individual robot. Because of this, this has to be done before launching the Turtlebot itself. Make shure the IP adress of the robot is set correctly before starting this process.",
-            )
-        )
+        self.label_3.setText(_translate("MainWindow", "Register a unique namespace in the system. The name space is used to identify the individual robot. Because of this, this has to be done before launching the Turtlebot itself. Make shure the IP adress of the robot is set correctly before starting this process."))
         self.label_4.setText(_translate("MainWindow", "**Name space:**"))
         self.pushButton_namespace.setText(_translate("MainWindow", "Register"))
         self.label_5.setText(_translate("MainWindow", "## Manage Turtlebot"))
-        self.label_7.setText(
-            _translate(
-                "MainWindow",
-                "The IPv4-adress of the robot should be set right, so the name space on the physical Turtlebot can be set correctly.",
-            )
-        )
+        self.label_7.setText(_translate("MainWindow", "The IPv4-adress of the robot should be set right, so the name space on the physical Turtlebot can be set correctly."))
         self.label_6.setText(_translate("MainWindow", "**IP-adress of Turtlebot**:"))
-        self.label_8.setText(
-            _translate(
-                "MainWindow",
-                "Before launching the Turtlebot, make sure the name space is registered",
-            )
-        )
-        self.pushButton_launch_turtlebot.setText(
-            _translate("MainWindow", "Launch Turtlebot")
-        )
-        self.pushButton_stop_turtlebot.setText(
-            _translate("MainWindow", "Stop Turtlebot")
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_conf_init),
-            _translate("MainWindow", "Initialization/Configuration"),
-        )
+        self.label_8.setText(_translate("MainWindow", "Before launching the Turtlebot, make sure the name space is registered"))
+        self.checkBox_use_simulation.setText(_translate("MainWindow", "Use simulation"))
+        self.pushButton_launch_turtlebot.setText(_translate("MainWindow", "Launch Turtlebot"))
+        self.pushButton_stop_turtlebot.setText(_translate("MainWindow", "Stop Turtlebot"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_conf_init), _translate("MainWindow", "Initialization/Configuration"))
         self.label_14.setText(_translate("MainWindow", "# Monitoring"))
         self.label_10.setText(_translate("MainWindow", "## Turtlebot state"))
         self.label_11.setText(_translate("MainWindow", "### Navigation"))
@@ -405,52 +365,25 @@ class Ui_MainWindow(object):
         self.label_17.setText(_translate("MainWindow", "**Docked:**"))
         self.label_kidnapped.setText(_translate("MainWindow", "TextLabel"))
         self.label_9.setText(_translate("MainWindow", "## Logging"))
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Monitoring")
-        )
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Monitoring"))
         self.label_19.setText(_translate("MainWindow", "# Mapping"))
         self.label_20.setText(_translate("MainWindow", "## Operating"))
-        self.label_21.setText(
-            _translate(
-                "MainWindow",
-                "Starting and stopping the mapping process. When stopped, the map is saved on the Sopias4 Map-Server with the confiugation settings below",
-            )
-        )
+        self.label_21.setText(_translate("MainWindow", "Starting and stopping the mapping process. When stopped, the map is saved on the Sopias4 Map-Server with the confiugation settings below"))
         self.pushButton_start_mapping.setText(_translate("MainWindow", "Start Mapping"))
-        self.pushButton_stop_mapping.setText(
-            _translate("MainWindow", "Stop Mapping/Saving map")
-        )
-        self.label_22.setText(
-            _translate("MainWindow", "## Configuration for saving map")
-        )
-        self.label_23.setText(
-            _translate(
-                "MainWindow",
-                "Configure the parameters with which the map is saved on the Sopias4 Map-Server. The default configuration is the map which is automatically loaded when launchong Sopias4 Map-Server without passing parameters",
-            )
-        )
+        self.pushButton_stop_mapping.setText(_translate("MainWindow", "Stop Mapping/Saving map"))
+        self.label_22.setText(_translate("MainWindow", "## Configuration for saving map"))
+        self.label_23.setText(_translate("MainWindow", "Configure the parameters with which the map is saved on the Sopias4 Map-Server. The default configuration is the map which is automatically loaded when launchong Sopias4 Map-Server without passing parameters"))
         self.label_24.setText(_translate("MainWindow", "**Map name:**"))
         self.label_27.setText(_translate("MainWindow", "**Map topic:**"))
         self.label_26.setText(_translate("MainWindow", "**Image format:**"))
         self.label_25.setText(_translate("MainWindow", "**Map mode:**"))
         self.label_28.setText(_translate("MainWindow", "**Threshold occupied:**"))
         self.label_29.setText(_translate("MainWindow", "**Free threshold:**"))
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Mapping")
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Navigation")
-        )
-        self.label_30.setText(
-            _translate("MainWindow", "# Manual operation and advanced features")
-        )
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Mapping"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Navigation"))
+        self.label_30.setText(_translate("MainWindow", "# Manual operation and advanced features"))
         self.label_32.setText(_translate("MainWindow", "## Driving"))
-        self.label_33.setText(
-            _translate(
-                "MainWindow",
-                "Manual driving the robot. Note that there are no safety features in place to prevent you from crashing",
-            )
-        )
+        self.label_33.setText(_translate("MainWindow", "Manual driving the robot. Note that there are no safety features in place to prevent you from crashing"))
         self.pushButton_rotate_left.setText(_translate("MainWindow", "Rotate Left"))
         self.pushButton_right.setText(_translate("MainWindow", "Right"))
         self.pushButton_left.setText(_translate("MainWindow", "Left"))
@@ -458,7 +391,4 @@ class Ui_MainWindow(object):
         self.pushButton_forward.setText(_translate("MainWindow", "Forward"))
         self.pushButton_rotate_right.setText(_translate("MainWindow", "Rotate Right"))
         self.label_31.setText(_translate("MainWindow", "**Velocity (m/s)**"))
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_4),
-            _translate("MainWindow", "Advanced/Manual operation"),
-        )
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Advanced/Manual operation"))
