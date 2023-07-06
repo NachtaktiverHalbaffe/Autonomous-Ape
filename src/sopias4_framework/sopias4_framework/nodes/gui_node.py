@@ -1,6 +1,9 @@
 import abc
+import multiprocessing
+import queue
 import random
 import string
+import time
 from multiprocessing import Process
 from threading import Event, Thread
 
@@ -8,11 +11,15 @@ import launch_ros
 import rclpy
 from geometry_msgs.msg import Twist
 from launch import LaunchDescription, LaunchService
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
+from sopias4_framework.tools.elevate_func_to_main_func import (
+    elevate_func_to_main_thread,
+)
 from sopias4_framework.tools.ros2 import drive_tools
 
 from sopias4_msgs.srv import (
@@ -60,6 +67,11 @@ class GUINode(QMainWindow):
                     # Disable the desired elements here
                     self.ui.pushButton_example.setEnabled(False)
 
+                def connect_labels_to_subscriptions(self):
+                    # CReate and connect subscriptions here
+                    gui_logger = GuiLogger(self.ui.textEdit)
+                    self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
+                    
                 def __foobar():
                     print("Hello World!")
 
@@ -87,6 +99,9 @@ class GUINode(QMainWindow):
     """
 
     __metaclass__ = abc.ABCMeta
+    # Signals for displaying dialogs because they need to be called from main thread and nodes run in a background thread
+    display_dialog_signal = pyqtSignal(ShowDialog.Request)
+    showed_dialog_signal = pyqtSignal(ShowDialog.Response)
 
     def __init__(
         self, ui, node_name: str = "gui_node", namespace: str | None = None
@@ -100,8 +115,22 @@ class GUINode(QMainWindow):
         self.turtlebot_running: bool = False
         self.is_mapping: bool = False
         # Private class attributes
-        self.__rm_node: RobotManager
+        self.__rm_node: RobotManager | None = None
         self.__restart_flag = Event()
+
+        self.display_dialog_signal.connect(self.__display_dialog)
+
+        rclpy.init()
+        self.node: GrapficalNode = GrapficalNode(
+            showed_dialog_signal=self.showed_dialog_signal,
+            display_dialog_signal=self.display_dialog_signal,
+            node_name=node_name,
+            namespace=namespace,
+        )
+        self.__executor = MultiThreadedExecutor()
+        self.__executor.add_node(self.node)
+        self.__spin_node_thread = Thread(target=self.__executor.spin)
+        self.__spin_node_thread.start()
 
         # Setup GUI
         self.ui.setupUi(self)
@@ -109,15 +138,7 @@ class GUINode(QMainWindow):
         self.connect_callbacks()
         self.set_default_values()
         self.set_initial_disabled_elements()
-
-        rclpy.init()
-        self.node: GrapficalNode = GrapficalNode(
-            node_name=node_name, namespace=namespace
-        )
-        self.__executor = MultiThreadedExecutor()
-        self.__executor.add_node(self.node)
-        self.__spin_node_thread = Thread(target=self.__executor.spin)
-        self.__spin_node_thread.start()
+        self.connect_labels_to_subscriptions()
 
     @abc.abstractmethod
     def connect_callbacks(self) -> None:
@@ -162,7 +183,22 @@ class GUINode(QMainWindow):
                         self.ui.pushButton_example.setEnabled(False)
         """
 
-    def register_namespace(self, namespace: str) -> None:
+    @abc.abstractmethod
+    def connect_labels_to_subscriptions(self) -> None:
+        """
+        Create ROS2 subscriptions which set the value of text labels
+
+        Example:
+            .. highlight:: python
+            .. code-block:: python
+
+                    def connect_labels_to_subscriptions(self):
+                        # Create and connect subscriptions here
+                        gui_logger = GuiLogger(self.ui.textEdit)
+                        self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
+        """
+
+    def register_namespace(self, namespace: str) -> bool:
         """
         Register a namespace on the Sopias4 Map-Server. It's basically a wrapper and calling the register_namespace
         service client in the underlying node object. If successful, it will restart `self.node` with the namespace.
@@ -172,6 +208,9 @@ class GUINode(QMainWindow):
 
         Args:
             namespace (str): The namespace which should be registered
+
+        Returns:
+            bool: If namespace was registered successfully
         """
         try:
             if self.node.register_namespace(namespace):
@@ -179,7 +218,7 @@ class GUINode(QMainWindow):
                 # Set restart flag so GUI recognizes the node shutdown as intentional and doesn't close
                 self.__restart_flag.set()
             else:
-                return
+                return False
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
@@ -193,11 +232,19 @@ class GUINode(QMainWindow):
         # Restart node with namespace
         self.__executor.remove_node(self.node)
         self.node.destroy_node()
-        self.node = GrapficalNode(node_name=self.node_name, namespace=self.namespace)
+        self.node = GrapficalNode(
+            showed_dialog_signal=self.showed_dialog_signal,
+            display_dialog_signal=self.display_dialog_signal,
+            node_name=self.node_name,
+            namespace=self.namespace,
+        )
         self.__executor.add_node(self.node)
         # Start robot manager
         self.__rm_node = RobotManager(namespace=self.namespace)
         self.__executor.add_node(self.__rm_node)
+
+        self.connect_labels_to_subscriptions()
+        return True
 
     def launch_robot(self, use_simulation: bool = False) -> None:
         """
@@ -208,27 +255,17 @@ class GUINode(QMainWindow):
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
-        #  Error message for user in Case something goes wrong
-        msg_request = ShowDialog.Request()
-        msg_request.title = "Couldn't launch robot"
-        msg_request.icon = ShowDialog.Request.ICON_ERROR
-        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-        msg_request.content = "Couldn't launch robot. Check if the Turtlebot4\
-                    nodes inside Sopias4 Application aren't running and that the physical \
-                    robot is started and connected to the network"
-
         try:
             status_response = self.node.launch_turtlebot(use_simulation=use_simulation)
 
             if status_response:
                 self.turtlebot_running = True
-                self.node.get_logger().debug("Launched robot")
+                self.node.get_logger().info("Launched robot")
             else:
                 self.turtlebot_running = False
                 self.node.get_logger().error(
                     f"Could'nt launch robot. Turtlebot is either already running or is'nt reachable"
                 )
-                self.__inform_and_retry(msg_request, self.launch_robot)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
@@ -243,13 +280,6 @@ class GUINode(QMainWindow):
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
-        #  Error message for user in Case something goes wrong
-        msg_request = ShowDialog.Request()
-        msg_request.title = "Couldn't stop robot"
-        msg_request.icon = ShowDialog.Request.ICON_ERROR
-        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-        msg_request.content = "Couldn't stop Robot. Check if the Turtlebot4\
-                    nodes inside Sopias4 Application are already stopped"
         try:
             status_response = self.node.stop_turtlebot()
 
@@ -262,7 +292,6 @@ class GUINode(QMainWindow):
                 self.node.get_logger().error(
                     "Couldnt stop robot: Nodes are either already stopped or error is unknown"
                 )
-                self.__inform_and_retry(msg_request, self.stop_robot)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
@@ -277,13 +306,6 @@ class GUINode(QMainWindow):
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
-        #  Error message for user in Case something goes wrong
-        msg_request = ShowDialog.Request()
-        msg_request.title = "Couldn't start mapping"
-        msg_request.icon = ShowDialog.Request.ICON_ERROR
-        msg_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-        msg_request.content = "Couldn't start mapping. Check if the Turtlebot4\
-                    Nodes inside Sopias4 Application are running and thats theres no mapping already in progress"
         try:
             if self.turtlebot_running and not self.is_mapping:
                 status_response = self.node.start_mapping()
@@ -296,38 +318,51 @@ class GUINode(QMainWindow):
                     self.node.get_logger().error(
                         "Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
                     )
-                    # Inform user about failure and see for it's response
-                    self.__inform_and_retry(msg_request, self.start_mapping)
             else:
                 self.node.get_logger().warning(
                     "Couldnt start mapping: Mapping already in process or Turtlebot is offline"
                 )
-                # Inform user about failure and see for it's response
-                self.__inform_and_retry(msg_request, self.start_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
             self.node.get_logger().error(f"Couldnt start mapping: {e}")
             raise e
 
-    def stop_mapping(self) -> None:
+    def stop_mapping(
+        self,
+        map_path: str = "maps/map_default",
+        map_topic: str = "/map",
+        image_format: str = "png",
+        map_mode: str = "trinary",
+        free_thres: float = 0.196,
+        occupied_thres: float = 0.65,
+    ) -> None:
         """
         Stops the mapping process. This can only be done if Sopias4 Application and the mapping process is fully running,
         otherwise itwill directly abort this process. It's basically a wrapper and calling the start_mapping service
         client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `False`
 
+        Args:
+            map_path(str, optional): The path to the map. Can be absolute or relative to a ros package. Defaults to "maps/map_default"
+            map_topic (str, optional): The topic under which the map should be served. Defaults to "/map"
+            image_format (str, optional): The image format under which the visualization of the map is saved. Can be either "png" "pgm", or "bmp". Defaults to "png"
+            map_mode (str, optional): Map modes: "trinary", "scale" or "raw". Defaults to "trinary"
+            free_thres (float, optional): Threshold over which a region is considered as free. Defaults to 0.196
+            occupied_thres (float, optional): Threshold over which a region is considered as occupied/obstacle. Defaults to 0.65
+
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
-        #  Error message for user in Case something goes wrong
-        request_informUser = ShowDialog.Request()
-        request_informUser.title = "Couldn't stop mapping"
-        request_informUser.icon = ShowDialog.Request.ICON_ERROR
-        request_informUser.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-        request_informUser.content = "Couldn't stop mapping. Check if the Turtlebot4\
-                    nodes inside Sopias4 Application are running and thats theres a mapping already in progress"
+
         try:
             if self.turtlebot_running and self.is_mapping:
-                status_response = self.node.stop_mapping()
+                status_response = self.node.stop_mapping(
+                    image_format=image_format,
+                    map_topic=map_topic,
+                    map_path=map_path,
+                    occupied_thres=occupied_thres,
+                    free_thres=free_thres,
+                    map_mode=map_mode,
+                )
                 if status_response:
                     self.turtlebot_running = True
                     self.node.get_logger().debug("Stopped Mapping")
@@ -336,14 +371,12 @@ class GUINode(QMainWindow):
                     self.node.get_logger().error(
                         "Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
                     )
-                    # Inform user about failure and see for it's response
-                    self.__inform_and_retry(request_informUser, self.stop_mapping)
+
             else:
                 self.node.get_logger().warning(
                     "Couldn't stop mapping: Mapping is already stopped or Turtlebot is offline"
                 )
                 # Inform user about failure and see for it's response
-                self.__inform_and_retry(request_informUser, self.stop_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
@@ -370,13 +403,6 @@ class GUINode(QMainWindow):
             vel_rel (float, optional): The relative velocity. The value is normed to the maximum speed of the Turtlebot,\
                                                      so e.g. 1.0 is maximum speed and 0 is standing still. Defaults to 1.0
         """
-        #  Error message for user in Case something goes wrong
-        request_informUser = ShowDialog.Request()
-        request_informUser.title = "Couldn't send drive command"
-        request_informUser.icon = ShowDialog.Request.ICON_ERROR
-        request_informUser.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-        request_informUser.content = "Couldn't send drive command. Check if the Turtlebot4\
-                    nodes inside Sopias4 Application are running"
         try:
             if self.turtlebot_running:
                 status_response = self.node.drive(twist_msg, direction, vel_rel)
@@ -389,13 +415,11 @@ class GUINode(QMainWindow):
                         "Couldnt send drive command to Turtlebot du to unknown error"
                     )
                     # Inform user about failure and see for it's response
-                    self.__inform_and_retry(request_informUser, self.stop_mapping)
             else:
                 self.node.get_logger().warning(
                     "Couldn't send drive command to Turtlebot: Turtlebot is offline"
                 )
                 # Inform user about failure and see for it's response
-                self.__inform_and_retry(request_informUser, self.stop_mapping)
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
@@ -409,25 +433,99 @@ class GUINode(QMainWindow):
         :meta private:
         """
         self.node.destroy_node()
-        self.__rm_node.destroy_node()
+        if self.__rm_node is not None:
+            self.__rm_node.destroy_node()
         rclpy.shutdown()
         event.accept()
 
-    def __inform_and_retry(self, msg: ShowDialog.Request, retry_fn):
-        """
-        It creates a message which is shown to the user and if the user\
-        chooses to retry operation calls the passed function
+    def __display_dialog(self, request_data: ShowDialog.Request):
+        """ """
+        response_data = ShowDialog.Response()
+        dlg = QMessageBox()
+        # Set static data that doesn't need validation
+        dlg.setWindowTitle(request_data.title)
+        dlg.setInformativeText(request_data.content)
 
-        Args:
-            msg (ShowDialog.Request): The message which should be shown to the user
-            retry_fn (function): The function which should be executed in case the user\
-                                             chooses to retry the operation. If the function takes arguments,\
-                                             then pass this function as a lambda e.g. `__inform_and_rety(msg, lambda: foo("bar"))`
-        """
-        user_response = self.node._show_dialog(msg, ShowDialog.Response())
-        if user_response == ShowDialog.Response.RETRY:
-            self.node.get_logger().debug(f"User chose to retry {retry_fn}")
-            retry_fn()
+        # Choose icon from set of QMessagebox icons
+        self.node.get_logger().debug(f"Selected icon: {request_data.icon}")
+        match request_data.icon:
+            case ShowDialog.Request.ICON_QUESTION:
+                dlg.setIcon(QMessageBox.Question)
+            case ShowDialog.Request.ICON_INFO:
+                dlg.setIcon(QMessageBox.Information)
+            case ShowDialog.Request.ICON_WARNING:
+                dlg.setIcon(QMessageBox.Warning)
+            case ShowDialog.Request.ICON_ERROR:
+                dlg.setIcon(QMessageBox.Critical)
+            case _:
+                raise ValueError(
+                    f"Specified icon: {request_data.icon} isn't implemented or has wrong value. \
+                                Implemented icons: {ShowDialog.Request.ICON_QUESTION}, {ShowDialog.Request.ICON_INFO},\
+                                {ShowDialog.Request.ICON_WARNING} and {ShowDialog.Request.ICON_ERROR}"
+                )
+
+        # Choose buttons which are displayed depending on the chosen interaction option in the request
+        # The service supports the buttons which are defined as constants in the service definition (see srv/ShowDialog.srv)
+        # PyQT support following buttons:  QMessageBox.Ok , QMessageBox.Open , QMessageBox.Save
+        # QMessageBox.Cancel, QMessageBox.Close, QMessageBox.Yes, QMessageBox.No, QMessageBox.Abort
+        # QMessageBox.Retry and QMessageBox.Ignore
+        self.node.get_logger().debug(
+            f"Selected interaction options: {request_data.interaction_options}"
+        )
+        match request_data.interaction_options:
+            case ShowDialog.Request.CONFIRM:
+                dlg.setStandardButtons(QMessageBox.Ok)
+            case ShowDialog.Request.CONFIRM_ABORT:
+                dlg.setStandardButtons(QMessageBox.Ok | QMessageBox.Abort)
+            case ShowDialog.Request.CONFIRM_RETRY:
+                dlg.setStandardButtons(QMessageBox.Ok | QMessageBox.Retry)
+            case ShowDialog.Request.CONFIRM_CANCEL:
+                dlg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            case ShowDialog.Request.YES_NO:
+                dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            case ShowDialog.Request.IGNORE_CANCEL:
+                dlg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ignore)
+            case ShowDialog.Request.IGNORE_ABORT:
+                dlg.setStandardButtons(QMessageBox.Abort | QMessageBox.Ignore)
+            case ShowDialog.Request.IGNORE_RETRY:
+                dlg.setStandardButtons(QMessageBox.Retry | QMessageBox.Ignore)
+            case _:
+                raise ValueError(
+                    f"Specified interaction option: {request_data.interaction_options} has isn't implemented \
+                        or has wrong value. Implemented icons: {ShowDialog.Request.CONFIRM}, {ShowDialog.Request.CONFIRM_ABORT} \
+                        {ShowDialog.Request.CONFIRM_CANCEL}, {ShowDialog.Request.CONFIRM_RETRY} and {ShowDialog.Request.YES_NO}"
+                )
+
+        self.node.get_logger().debug(f'Showing dialog "{request_data.title}"')
+        # Show dialog and get the pressed button
+        selected_option = dlg.exec_()
+
+        # Here we can look for each button, even if they werent displayed,
+        # because we only want to know the pressed button so the ones that arent displayed are not selected
+        match selected_option:
+            case QMessageBox.Ok:
+                response_data.selected_option = ShowDialog.Response.CONFIRMED
+            case QMessageBox.Abort:
+                response_data.selected_option = ShowDialog.Response.ABORT
+            case QMessageBox.Retry:
+                response_data.selected_option = ShowDialog.Response.RETRY
+            case QMessageBox.Yes:
+                response_data.selected_option = ShowDialog.Response.YES
+            case QMessageBox.No:
+                response_data.selected_option = ShowDialog.Response.NO
+            case QMessageBox.Ignore:
+                response_data.selected_option = ShowDialog.Response.IGNORE
+            case QMessageBox.Cancel:
+                response_data.selected_option = ShowDialog.Response.CANCEL
+            case _:
+                raise NotImplementedError(
+                    f"Dialog returned selected option: {selected_option} which is not\
+                        implemented in ROS Service. Currently supported options are:\
+                        QMessageBox.Ok, QMessageBox.Abort, QMessageBox.Retry, \
+                        QMessageBox.Yes, QMessageBox.No, QMessageBox.Ignore and QMessageBox.Cancel"
+                )
+
+        self.showed_dialog_signal.emit(response_data)
 
 
 class GrapficalNode(Node):
@@ -443,7 +541,11 @@ class GrapficalNode(Node):
     """
 
     def __init__(
-        self, node_name: str = "gui_node", namespace: str | None = None
+        self,
+        display_dialog_signal,
+        showed_dialog_signal,
+        node_name: str = "gui_node",
+        namespace: str | None = None,
     ) -> None:
         if namespace is not None:
             super().__init__(node_name, namespace=namespace)  # type: ignore
@@ -451,13 +553,16 @@ class GrapficalNode(Node):
             ns = "".join(random.choices(string.ascii_lowercase, k=8))
             super().__init__(node_name, namespace=ns)  # type: ignore
 
+        self.show_dialog_signal = display_dialog_signal
+        showed_dialog_signal.connect(self.__set_response_data)
+        self.dialog_return_data: ShowDialog.Response | None = None
         # Log level 10 is debug
         self.get_logger().set_level(10)
         self.get_logger().info(f"Node started with namespace {self.get_namespace()}")
 
         # ---- Setup services -----
         self.show_dialog_service = self.create_service(
-            ShowDialog, "show_dialog", self._show_dialog
+            ShowDialog, "show_dialog", self.__show_dialog
         )
 
         # --- Setup service clients ---
@@ -552,7 +657,7 @@ class GrapficalNode(Node):
                     msg_2_user.content = "Unknown error occured"
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
 
-            user_response = self._show_dialog(msg_2_user, ShowDialog.Response())
+            user_response = self.__show_dialog(msg_2_user, ShowDialog.Response())
 
             # If user response is to retry, then recursively call this function, otherwise return False
             if user_response.selected_option == ShowDialog.Response.CONFIRMED:
@@ -645,16 +750,38 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def stop_mapping(self) -> bool:
+    def stop_mapping(
+        self,
+        map_path: str = "maps/map_default",
+        map_topic: str = "/map",
+        image_format: str = "png",
+        map_mode: str = "trinary",
+        free_thres: float = 0.196,
+        occupied_thres: float = 0.65,
+    ) -> bool:
         """
         Runs a service client to stop the mapping process. The Sopias4 Application should
         be fully launched and the mapping process running before running this service
+
+        Args:
+            map_name (str, optional): The path to the map. Can be absolute or relative to a ros package. Defaults to "maps/map_default"
+            map_topic (str, optional): The topic under which the map should be served. Defaults to "/map"
+            image_format (str, optional): The image format under which the visualization of the map is saved. Can be either "png" "pgm", or "bmp". Defaults to "png"
+            map_mode (str, optional): Map modes: "trinary", "scale" or "raw". Defaults to "trinary"
+            free_thres (float, optional): Threshold over which a region is considered as free. Defaults to 0.196
+            occupied_thres (float, optional): Threshold over which a region is considered as occupied/obstacle. Defaults to 0.65
 
         Returns:
             bool: If operation was successful
         """
         self.get_logger().debug("Sending service request to stop mapping")
         request = StopMapping.Request()
+        request.map_name = map_path
+        request.map_topic = map_topic
+        request.image_format = image_format
+        request.map_mode = map_mode
+        request.free_thres = free_thres
+        request.occupied_thres = occupied_thres
         future = self.__rm_sclient_stop_mapping.call_async(request)
 
         self.get_logger().debug(
@@ -711,7 +838,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def _show_dialog(
+    def __show_dialog(
         self, request_data: ShowDialog.Request, response_data: ShowDialog.Response
     ) -> ShowDialog.Response:
         """Callback function for the show_dialog service. It creates a QT dialog, fills it with the values from the service request and shows it.
@@ -731,87 +858,22 @@ class GrapficalNode(Node):
         self.get_logger().info(
             f"Got service request to display dialog with title {request_data.title}"
         )
-        dlg = QMessageBox()
-        # Set static data that doesn't need validation
-        dlg.setWindowTitle(request_data.title)
-        dlg.setInformativeText(request_data.title)
+        # Send Signal to main thread so dialog is shown
+        self.show_dialog_signal.emit(request_data)
 
-        # Choose icon from set of QMessagebox icons
-        match request_data.icon:
-            case ShowDialog.Request.ICON_QUESTION:
-                dlg.setIcon(QMessageBox.Question)
-            case ShowDialog.Request.ICON_INFO:
-                dlg.setIcon(QMessageBox.Information)
-            case ShowDialog.Request.ICON_WARNING:
-                dlg.setIcon(QMessageBox.Warning)
-            case ShowDialog.Request.ICON_ERROR:
-                dlg.setIcon(QMessageBox.Critical)
-            case _:
-                raise ValueError(
-                    f"Specified icon: {request_data.icon} isn't implemented or has wrong value. \
-                                Implemented icons: {ShowDialog.Request.ICON_QUESTION}, {ShowDialog.Request.ICON_INFO},\
-                                {ShowDialog.Request.ICON_WARNING} and {ShowDialog.Request.ICON_ERROR}"
-                )
+        # Wait until user responded. The feedback is returned via a QT signal which sets the self.dialog_return_data variable
+        while self.dialog_return_data is None:
+            time.sleep(0.2)
 
-        # Choose buttons which are displayed depending on the chosen interaction option in the request
-        # The service supports the buttons which are defined as constants in the service definition (see srv/ShowDialog.srv)
-        # PyQT support following buttons:  QMessageBox.Ok , QMessageBox.Open , QMessageBox.Save
-        # QMessageBox.Cancel, QMessageBox.Close, QMessageBox.Yes, QMessageBox.No, QMessageBox.Abort
-        # QMessageBox.Retry and QMessageBox.Ignore
-        match request_data.interaction_options:
-            case ShowDialog.Request.CONFIRM:
-                dlg.setStandardButtons(QMessageBox.Ok)
-            case ShowDialog.Request.CONFIRM_ABORT:
-                dlg.setStandardButtons(QMessageBox.Abort | QMessageBox.Ok)
-            case ShowDialog.Request.CONFIRM_RETRY:
-                dlg.setStandardButtons(QMessageBox.Retry | QMessageBox.Ok)
-            case ShowDialog.Request.CONFIRM_CANCEL:
-                dlg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-            case ShowDialog.Request.YES_NO:
-                dlg.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
-            case ShowDialog.Request.IGNORE_CANCEL:
-                dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Cancel)
-            case ShowDialog.Request.IGNORE_ABORT:
-                dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Abort)
-            case ShowDialog.Request.IGNORE_RETRY:
-                dlg.setStandardButtons(QMessageBox.Ignore | QMessageBox.Retry)
-            case _:
-                raise ValueError(
-                    f"Specified interaction option: {request_data.interaction_options} has isn't implemented \
-                                    or has wrong value. Implemented icons: {ShowDialog.Request.CONFIRM}, {ShowDialog.Request.CONFIRM_ABORT} \
-                                    {ShowDialog.Request.CONFIRM_CANCEL}, {ShowDialog.Request.CONFIRM_RETRY} and {ShowDialog.Request.YES_NO}"
-                )
-
-        self.get_logger().debug(f'Showing dialog "{request_data.title}"')
-        # Show dialog and get the pressed button
-        selected_option = dlg.exec()
-
-        # Here we can look for each button, even if they werent displayed,
-        # because we only want to know the pressed button so the ones that arent displayed are not selected
-        match selected_option:
-            case QMessageBox.Ok:
-                response_data.selected_option = ShowDialog.Response.CONFIRMED
-            case QMessageBox.Abort:
-                response_data.selected_option = ShowDialog.Response.ABORT
-            case QMessageBox.Retry:
-                response_data.selected_option = ShowDialog.Response.RETRY
-            case QMessageBox.Yes:
-                response_data.selected_option = ShowDialog.Response.YES
-            case QMessageBox.No:
-                response_data.selected_option = ShowDialog.Response.NO
-            case QMessageBox.Ignore:
-                response_data.selected_option = ShowDialog.Response.IGNORE
-            case QMessageBox.Cancel:
-                response_data.selected_option = ShowDialog.Response.CANCEL
-            case _:
-                raise NotImplementedError(
-                    f"Dialog returned selected option: {selected_option} which is not\
-                        implemented in ROS Service. Currently supported options are:\
-                        QMessageBox.Ok, QMessageBox.Abort, QMessageBox.Retry, \
-                        QMessageBox.Yes, QMessageBox.No, QMessageBox.Ignore and QMessageBox.Cancel"
-                )
-
+        self.get_logger().debug(
+            f"Got user response: {self.dialog_return_data.selected_option}"
+        )
+        response_data = self.dialog_return_data
+        self.dialog_return_data = None
         return response_data
+
+    def __set_response_data(self, data: ShowDialog.Response):
+        self.dialog_return_data = data
 
     def destroy_node(self):
         """

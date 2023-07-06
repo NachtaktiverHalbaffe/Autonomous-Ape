@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1580</width>
-    <height>767</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -122,7 +122,7 @@
           <item>
            <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>Before launching the Turtlebot, make sure the name space is registered</string>
+             <string>Before launching the Turtlebot, make sure the name space is registered. If using the simulation, then make sure to set the namespace also inside gazebo</string>
             </property>
            </widget>
           </item>
@@ -416,7 +416,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="label_24">
               <property name="text">
-               <string>**Map name:**</string>
+               <string>**Map path:**</string>
               </property>
               <property name="textFormat">
                <enum>Qt::MarkdownText</enum>
@@ -473,7 +473,14 @@
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_occupied_thres"/>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_occupied_thres">
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
             </item>
             <item row="2" column="2">
              <widget class="QLabel" name="label_29">
@@ -486,7 +493,14 @@
              </widget>
             </item>
             <item row="2" column="3">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_free_tttttttthres"/>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_free_thres">
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
