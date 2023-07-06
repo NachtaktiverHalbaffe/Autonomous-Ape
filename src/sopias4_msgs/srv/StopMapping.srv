@@ -1,10 +1,18 @@
 # Request
-string map_name "map_default"
+# URL of map resource
+# Can be an absolute path to a file: file:///path/to/maps/floor1.yaml
+# Or, relative to a ROS package: package://my_ros_package/maps/floor2.yaml
+string map_name "maps/map_default"
+# The topic under which the map should be served
 string map_topic "/map"
+# Map modes: trinary, scale or raw
 string map_mode "trinary"
-string image_format
+# Constants for image_format. Supported formats: pgm, png, bmp
+string image_format "pgm"
+# Threshold over which a region is considered as occupied/obstacle
 float32 occupied_thres 0.65
-float32 free_thres 0.25
+# Threshold over which a region is considered as free
+float32 free_thres 0.196
 ---
 # Response
 string SUCCESS = "success"

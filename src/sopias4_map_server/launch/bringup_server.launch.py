@@ -16,35 +16,35 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
-from launch.conditions import IfCondition
-from launch.substitutions import EqualsSubstitution  # type: ignore
-from launch.substitutions import NotEqualsSubstitution  # type: ignore
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch.conditions import (
+    IfCondition,
+    LaunchConfigurationEquals,
+    LaunchConfigurationNotEquals,
+)
 from launch.substitutions import LaunchConfiguration, PythonExpression
-from launch_ros.actions import Node, SetParameter
+from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
     # Get the launch directory
-    bringup_dir = get_package_share_directory("nav2_bringup")
+    bringup_dir = get_package_share_directory("sopias4_map_server")
+    lifecycle_nodes = ["map_saver"]
 
     namespace = LaunchConfiguration("namespace")
     map_yaml_file = LaunchConfiguration("map")
-    use_sim_time = LaunchConfiguration("use_sim_time")
     params_file = LaunchConfiguration("params_file")
-    use_composition = LaunchConfiguration("use_composition")
     use_respawn = LaunchConfiguration("use_respawn")
     log_level = LaunchConfiguration("log_level")
-
-    remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
-
     configured_params = RewrittenYaml(
         source_file=params_file,
         root_key=namespace,
         param_rewrites={},
         convert_types=True,
     )
+
+    remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
     stdout_linebuf_envvar = SetEnvironmentVariable(
         "RCUTILS_LOGGING_BUFFERED_STREAM", "1"
@@ -55,12 +55,14 @@ def generate_launch_description():
     )
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
-        "map", default_value="", description="Full path to map yaml file to load"
+        "map",
+        default_value="",
+        description="Full path to map yaml file to load",
     )
 
     declare_params_file_cmd = DeclareLaunchArgument(
         "params_file",
-        default_value=os.path.join(bringup_dir, "params", "nav2_params.yaml"),
+        default_value=os.path.join(bringup_dir, "config", "map_server.yaml"),
         description="Full path to the ROS2 parameters file to use for all launched nodes",
     )
 
@@ -74,44 +76,48 @@ def generate_launch_description():
         "log_level", default_value="info", description="log level"
     )
 
-    map_server = GroupAction(
-        condition=IfCondition(PythonExpression(["not ", use_composition])),
-        actions=[
-            SetParameter("use_sim_time", use_sim_time),
-            Node(
-                condition=IfCondition(
-                    EqualsSubstitution(LaunchConfiguration("map"), "")
-                ),
-                package="nav2_map_server",
-                executable="map_server",
-                name="map_server",
-                output="screen",
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params],
-                arguments=["--ros-args", "--log-level", log_level],
-                remappings=remappings,
-            ),
-            Node(
-                condition=IfCondition(
-                    NotEqualsSubstitution(LaunchConfiguration("map"), "")
-                ),
-                package="nav2_map_server",
-                executable="map_server",
-                name="map_server",
-                output="screen",
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params, {"yaml_filename": map_yaml_file}],
-                arguments=["--ros-args", "--log-level", log_level],
-                remappings=remappings,
-            ),
-            Node(
-                package="sopias4_map_server",
-                executable="multi_robot_coordinator",
-                name="multi_robot_coordinator",
-            ),
+    map_server_empty = Node(
+        condition=LaunchConfigurationNotEquals("map", ""),
+        namespace=namespace,
+        package="nav2_map_server",
+        executable="map_server",
+        name="map_server",
+        output="screen",
+        respawn=use_respawn,
+        respawn_delay=2.0,
+        parameters=[configured_params, {"yaml_filename": map_yaml_file}],
+        arguments=["--ros-args", "--log-level", log_level],
+        remappings=remappings,
+    )
+    map_server_map_loaded = Node(
+        condition=LaunchConfigurationEquals("map", ""),
+        namespace=namespace,
+        package="nav2_map_server",
+        executable="map_server",
+        name="map_server",
+        output="screen",
+        respawn=use_respawn,
+        parameters=[configured_params],
+        respawn_delay=2.0,
+        arguments=["--ros-args", "--log-level", log_level],
+        remappings=remappings,
+    )
+    start_lifecycle_manager_cmd = Node(
+        package="nav2_lifecycle_manager",
+        executable="lifecycle_manager",
+        name="lifecycle_manager_sopias4_map_server",
+        output="screen",
+        emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+        parameters=[
+            {"use_sim_time": True},
+            {"autostart": True},
+            {"node_names": lifecycle_nodes},
         ],
+    )
+    multi_robot_coordinator = Node(
+        package="sopias4_map_server",
+        executable="multi_robot_coordinator",
+        name="multi_robot_coordinator",
     )
 
     # Create the launch description and populate
@@ -123,11 +129,14 @@ def generate_launch_description():
     # Declare the launch options
     ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_map_yaml_cmd)
-    ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
+    ld.add_action(declare_params_file_cmd)
 
     # Add the actions to launch all of the localiztion nodes
-    ld.add_action(map_server)
+    ld.add_action(map_server_empty)
+    ld.add_action(map_server_map_loaded)
+    ld.add_action(multi_robot_coordinator)
+    ld.add_action(start_lifecycle_manager_cmd)
 
     return ld

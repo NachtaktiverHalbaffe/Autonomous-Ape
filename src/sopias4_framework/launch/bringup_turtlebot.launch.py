@@ -30,7 +30,7 @@ def generate_launch_description():
 
     turtlebot4_sim = GroupAction(
         [
-            PushRosNamespace(namespace),
+            # PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -42,6 +42,7 @@ def generate_launch_description():
                     )
                 ),
                 condition=IfCondition(use_gazebo),
+                launch_arguments=[("namespace", namespace)],
             ),
         ]
     )
@@ -49,14 +50,13 @@ def generate_launch_description():
     turtlebot4_real = Node(
         package="turtlebot4_node",
         executable="turtlebot4_node",
-        name="turtlebot4_node",
+        name="turtlebot4_node_real",
         namespace=namespace,
         condition=IfCondition(NotSubstitution(use_gazebo)),
     )
 
     amcl = GroupAction(
         [
-            PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -67,6 +67,7 @@ def generate_launch_description():
                         ]
                     )
                 ),
+                launch_arguments=[("namespace", namespace)],
             ),
         ]
     )
@@ -80,7 +81,6 @@ def generate_launch_description():
 
     nav2 = GroupAction(
         [
-            PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -90,7 +90,8 @@ def generate_launch_description():
                             "nav2.launch.py",
                         ]
                     )
-                )
+                ),
+                launch_arguments=[("namespace", namespace)],
             ),
         ]
     )

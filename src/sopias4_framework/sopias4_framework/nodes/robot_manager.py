@@ -129,6 +129,8 @@ class RobotManager(Node):
         self.__turtlebot_shell_process: subprocess.Popen | None = None
         self.__mapping_shell_process: subprocess.Popen | None = None
 
+        # Log level 10 is debug
+        self.get_logger().set_level(10)
         self.get_logger().info("Started node")
 
     def __drive__to_pos(
@@ -205,7 +207,18 @@ class RobotManager(Node):
             self.__cmd_vel_pub.publish(request_data.twist)
             response_data.statuscode = Drive.Response.SUCCESS
         except Exception as e:
+            #  Error message for user in Case something goes wrong
+            request_informUser = ShowDialog.Request()
+            request_informUser.title = "Couldn't send drive command"
+            request_informUser.icon = ShowDialog.Request.ICON_ERROR
+            request_informUser.interaction_options = ShowDialog.Request.CONFIRM
+            request_informUser.content = "Couldn't send drive command. Check if the Turtlebot4\
+                        nodes inside Sopias4 Application are running"
             response_data.statuscode = Drive.Response.UNKNOWN_ERROR
+            future = self.__gui_sclient_showDialog.call_async(request_informUser)
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=10
+            )
         return response_data
 
     def __launch_robot(
@@ -229,14 +242,21 @@ class RobotManager(Node):
             LaunchTurtlebot.Response: A response which contains the statuscode of the operation\
                                                             Look at service definition in srv/LaunchTurtlebot.srv
         """
+        self.get_logger().info(
+            "Got service request to launch necessary turtlebot nodes"
+        )
         if self.__turtlebot_shell_process is None:
             # Launch launchfile
             cmd = f'ros2 launch sopias4_framework bringup_turtlebot.launch.py namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
             self.__turtlebot_shell_process = subprocess.Popen(cmd.split(" "))
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
+            self.get_logger().warning(
+                "Couldn't launch turtlebot nodes: Nodes already running"
+            )
             # Robot is already running
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_RUNNING
+
             #  Inform user
             dialog_request = ShowDialog.Request()
             dialog_request.title = "Turtlebot already running"
@@ -246,9 +266,13 @@ class RobotManager(Node):
             dialog_request.icon = ShowDialog.Request.ICON_INFO
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
-            self.__gui_sclient_showDialog.call_async(dialog_request)
+            future = self.__gui_sclient_showDialog.call_async(dialog_request)
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=10
+            )
             # Because we only confirm the user, we doen't need to check the response
 
+        self.get_logger().info("Successfully started turtlebot nodes")
         return response_data
 
     def __stop_robot(
@@ -271,16 +295,22 @@ class RobotManager(Node):
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
         # Kill turtlebot nodes by killing the process which runs these
+        self.get_logger().info("Got service rquest to stop turtlebot nodes")
 
+        self.get_logger().debug("Shutting down turtlebot nodes")
         if self.__shutdown_shell_process(self.__turtlebot_shell_process):
+            self.__turtlebot_shell_process = None
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
+            self.get_logger().warning(
+                "Couldn't shutdown turtlebot nodes: Nodes already stopped"
+            )
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_STOPPED
             #  Inform user
             dialog_request = ShowDialog.Request()
             dialog_request.title = "Turtlebot already stopped"
             dialog_request.content = "The Turtlebot is already stopped. Was it stopped before or by another component?"
-            dialog_request.icon = ShowDialog.Request.ICON_INFO
+            dialog_request.icon = ShowDialog.Request.ICON_ERROR
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
             future = self.__gui_sclient_showDialog.call_async(dialog_request)
@@ -289,23 +319,11 @@ class RobotManager(Node):
 
         # Kill slam nodes by killing the process which runs these. Because slam is not running every time,
         # no error status response is generated when node is already stopped
-        self.__shutdown_shell_process(self.__mapping_shell_process)
+        self.get_logger().debug("Shutting down mapping nodes if running")
+        if self.__shutdown_shell_process(self.__mapping_shell_process):
+            self.__mapping_shell_process = None
 
-        #  Unregister namespace so it can be used again
-        unregister_request = Unregister.Request()
-        unregister_request.name_space = self.get_namespace()
-
-        future = self.__mrc__sclient__unregister.call_async(unregister_request)
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
-
-        response: Unregister.Response | None = future.result()
-        if response is None:
-            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
-        elif response.statuscode == Unregister.Response.SUCCESS:
-            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-        else:
-            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_STOPPED
-
+        self.get_logger().info("Successfully shutdown turtlebot nodes")
         return response_data
 
     def __start_mapping(
@@ -327,28 +345,49 @@ class RobotManager(Node):
             EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
+        self.get_logger().info("Got service request to start mapping")
+
         # ------ Set AMCL in Inactive state -------
+        self.get_logger().debug("Setting AMCL to inactive state")
         request: ChangeState.Request = ChangeState.Request()
         request.transition.id = Transition.TRANSITION_DEACTIVATE
-        future = self.__amcl_sclient_lifecycle.call_async(request)
+        try:
+            future = self.__amcl_sclient_lifecycle.call_async(request)
+            rclpy.spin_until_future_complete(self.__service_client_node, future)
 
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
-        response: ChangeState.Response | None = future.result()
-        if response is None:
-            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
-        elif response.success:
-            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-        else:
-            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
+            response: ChangeState.Response | None = future.result()
+            if response is None:
+                response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+            elif response.success:
+                response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+            else:
+                self.get_logger().warning("Couldn't set AMCL node in inactive state")
+                response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't set AMCL node in inactive state: {e}")
 
         # ------ start slam toolbox ---------
-        if self.__mapping_shell_process is not None:
-            cmd = f"ros2 launch sopiaf4_framework slam.launch.py namespace:={self.get_namespace()}"
+        self.get_logger().debug("Starting slam nodes")
+        if self.__mapping_shell_process is None:
+            cmd = f"ros2 launch sopias4_framework slam.launch.py namespace:={self.get_namespace()}"
             self.__mapping_shell_process = subprocess.Popen(cmd.split(" "))
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
+            self.get_logger().warning(
+                "Couldn't start SLAM nodes: Nodes already running"
+            )
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_RUNNING
+            #  Error message for user in Case something goes wrong
+            msg_request = ShowDialog.Request()
+            msg_request.title = "Couldn't start mapping"
+            msg_request.icon = ShowDialog.Request.ICON_ERROR
+            msg_request.interaction_options = ShowDialog.Request.CONFIRM
+            msg_request.content = "Couldn't start mapping. Check if the Turtlebot4 Nodes inside Sopias4 Application are running and thats theres no mapping already in progress"
+            future_dialog = self.__gui_sclient_showDialog.call_async(msg_request)
+            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
+            return response_data
 
+        self.get_logger().info("Successfully started mapping")
         return response_data
 
     def __stop_mapping(
@@ -370,13 +409,18 @@ class RobotManager(Node):
             StopMapping.Response: A response which contains the statuscode of the operation.  \
                                                      Look at service definition in srv/StopMapping.srv
         """
+        self.get_logger().info("Got service request to stop mapping")
         # ------ Stop slam toolbox ---------
+        self.get_logger().debug("Stopping slam nodes")
         if self.__shutdown_shell_process(self.__mapping_shell_process):
+            self.__mapping_shell_process = None
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
+            self.get_logger().warning("Couldn't stop slam nodes: Nodes already stopped")
             response_data.statuscode = StopMapping.Response.ALREADY_STOPPED
 
         # ------ Set AMCL in active state -------
+        self.get_logger().debug("Setting AMCL in active state")
         request: ChangeState.Request = ChangeState.Request()
         request.transition.id = Transition.TRANSITION_ACTIVATE
         future = self.__amcl_sclient_lifecycle.call_async(request)
@@ -384,16 +428,31 @@ class RobotManager(Node):
         rclpy.spin_until_future_complete(self.__service_client_node, future)
         response: ChangeState.Response | None = future.result()
         if response is None:
+            dialog_request = ShowDialog.Request()
+            dialog_request.title = "Couldn't stop mapping"
+            dialog_request.icon = ShowDialog.Request.ICON_INFO
+            dialog_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+            dialog_request.content = (
+                "AMCL couldn't be set in active state: Unkown Error"
+            )
+            future_dialog = self.__gui_sclient_showDialog.call_async(dialog_request)
+            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
+
             response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
         elif response.success:
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
+            self.get_logger().warning(
+                "Couldn't set AMCL in active state: Node already active"
+            )
             response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
             return response_data
 
         #  Save map
+        self.get_logger().debug("Saving map")
         response_data = self.__save_map(request_data, response_data)  # type: ignore
 
+        self.get_logger().info("Successfully stopped mapping")
         return response_data
 
     def __save_map(
@@ -418,6 +477,9 @@ class RobotManager(Node):
         save_map_requ.occupied_thresh = save_params.occupied_thres
         # save_map_requ.image_format = save_params.image_format
 
+        self.get_logger().debug(
+            "Send service request to save map to Sopias4 Map-Server"
+        )
         future = self.__ms_sclient_saveMap.call_async(save_map_requ)
         rclpy.spin_until_future_complete(self.__service_client_node, future)
         response: SaveMap.Response | None = future.result()
@@ -438,12 +500,14 @@ class RobotManager(Node):
             dialog_request.icon = ShowDialog.Request.ICON_ERROR
             dialog_request.interaction_options = ShowDialog.Request.IGNORE_RETRY
 
-            user_response: ShowDialog.Response = self.__gui_sclient_showDialog.call(
-                dialog_request
-            )
+            future_dialog = self.__gui_sclient_showDialog.call_async(dialog_request)
+            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
 
             # User chose to retry operation
-            if user_response.selected_option == ShowDialog.Response.RETRY:
+            user_response = future_dialog.result()
+            if user_response is None:
+                response_data.statuscode = StopMapping.Response.SAVING_FAILED
+            elif user_response.selected_option == ShowDialog.Response.RETRY:
                 #  Call function recursively to retry save operation
                 return self.__save_map(save_params, response_data)
             #  User chose to ignore error
@@ -464,7 +528,7 @@ class RobotManager(Node):
         """
         if shell_process is not None:
             shell_process.send_signal(signal.SIGINT)
-            shell_process.wait()
+            shell_process.wait(timeout=10)
             shell_process = None
             return True
         else:
@@ -476,6 +540,7 @@ class RobotManager(Node):
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
         :meta private:
         """
+        self.get_logger().info("Shutting down node")
         # Unregister namespace
         request = Unregister.Request()
         request.name_space = self.get_namespace()
@@ -497,7 +562,6 @@ class RobotManager(Node):
         self.__shutdown_shell_process(self.__turtlebot_shell_process)
         self.__shutdown_shell_process(self.__mapping_shell_process)
 
-        self.get_logger().info("Shutting down node")
         super().destroy_node()
 
 

@@ -141,6 +141,7 @@ void unregister_callback(const sopias4_msgs::srv::Unregister::Request::SharedPtr
     RCLCPP_DEBUG(logger, "Deleted state of robot with namespace %s", request -> name_space.c_str());
 
     RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request -> name_space.c_str());
+	return;
 }
 
 void set_robot_path_callback(const sopias4_msgs::srv::SetRobotPath::Request::SharedPtr request, sopias4_msgs::srv::SetRobotPath::Response::SharedPtr response){
