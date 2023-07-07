@@ -14,6 +14,19 @@ find_package(rosidl_default_generators REQUIRED)
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(nav2_util REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+find_package(nav2_core REQUIRED)
+find_package(pluginlib REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -31,17 +44,50 @@ find_package(rclpy REQUIRED)
 ######################################
 # ------------------- C++ ------------------------
 include_directories(include)
-# Create exectuables. For this purpose, add 
-# following line for each node:
-# add_executable(cpp_exe src/<node file>)
-# ament_target_dependencies(cpp_exe rclcpp)
-# Install C++ executables. For this purpose, add 
-# following line for each node:
-# install(TARGETS
-#     cpp_exe
-#     DESTINATION lib/${PROJECT_NAME}
-# )
 
+set(library_name plugin_bridges)
+# Declare dependecies here
+set(dependencies
+    rclcpp
+    rclcpp_action
+    rclcpp_lifecycle
+    std_msgs
+    visualization_msgs
+    nav2_util
+    nav2_msgs
+    nav_msgs
+    geometry_msgs
+    builtin_interfaces
+    tf2_ros
+    nav2_costmap_2d
+    nav2_core
+    pluginlib
+)
+# Add the plugin bridges source files here
+add_library(${library_name} SHARED
+    src/plugin_bridge_planner.cpp
+)
+# Include dependecies in compiled plugins
+ament_target_dependencies(${library_name}
+    ${dependencies}
+)
+
+# Define plugins here
+target_compile_definitions(${library_name} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+pluginlib_export_plugin_description_file(nav2_core plugin_bridge_planner.xml)
+
+# Install C++ executables
+install(TARGETS ${library_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+install(DIRECTORY include/
+  DESTINATION include/
+)
+install(FILES plugin_bridge_planner.xml
+  DESTINATION share/${PROJECT_NAME}
+)
 #------------------ Python ---------------------
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
@@ -55,9 +101,8 @@ install(PROGRAMS
 ######################################
 # ----------- ROS specific stuff ---------------
 ######################################
-# Install launch files, configs
-install(
-  DIRECTORY launch config
+# Install launch files, configs, plugin descriptions
+install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME}
   )
 
@@ -73,4 +118,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_include_directories(include)
+ament_export_libraries(${library_name})
+ament_export_dependencies(${dependencies})
 ament_package()

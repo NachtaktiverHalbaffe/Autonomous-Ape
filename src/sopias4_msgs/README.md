@@ -39,18 +39,18 @@ When using the plugin bridge, it is important to provide an parameter file which
 
 <!-- TODO Seperate actions out into the actions sec -->
 ### Services
-| **Service** | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**        |
-| ----------- | -------------------------- | --------------------------- | ---------------------- |
-|             | Layer Plugin PyBridge      | update_costs()              | Implementation pending |
-|             | Planner Plugin PyBridge    | create_plan()               | Implementation pending |
-|             | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending |
-|             | Controller Plugin PyBridge | set_speed_limit()           | Implementation Pending |
-|             | Navigator Plugin PyBridge  | get_default_bt_filepath()   | Implementation Pending |
-|             | Navigator Plugin PyBridge  | goal_received()             | Implementation Pending |
-|             | Navigator Plugin PyBridge  | goal_completed()            | Implementation Pending |
-|             | Navigator Plugin PyBridge  | get_name()                  | Implementation Pending |
-|             | BT Plugin PyBridge         | provide_ports()             | Implementation pending |
-|             | Behavior Plugin PyBridge   | on_run()                    | Implementation pending |
+| **Service**                               | **Service type** | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**        |
+| ----------------------------------------- | ---------------- | -------------------------- | --------------------------- | ---------------------- |
+|                                           |                  | Layer Plugin PyBridge      | update_costs()              | Implementation pending |
+| /<*namespace*>/create_plan/<*identifier*> | CreatePlan       | Planner Plugin PyBridge    | create_plan()               | Implementation pending |
+|                                           |                  | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending |
+|                                           |                  | Controller Plugin PyBridge | set_speed_limit()           | Implementation Pending |
+|                                           |                  | Navigator Plugin PyBridge  | get_default_bt_filepath()   | Implementation Pending |
+|                                           |                  | Navigator Plugin PyBridge  | goal_received()             | Implementation Pending |
+|                                           |                  | Navigator Plugin PyBridge  | goal_completed()            | Implementation Pending |
+|                                           |                  | Navigator Plugin PyBridge  | get_name()                  | Implementation Pending |
+|                                           |                  | BT Plugin PyBridge         | provide_ports()             | Implementation pending |
+|                                           |                  | Behavior Plugin PyBridge   | on_run()                    | Implementation pending |
 
 ### Actions
 

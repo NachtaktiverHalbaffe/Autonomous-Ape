@@ -1,0 +1,5 @@
+<library path="plugin_bridges">
+    <class name="plugin_bridges/PlannerBridge" type="plugin_bridges::PlannerBridge" base_class_type="nav2_core::GlobalPlanner">
+        <description>A plugin bridge which allows you to implement your Planner plugin in another language</description>
+    </class>
+</library>

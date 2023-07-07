@@ -10,6 +10,7 @@ endif()
 #######################################
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
@@ -23,6 +24,7 @@ find_package(rclcpp REQUIRED)
 ######################################
 # Service definitions
 rosidl_generate_interfaces(${PROJECT_NAME}
+      # Framework
       "msg/Robot.msg"
       "srv/ShowDialog.srv"
       "srv/RegistryService.srv"
@@ -35,7 +37,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/SetRobotPath.srv"
       "srv/Drive.srv"
       "srv/StopMapping.srv"
-      DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs
+      # Plugin Bridges
+      "srv/CreatePlan.srv"
+      DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs nav2_msgs
 )
 
 if(BUILD_TESTING)
