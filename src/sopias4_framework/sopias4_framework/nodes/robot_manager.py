@@ -10,7 +10,7 @@ from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from nav2_msgs.action import NavigateToPose
 from nav2_msgs.srv import SaveMap
-from rclpy.action import ActionClient, ActionServer
+from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.node import Node
 from rclpy.service import Service
@@ -19,13 +19,10 @@ from sopias4_msgs.srv import (
     Drive,
     DriveToPos,
     EmptyWithStatuscode,
-    GetNamespaces,
-    GetRobotIdentity,
-    GetRobots,
     LaunchTurtlebot,
+    RegistryService,
     ShowDialog,
     StopMapping,
-    Unregister,
 )
 
 
@@ -45,7 +42,6 @@ class RobotManager(Node):
         stop_mapping_service (Service): A service to stop the mapping. The service can be accessed via the service "<namespace>/stop_mapping". It uses the lifecycles in the background to set the slam node into an inactive state
     """
 
-    # TODO Keep doc up to date
     def __init__(self, node_name="robot_manager", namespace: str | None = None) -> None:
         if namespace is None:
             super().__init__(node_name)  # type: ignore
@@ -78,19 +74,20 @@ class RobotManager(Node):
         # ------------------- Service clients--------------------
         # Create own sub node for service clients so they can spin independently
         self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients", namespace=self.get_namespace())  # type: ignore
-        # This service requests the states of the robot from the multi robot coordinator inside Sopias4 Map-Server
-        self.__mrc_sclient_robots: Client = self.__service_client_node.create_client(
-            GetRobots, "/get_robots"
-        )
-        self.__mrc_sclient_robot_identity: Client = (
-            self.__service_client_node.create_client(
-                GetRobotIdentity, "/get_robot_identity"
-            )
-        )
-        # This service requests all registered namespaces of multi robot coordinator inside Sopias4 Map-Server
-        self.__mrc_sclient_namespaces: Client = (
-            self.__service_client_node.create_client(GetNamespaces, "/get_namespaces")
-        )
+        # # This service requests the states of the robot from the multi robot coordinator inside Sopias4 Map-Server
+        # TODO Remove if not
+        # self.__mrc_sclient_robots: Client = self.__service_client_node.create_client(
+        #     GetRobots, "/get_robots"
+        # )
+        # self.__mrc_sclient_robot_identity: Client = (
+        #     self.__service_client_node.create_client(
+        #         GetRobotIdentity, "/get_robot_identity"
+        #     )
+        # )
+        # # This service requests all registered namespaces of multi robot coordinator inside Sopias4 Map-Server
+        # self.__mrc_sclient_namespaces: Client = (
+        #     self.__service_client_node.create_client(GetNamespaces, "/get_namespaces")
+        # )
         # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
         # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
         self.__amcl_sclient_lifecycle: Client = (
@@ -114,7 +111,7 @@ class RobotManager(Node):
         )
         # This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver
         self.__mrc__sclient__unregister = self.__service_client_node.create_client(
-            Unregister, "/unregister_namespace"
+            RegistryService, "/unregister_namespace"
         )
 
         # ---------- Publishers ----------------
@@ -534,13 +531,14 @@ class RobotManager(Node):
         """
         self.get_logger().info("Shutting down node")
         # Unregister namespace
-        request = Unregister.Request()
+        request = RegistryService.Request()
         request.name_space = self.get_namespace()
         self.__mrc__sclient__unregister.call_async(request)
         # Release service clients
-        self.__mrc_sclient_namespaces.destroy()
-        self.__mrc_sclient_robot_identity.destroy()
-        self.__mrc_sclient_robots.destroy()
+        # TODO Remove if not used
+        # self.__mrc_sclient_namespaces.destroy()
+        # self.__mrc_sclient_robot_identity.destroy()
+        # self.__mrc_sclient_robots.destroy()
         self.__amcl_sclient_lifecycle.destroy()
         self.__nav2_aclient_driveToPos.destroy()
         self.__service_client_node.destroy_node()

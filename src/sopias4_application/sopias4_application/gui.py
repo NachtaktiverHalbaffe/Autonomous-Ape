@@ -9,8 +9,10 @@ from rcl_interfaces.msg import Log
 from sensor_msgs.msg import BatteryState
 from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
-from sopias4_framework.tools.gui_logger import GuiLogger
-from sopias4_framework.tools.label_subscription_handle import LabelSubscriptionHandler
+from sopias4_framework.tools.gui.gui_logger import GuiLogger
+from sopias4_framework.tools.gui.label_subscription_handle import (
+    LabelSubscriptionHandler,
+)
 
 
 class GUI(GUINode):

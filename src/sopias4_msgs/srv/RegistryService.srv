@@ -1,0 +1,17 @@
+# Request
+# The namespace. Following should be avoided: 
+#  - having whitespaces
+#  - using "-" instead of "_"
+#  - using "/" between to words
+#  - starting with an number
+string name_space
+---
+#Response
+string SUCCESS = "success"
+string UNKNOWN_ERROR ="unknown_error"
+string NS_NOT_FOUND = "ns_not_found"
+string ILLEGAL_NAMESPACE_ERROR = "illegal_namespace"
+string COLLISION_ERROR ="collision_namespace"
+
+# status code of request
+string statuscode "unknown error"

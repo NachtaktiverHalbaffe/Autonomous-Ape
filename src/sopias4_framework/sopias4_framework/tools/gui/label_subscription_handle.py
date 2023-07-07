@@ -58,7 +58,7 @@ class LabelSubscriptionHandler:
                 self.set_label_dockstatus,
                 10,
             )
-        elif message_type == DockStatus:
+        elif message_type == KidnapStatus:
             node.create_subscription(
                 KidnapStatus,
                 f"{node.get_namespace()}/kidnap_status",
@@ -67,7 +67,7 @@ class LabelSubscriptionHandler:
             )
         else:
             raise NotImplementedError(
-                f"{message_type} not implemented as a message type"
+                f"{type(message_type)} not implemented as a message type"
             )
 
     def set_label_kidnap_status(self, msg: KidnapStatus):

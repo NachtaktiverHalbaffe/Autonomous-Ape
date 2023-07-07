@@ -19,7 +19,7 @@ from sopias4_msgs.srv import (
     Drive,
     EmptyWithStatuscode,
     LaunchTurtlebot,
-    Register,
+    RegistryService,
     ShowDialog,
     StopMapping,
 )
@@ -564,7 +564,7 @@ class GrapficalNode(Node):
         # This service registers the namespace in the multi robot coordinator
         # inside the Sopias4 Map-server
         self.__mrc_sclient_register: Client = self.__service_client_node.create_client(
-            Register, "/register_namespace"
+            RegistryService, "/register_namespace"
         )
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
@@ -607,8 +607,8 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             f"Sending service request to register namespace {namespace}"
         )
-        request: Register.Request = Register.Request()
-        request.namespace_canditate = f"/{namespace}"
+        request: RegistryService.Request = RegistryService.Request()
+        request.name_space = f"/{namespace}"
         future = self.__mrc_sclient_register.call_async(request)
         self.get_logger().debug(
             "Service request for registering namespace sent. Waiting for response"
@@ -617,10 +617,10 @@ class GrapficalNode(Node):
         # Make sure the node itself is spinnig
         rclpy.spin_until_future_complete(self.__service_client_node, future)
 
-        response: Register.Response | None = future.result()
+        response: RegistryService.Response | None = future.result()
         if response is None:
             return False
-        elif response.statuscode == Register.Response.SUCCESS:
+        elif response.statuscode == RegistryService.Response.SUCCESS:
             return True
         else:
             # Inform user about error
@@ -629,7 +629,7 @@ class GrapficalNode(Node):
             msg_2_user.icon = ShowDialog.Request.ICON_ERROR
 
             match response.statuscode:
-                case Register.Response.COLLISION_ERROR:
+                case RegistryService.Response.COLLISION_ERROR:
                     self.get_logger().error(
                         "Couldn't register namespace: Already registered"
                     )
@@ -637,7 +637,7 @@ class GrapficalNode(Node):
                         "Namespace is already registered. Choose another one"
                     )
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
-                case Register.Response.ILLEGAL_NAMESPACE_ERROR:
+                case RegistryService.Response.ILLEGAL_NAMESPACE_ERROR:
                     self.get_logger().error(
                         "Couldn't register namespace: Namespace contains illegal characters"
                     )
@@ -645,7 +645,7 @@ class GrapficalNode(Node):
                         "Namespace contains illegal characters. Choose another one"
                     )
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
-                case Register.Response.UNKOWN_ERROR:
+                case RegistryService.Response.UNKNOWN_ERROR:
                     self.get_logger().error("Couldn't register namespace: Unkown error")
                     msg_2_user.content = "Unknown error occured"
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY

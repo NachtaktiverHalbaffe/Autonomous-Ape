@@ -3,7 +3,7 @@
 <package format="3">
   <name>sopias4_msgs</name>
   <version>0.1.0</version>
-  <description>This ROS2-package contains the framework which extends the ROS2 framework. </description>
+  <description>This ROS2-package contains the custom interface definitions for Sopias4</description>
   <maintainer email="LeMonkay.VTIT@tutanota.com">NachtaktiverHalbaffe</maintainer>
   <license>Apache-2.0</license>
 
