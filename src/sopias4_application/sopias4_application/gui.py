@@ -19,36 +19,17 @@ class GUI(GUINode):
         super().__init__(Ui_MainWindow())
 
     def connect_labels_to_subscriptions(self):
-        gui_logger = GuiLogger(self.ui.textEdit)
-        self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
-        label_battery = LabelSubscriptionHandler(self.ui.label_battery)
-        self.node.create_subscription(
-            BatteryState,
-            f"{self.node.get_namespace()}/battery_state",
-            label_battery.set_label_battery,
-            10,
-        )
-        label_vel = LabelSubscriptionHandler(self.ui.label_current_speed)
-        self.node.create_subscription(
-            WheelVels,
-            f"{self.node.get_namespace()}/wheel_vels",
-            label_vel.set_label_velocity,
-            10,
-        )
-        label_docked = LabelSubscriptionHandler(self.ui.label_docked)
-        self.node.create_subscription(
-            DockStatus,
-            f"{self.node.get_namespace()}/dock",
-            label_docked.set_label_dockstatus,
-            10,
-        )
-        label_kidnapped = LabelSubscriptionHandler(self.ui.label_kidnapped)
-        self.node.create_subscription(
-            KidnapStatus,
-            f"{self.node.get_namespace()}/kidnap_status",
-            label_kidnapped.set_label_kidnap_status,
-            10,
-        )
+        GuiLogger(widget=self.ui.textEdit, node=self.node)
+        try:
+            LabelSubscriptionHandler(
+                widget=self.ui.label_battery, node=self.node, message_type=BatteryState
+            )
+            LabelSubscriptionHandler(self.ui.label_current_speed, self.node, WheelVels)
+            LabelSubscriptionHandler(self.ui.label_docked, self.node, DockStatus)
+            LabelSubscriptionHandler(self.ui.label_kidnapped, self.node, KidnapStatus)
+
+        except Exception as e:
+            self.node.get_logger().error(f"Couldn't add LabelSubscriptionHandler: {e}")
 
     def connect_callbacks(self):
         #########################
@@ -162,6 +143,12 @@ class GUI(GUINode):
         self.ui.lineEdit_map_topic.setText("/map")
         self.ui.doubleSpinBox_free_thres.setValue(0.196)
         self.ui.doubleSpinBox_occupied_thres.setValue(0.65)
+        self.ui.label_kidnapped.setText("Unknown")
+        self.ui.label_battery.setText("Unknown")
+        self.ui.label_docked.setText("Unknown")
+        self.ui.label_is_navigating.setText("Unknown")
+        self.ui.label_kidnapped.setText("Unknown")
+        self.ui.label_current_speed.setText("Unknown")
 
     def set_initial_disabled_elements(self):
         # --- Tab: System initialization and configuration ---
@@ -191,7 +178,6 @@ class GUI(GUINode):
         self.ui.pushButton_stop_turtlebot.setEnabled(False)
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
-        self.ui.lineEdit_namespace.setText("")
         self.__enable_drive_buttons(False)
 
     def __start_mapping(self):

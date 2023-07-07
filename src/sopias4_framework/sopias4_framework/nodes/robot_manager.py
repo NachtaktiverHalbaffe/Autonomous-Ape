@@ -36,7 +36,6 @@ class RobotManager(Node):
     this node acts as an interface between the system and the user or GUI. Running tasks is done with the help of services, so this node entirely communicates via ROS2 services.
 
     Attributes:
-        other_robots (list<Robot>): A list containing the state of the other robots
         drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action "drive_to_pos" (remember to add the namespace) and\
                                                                         takes a Navigation2 Goal. It's basically a wrapper to pass the action to the Nav2 stack
         drive_service (Service):  A service to send a drive command to the Turtlebot. The service can be accessed via the service "<namespace>/drive"
@@ -137,7 +136,6 @@ class RobotManager(Node):
         self, pose: DriveToPos.Request, response: DriveToPos.Response
     ) -> DriveToPos.Response:
         """
-         :meta public:
         Callback for a service to let the Turtlebot drive to a given goal position. It's basically a wrapper for the corresponding \
         nav2 action. Its a nice2have service, but navigations goals can also be send directly via the corresponding nav2 action called\
         "navigate_to_pose"
@@ -190,7 +188,6 @@ class RobotManager(Node):
         self, request_data: Drive.Request, response_data: Drive.Response
     ) -> Drive.Response:
         """ 
-         :meta public:
         Callback function for a service which sends a driving command to the Turtlebot. It basically takes an Twist-Message and publishes it 
         to the right topic with the right namespace.
 
@@ -227,7 +224,6 @@ class RobotManager(Node):
         response_data: LaunchTurtlebot.Response,
     ) -> LaunchTurtlebot.Response:
         """
-        :meta public:
         Callback function for a service which launches all nodes related to the robot itself. It basically launches AMCL, Turtlebot4, Rviz2 \
         and Navigation 2 node. If the usage of simulation is specified, the a launch description is generated which runs everything inside \
         a simulation, otherwise a launch description is generated which runs the real world robot. The corresponding launch description \
@@ -281,7 +277,6 @@ class RobotManager(Node):
         response_data: EmptyWithStatuscode.Response,
     ) -> EmptyWithStatuscode.Response:
         """
-        :meta public:
         Callback function for a service which stops all nodes related to the robot itself. It basically kills each node except the 
         robot_manager und gui node.
 
@@ -332,7 +327,6 @@ class RobotManager(Node):
         response_data: EmptyWithStatuscode.Response,
     ) -> EmptyWithStatuscode.Response:
         """
-        :meta public:
         Callback function for a service which starts the mapping. This is done by setting the amcl node to an \
         inactive state so it doesn't operate anymore and starting the slam node.
 
@@ -396,7 +390,6 @@ class RobotManager(Node):
         response_data: StopMapping.Response,
     ) -> StopMapping.Response:
         """
-        :meta public:
         Callback function for a service which stops the mapping. This is done by setting the amcl node to an \
         active state so it does operate again and stopping the slam node. Furthermore, the map is saved on Sopias4 Map-Server
 
@@ -536,7 +529,6 @@ class RobotManager(Node):
 
     def destroy_node(self):
         """
-        self.__service_client_node.destroy_node()
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
         :meta private:
         """
@@ -568,6 +560,7 @@ class RobotManager(Node):
 def main(args=None):
     """
     Start the node. It basically initializes the ROS2 context and creates a instance of RobotManager
+    :meta private:
     """
     # Initialize node context
     rclpy.init(args=args)

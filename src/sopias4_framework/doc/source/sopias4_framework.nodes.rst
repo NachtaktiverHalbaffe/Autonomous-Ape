@@ -12,6 +12,14 @@ sopias4\_framework.nodes.gui\_node module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.nodes.robot\_manager module
+----------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.robot_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

@@ -25,7 +25,7 @@ explicit MultiRobotCoordinator(const std::string & nodeName) : Node(nodeName){
 	set_robot_path_service = create_service<sopias4_msgs::srv::SetRobotPath>("set_robot_path", std::bind(&MultiRobotCoordinator::set_robot_path_callback, this, std::placeholders::_1, std::placeholders::_2));
 
     RCLCPP_INFO(logger, "Started node");
-	logger.set_level(rclcpp::Logger::Level::Debug);
+	logger.set_level(rclcpp::Logger::Level::Info);
 }
 private:
 // All registered namespaces

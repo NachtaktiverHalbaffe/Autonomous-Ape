@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sopias4_framework.tools.scripts.generate_ui &mdash; Sopias4 Framework 0.1 documentation</title>
+  <title>sopias4_framework.tools.ros2.drive_tools &mdash; Sopias4 Framework 0.1 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/collapsible-lists/css/tree_view.css" type="text/css" />
@@ -171,7 +171,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">sopias4_framework.tools.scripts.generate_ui</li>
+      <li class="breadcrumb-item active">sopias4_framework.tools.ros2.drive_tools</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -180,72 +180,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for sopias4_framework.tools.scripts.generate_ui</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This scripts automatically generates the Python Ui Object from a QT Designer Ui file. For running, use</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">getopt</span>
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+  <h1>Source code for sopias4_framework.tools.ros2.drive_tools</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">rclpy</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Twist</span>
+<span class="kn">from</span> <span class="nn">rclpy.node</span> <span class="kn">import</span> <span class="n">Node</span>
 
 
-<span class="c1"># Generate Sphinx files (Python)</span>
-<div class="viewcode-block" id="generate_ui_object"><a class="viewcode-back" href="../../../../sopias4_framework.tools.scripts.html#sopias4_framework.tools.scripts.generate_ui.generate_ui_object">[docs]</a><span class="k">def</span> <span class="nf">generate_ui_object</span><span class="p">(</span>
-    <span class="n">path_ui_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path_dst</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ui_object.py&quot;</span>
-<span class="p">):</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="s2">&quot;python3&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;PyQt5.uic.pyuic&quot;</span><span class="p">,</span>
-            <span class="n">path_ui_file</span><span class="p">,</span>
-            <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_dst</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;colcon&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">])</span></div>
+<div class="viewcode-block" id="generate_twist_msg"><a class="viewcode-back" href="../../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.drive_tools.generate_twist_msg">[docs]</a><span class="k">def</span> <span class="nf">generate_twist_msg</span><span class="p">(</span><span class="n">direction</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vel_rel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Twist</span><span class="p">:</span>
+    <span class="n">drive_msg</span> <span class="o">=</span> <span class="n">Twist</span><span class="p">()</span>
 
+    <span class="k">if</span> <span class="n">vel_rel</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">vel_rel</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wring velocity given. Make sure it&#39;s between 0 and 1&quot;</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">inputfile</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">outputfile</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">file_name</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">&quot;hi:o:n:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;ifile=&quot;</span><span class="p">,</span> <span class="s2">&quot;ofile=&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-    <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">GetoptError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="s2">&quot;generate_ui.py -i &lt;inputfile&gt; -o &lt;path of outputfile&gt; -n &lt;name of outputfile&gt;&quot;</span>
-        <span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">opt</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s2">&quot;-h&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;generate_ui.py -i &lt;inputfile&gt; -o &lt;path of outputfile&gt; -n &lt;name of outputfile&gt;&quot;</span>
+    <span class="k">match</span> <span class="n">direction</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">&quot;forward&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;backward&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;rotate_left&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">angular</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;rotate_right&quot;</span><span class="p">:</span>
+            <span class="n">drive_msg</span><span class="o">.</span><span class="n">angular</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.34</span> <span class="o">*</span> <span class="n">vel_rel</span>
+        <span class="k">case</span> <span class="s2">&quot;stop&quot;</span><span class="p">:</span>
+            <span class="c1"># drive_msgs is already at 0 speed</span>
+            <span class="k">pass</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Wrong direction given. Only &quot;forward&quot;, &quot;backward&quot;, &quot;left&quot;, &quot;right&quot;, &quot;rotate_left&quot; and &quot;rotate_right&quot; possible.&#39;</span>
             <span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;--ifile&quot;</span><span class="p">):</span>
-            <span class="n">inputfile</span> <span class="o">=</span> <span class="n">arg</span>
-        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--ifile&quot;</span><span class="p">):</span>
-            <span class="n">outputfile</span> <span class="o">=</span> <span class="n">arg</span>
-        <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">):</span>
-            <span class="n">file_name</span> <span class="o">=</span> <span class="n">arg</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inputfile</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input file </span><span class="si">{</span><span class="n">inputfile</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputfile</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output path </span><span class="si">{</span><span class="n">outputfile</span><span class="si">}</span><span class="s2"> for generated ui file doesn&#39;t exist&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">generate_ui_object</span><span class="p">(</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">generate_ui_object</span><span class="p">(</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">drive_msg</span></div>
 </pre></div>
 
            </div>

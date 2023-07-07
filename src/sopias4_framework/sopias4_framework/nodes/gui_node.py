@@ -1,25 +1,18 @@
+#!/usr/bin/env python3
 import abc
-import multiprocessing
-import queue
 import random
 import string
 import time
-from multiprocessing import Process
 from threading import Event, Thread
 
-import launch_ros
 import rclpy
 from geometry_msgs.msg import Twist
-from launch import LaunchDescription, LaunchService
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
-from sopias4_framework.tools.elevate_func_to_main_func import (
-    elevate_func_to_main_thread,
-)
 from sopias4_framework.tools.ros2 import drive_tools
 
 from sopias4_msgs.srv import (

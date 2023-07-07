@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sopias4_framework.nodes.robot_manager &mdash; Sopias4 Framework 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../../../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Sopias4 Framework
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">sopias4_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../sopias4_framework.html">sopias4_framework package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../sopias4_framework.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../sopias4_framework.nodes.html">sopias4_framework.nodes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#module-sopias4_framework.nodes.gui_node">sopias4_framework.nodes.gui_node module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode"><code class="docutils literal notranslate"><span class="pre">GUINode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.ui"><code class="docutils literal notranslate"><span class="pre">GUINode.ui</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.namespace</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.turtlebot_running"><code class="docutils literal notranslate"><span class="pre">GUINode.turtlebot_running</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.is_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.is_mapping</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.display_dialog_signal"><code class="docutils literal notranslate"><span class="pre">GUINode.display_dialog_signal</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.showed_dialog_signal"><code class="docutils literal notranslate"><span class="pre">GUINode.showed_dialog_signal</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.connect_callbacks"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_callbacks()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.set_default_values"><code class="docutils literal notranslate"><span class="pre">GUINode.set_default_values()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.set_initial_disabled_elements"><code class="docutils literal notranslate"><span class="pre">GUINode.set_initial_disabled_elements()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.connect_labels_to_subscriptions"><code class="docutils literal notranslate"><span class="pre">GUINode.connect_labels_to_subscriptions()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GUINode.register_namespace()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.launch_robot"><code class="docutils literal notranslate"><span class="pre">GUINode.launch_robot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.stop_robot"><code class="docutils literal notranslate"><span class="pre">GUINode.stop_robot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.start_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.start_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.stop_mapping"><code class="docutils literal notranslate"><span class="pre">GUINode.stop_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GUINode.drive"><code class="docutils literal notranslate"><span class="pre">GUINode.drive()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode"><code class="docutils literal notranslate"><span class="pre">GrapficalNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.node_name"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.node_name</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.namespace</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.register_namespace"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.register_namespace()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.launch_turtlebot"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.launch_turtlebot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.stop_turtlebot"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.stop_turtlebot()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.start_mapping"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.start_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.stop_mapping"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.stop_mapping()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.drive"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.drive()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.gui_node.GrapficalNode.destroy_node"><code class="docutils literal notranslate"><span class="pre">GrapficalNode.destroy_node()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#module-sopias4_framework.nodes.robot_manager">sopias4_framework.nodes.robot_manager module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager"><code class="docutils literal notranslate"><span class="pre">RobotManager</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.drive_to_pos_action"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_to_pos_action</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.drive_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_service</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.launch_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.launch_service</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.stop_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.stop_service</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.start_mapping_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.start_mapping_service</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.stop_mapping_service"><code class="docutils literal notranslate"><span class="pre">RobotManager.stop_mapping_service</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.destroy_node"><code class="docutils literal notranslate"><span class="pre">RobotManager.destroy_node()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#module-sopias4_framework.nodes">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../sopias4_framework.tools.html">sopias4_framework.tools package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.tools.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html">sopias4_framework.tools.gui package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#module-sopias4_framework.tools.gui.gui_logger">sopias4_framework.tools.gui.gui_logger module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#sopias4_framework.tools.gui.gui_logger.GuiLogger"><code class="docutils literal notranslate"><span class="pre">GuiLogger</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#module-sopias4_framework.tools.gui.label_subscription_handle">sopias4_framework.tools.gui.label_subscription_handle module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#sopias4_framework.tools.gui.label_subscription_handle.LabelSubscriptionHandler"><code class="docutils literal notranslate"><span class="pre">LabelSubscriptionHandler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.gui.html#module-sopias4_framework.tools.gui">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html">sopias4_framework.tools.ros2 package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2.drive_tools">sopias4_framework.tools.ros2.drive_tools module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.drive_tools.generate_twist_msg"><code class="docutils literal notranslate"><span class="pre">generate_twist_msg()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html">sopias4_framework.tools.scripts package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#module-sopias4_framework.tools.scripts.generate_docs">sopias4_framework.tools.scripts.generate_docs module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#sopias4_framework.tools.scripts.generate_docs.generate_docs"><code class="docutils literal notranslate"><span class="pre">generate_docs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#module-sopias4_framework.tools.scripts.generate_ui">sopias4_framework.tools.scripts.generate_ui module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#sopias4_framework.tools.scripts.generate_ui.generate_ui_object"><code class="docutils literal notranslate"><span class="pre">generate_ui_object()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.scripts.html#module-sopias4_framework.tools.scripts">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.tools.html#module-sopias4_framework.tools">Module contents</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.tools.html#tools">Tools</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.html#scripts">Scripts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../sopias4_framework.html#module-sopias4_framework">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Sopias4 Framework</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sopias4_framework.nodes.robot_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sopias4_framework.nodes.robot_manager</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">import</span> <span class="nn">rclpy</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Twist</span>
+<span class="kn">from</span> <span class="nn">lifecycle_msgs.msg</span> <span class="kn">import</span> <span class="n">Transition</span>
+<span class="kn">from</span> <span class="nn">lifecycle_msgs.srv</span> <span class="kn">import</span> <span class="n">ChangeState</span>
+<span class="kn">from</span> <span class="nn">nav2_msgs.action</span> <span class="kn">import</span> <span class="n">NavigateToPose</span>
+<span class="kn">from</span> <span class="nn">nav2_msgs.srv</span> <span class="kn">import</span> <span class="n">SaveMap</span>
+<span class="kn">from</span> <span class="nn">rclpy.action</span> <span class="kn">import</span> <span class="n">ActionClient</span><span class="p">,</span> <span class="n">ActionServer</span>
+<span class="kn">from</span> <span class="nn">rclpy.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">rclpy.node</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">rclpy.service</span> <span class="kn">import</span> <span class="n">Service</span>
+
+<span class="kn">from</span> <span class="nn">sopias4_msgs.srv</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Drive</span><span class="p">,</span>
+    <span class="n">DriveToPos</span><span class="p">,</span>
+    <span class="n">EmptyWithStatuscode</span><span class="p">,</span>
+    <span class="n">GetNamespaces</span><span class="p">,</span>
+    <span class="n">GetRobotIdentity</span><span class="p">,</span>
+    <span class="n">GetRobots</span><span class="p">,</span>
+    <span class="n">LaunchTurtlebot</span><span class="p">,</span>
+    <span class="n">ShowDialog</span><span class="p">,</span>
+    <span class="n">StopMapping</span><span class="p">,</span>
+    <span class="n">Unregister</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="RobotManager"><a class="viewcode-back" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager">[docs]</a><span class="k">class</span> <span class="nc">RobotManager</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A central aspect of the Robot Manager is to initialise and configure SLAM, AMCL, Navigation2 and Turtlebot4. The main task is to assign the namespace of the robot\</span>
+<span class="sd">    to the nodes and their topics and to start them if necessary. This allows them to be uniquely identified in a multi-robot scenario. Apart from initialization and configuration,\</span>
+<span class="sd">    this node acts as an interface between the system and the user or GUI. Running tasks is done with the help of services, so this node entirely communicates via ROS2 services.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action &quot;drive_to_pos&quot; (remember to add the namespace) and\</span>
+<span class="sd">                                                                        takes a Navigation2 Goal. It&#39;s basically a wrapper to pass the action to the Nav2 stack</span>
+<span class="sd">        drive_service (Service):  A service to send a drive command to the Turtlebot. The service can be accessed via the service &quot;&lt;namespace&gt;/drive&quot;</span>
+<span class="sd">        launch_service (Service): A service to start/connect to the Turtlebot. The service can be accessed via the service &quot;&lt;namespace&gt;/launch&quot;</span>
+<span class="sd">        stop_service (Service): A service to stop/disconnect from the Turtlebot. The service can be accessed via the service &quot;&lt;namespace&gt;/stop&quot;</span>
+<span class="sd">        start_mapping_service (Service): A service to start the mapping. The service can be accessed via the service &quot;&lt;namespace&gt;/start_mapping&quot;. It uses the lifecycles in the background to set the slam node into an active state</span>
+<span class="sd">        stop_mapping_service (Service): A service to stop the mapping. The service can be accessed via the service &quot;&lt;namespace&gt;/stop_mapping&quot;. It uses the lifecycles in the background to set the slam node into an inactive state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO Keep doc up to date</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="o">=</span><span class="s2">&quot;robot_manager&quot;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other_robots</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__goal_handle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__result_future</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># ------------------- Service server --------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drive_to_pos_action</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">DriveToPos</span><span class="p">,</span> <span class="s2">&quot;drive_to_pos&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drive__to_pos</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drive_serive</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">Drive</span><span class="p">,</span> <span class="s2">&quot;drive&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drive_callback</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launch_service</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">LaunchTurtlebot</span><span class="p">,</span> <span class="s2">&quot;launch&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__launch_robot</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_service</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">EmptyWithStatuscode</span><span class="p">,</span> <span class="s2">&quot;stop&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stop_robot</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_mapping_service</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">EmptyWithStatuscode</span><span class="p">,</span> <span class="s2">&quot;start_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_mapping</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_mapping_service</span><span class="p">:</span> <span class="n">Service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span>
+            <span class="n">StopMapping</span><span class="p">,</span> <span class="s2">&quot;stop_mapping&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stop_mapping</span>
+        <span class="p">)</span>
+
+        <span class="c1"># ------------------- Service clients--------------------</span>
+        <span class="c1"># Create own sub node for service clients so they can spin independently</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">:</span> <span class="n">Node</span> <span class="o">=</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="s2">&quot;_robot_manager_service_clients&quot;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+        <span class="c1"># This service requests the states of the robot from the multi robot coordinator inside Sopias4 Map-Server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_robots</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+            <span class="n">GetRobots</span><span class="p">,</span> <span class="s2">&quot;/get_robots&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_robot_identity</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+                <span class="n">GetRobotIdentity</span><span class="p">,</span> <span class="s2">&quot;/get_robot_identity&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># This service requests all registered namespaces of multi robot coordinator inside Sopias4 Map-Server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_namespaces</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span><span class="n">GetNamespaces</span><span class="p">,</span> <span class="s2">&quot;/get_namespaces&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state</span>
+        <span class="c1"># (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__amcl_sclient_lifecycle</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+                <span class="n">ChangeState</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span><span class="si">}</span><span class="s2">/amcl/change_state&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># This action lets the robot drive autonomously to an goal position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nav2_aclient_driveToPos</span><span class="p">:</span> <span class="n">ActionClient</span> <span class="o">=</span> <span class="n">ActionClient</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">NavigateToPose</span><span class="p">,</span> <span class="s2">&quot;navigate_to_pose&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ms_sclient_saveMap</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+            <span class="n">SaveMap</span><span class="p">,</span> <span class="s2">&quot;map_server/save_map&quot;</span>
+        <span class="p">)</span>
+        <span class="c1">#  This service allows the robot manager to show a dialog with which the user can interact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="p">:</span> <span class="n">Client</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+                <span class="n">ShowDialog</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span><span class="si">}</span><span class="s2">/show_dialog&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc__sclient__unregister</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span>
+            <span class="n">Unregister</span><span class="p">,</span> <span class="s2">&quot;/unregister_namespace&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># ---------- Publishers ----------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cmd_vel_pub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span>
+            <span class="n">Twist</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span><span class="si">}</span><span class="s2">/cmd_vel&quot;</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="p">)</span>
+
+        <span class="c1"># ---------- Shell processes to run nodes ----------</span>
+        <span class="c1"># The necessary turtlebot and mapping nodes are run inside shell processes via subprocess.popen,</span>
+        <span class="c1"># because so they can be shutdown cleanly during runtime and they run non-blocking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Log level 10 is debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Started node&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__drive__to_pos</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pose</span><span class="p">:</span> <span class="n">DriveToPos</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">DriveToPos</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DriveToPos</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback for a service to let the Turtlebot drive to a given goal position. It&#39;s basically a wrapper for the corresponding \</span>
+<span class="sd">        nav2 action. Its a nice2have service, but navigations goals can also be send directly via the corresponding nav2 action called\</span>
+<span class="sd">        &quot;navigate_to_pose&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pose (DriveToPose.Request): The data from the service request. Contains the goal pose. \</span>
+<span class="sd">                                                              Look at service definition in srv/DriveToPos.srv</span>
+<span class="sd">            response (DriveToPos.Response):  A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                      Look at service definition in srv/DriveToPos.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            DriveToPos.Response: The statuscode of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Generate action goal</span>
+        <span class="n">goal_msg</span> <span class="o">=</span> <span class="n">NavigateToPose</span><span class="o">.</span><span class="n">Goal</span><span class="p">()</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span> <span class="o">=</span> <span class="n">pose</span><span class="o">.</span><span class="n">goal</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">behavior_tree</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Wait until action server is up</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nav2_aclient_driveToPos</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">(</span><span class="n">timeout_sec</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; Waiting for nav2 action server startup...&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Send action goal to action server</span>
+        <span class="n">send_goal_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nav2_aclient_driveToPos</span><span class="o">.</span><span class="n">send_goal_async</span><span class="p">(</span>
+            <span class="n">goal_msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feedbackCallback</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Wait until the goal is either accepted or rejected</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">send_goal_future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__goal_handle</span> <span class="o">=</span> <span class="n">send_goal_future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+        <span class="c1"># Check if goal was accepted and setting statuscode for response</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__goal_handle</span><span class="o">.</span><span class="n">accepted</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">DriveToPos</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">GOAL_REJECTED</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__result_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__goal_handle</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">DriveToPos</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">def</span> <span class="nf">_feedbackCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">NavigateToPose</span><span class="o">.</span><span class="n">Feedback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Feedback callback for the nav2 action client. Currently unused</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__drive_callback</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request_data</span><span class="p">:</span> <span class="n">Drive</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response_data</span><span class="p">:</span> <span class="n">Drive</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Drive</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Callback function for a service which sends a driving command to the Turtlebot. It basically takes an Twist-Message and publishes it </span>
+<span class="sd">        to the right topic with the right namespace.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request_data (Drive.Request): The data from the request. Look at service definition in srv/Drive.srv</span>
+<span class="sd">            response_data (Drive.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                    Look at service definition in srv/Drive.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Drive.Response: A response which contains the statuscode of the operation\</span>
+<span class="sd">                                        Look at service definition in srv/Drive.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cmd_vel_pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">request_data</span><span class="o">.</span><span class="n">twist</span><span class="p">)</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">Drive</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1">#  Error message for user in Case something goes wrong</span>
+            <span class="n">request_informUser</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">request_informUser</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t send drive command&quot;</span>
+            <span class="n">request_informUser</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_ERROR</span>
+            <span class="n">request_informUser</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">CONFIRM</span>
+            <span class="n">request_informUser</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t send drive command. Check if the Turtlebot4</span><span class="se">\</span>
+<span class="s2">                        nodes inside Sopias4 Application are running&quot;</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">Drive</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">UNKNOWN_ERROR</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request_informUser</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__launch_robot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request_data</span><span class="p">:</span> <span class="n">LaunchTurtlebot</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span>
+        <span class="n">response_data</span><span class="p">:</span> <span class="n">LaunchTurtlebot</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LaunchTurtlebot</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for a service which launches all nodes related to the robot itself. It basically launches AMCL, Turtlebot4, Rviz2 \</span>
+<span class="sd">        and Navigation 2 node. If the usage of simulation is specified, the a launch description is generated which runs everything inside \</span>
+<span class="sd">        a simulation, otherwise a launch description is generated which runs the real world robot. The corresponding launch description \</span>
+<span class="sd">        is then run inside a own process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request_data (LaunchTurtlebot.Request): The data from the request. Look at service definition in srv/LaunchTurtlebot.srv</span>
+<span class="sd">            response_data (Launchturtlebot.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                    Look at service definition in srv/LaunchTurtlebot.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            LaunchTurtlebot.Response: A response which contains the statuscode of the operation\</span>
+<span class="sd">                                                            Look at service definition in srv/LaunchTurtlebot.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Got service request to launch necessary turtlebot nodes&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Launch launchfile</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ros2 launch sopias4_framework bringup_turtlebot.launch.py namespace:=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span><span class="si">}</span><span class="s1"> use_simulation:=</span><span class="si">{</span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">request_data</span><span class="o">.</span><span class="n">use_simulation</span><span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Couldn&#39;t launch turtlebot nodes: Nodes already running&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># Robot is already running</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_RUNNING</span>
+
+            <span class="c1">#  Inform user</span>
+            <span class="n">dialog_request</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Turtlebot already running&quot;</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;The Turtlebot is already running and doesn&#39;t need to be started&quot;</span>
+            <span class="p">)</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_INFO</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">CONFIRM</span>
+
+            <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">dialog_request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+            <span class="c1"># Because we only confirm the user, we doen&#39;t need to check the response</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully started turtlebot nodes&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__stop_robot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">:</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span>
+        <span class="n">response_data</span><span class="p">:</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for a service which stops all nodes related to the robot itself. It basically kills each node except the </span>
+<span class="sd">        robot_manager und gui node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request_data (EmptyWithStatuscode.Request): The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                    Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation. \</span>
+<span class="sd">                                                                    Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Kill turtlebot nodes by killing the process which runs these</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Got service rquest to stop turtlebot nodes&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Shutting down turtlebot nodes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Couldn&#39;t shutdown turtlebot nodes: Nodes already stopped&quot;</span>
+            <span class="p">)</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_STOPPED</span>
+            <span class="c1">#  Inform user</span>
+            <span class="n">dialog_request</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Turtlebot already stopped&quot;</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;The Turtlebot is already stopped. Was it stopped before or by another component?&quot;</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_ERROR</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">CONFIRM</span>
+
+            <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">dialog_request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
+            <span class="c1"># Because we only confirm the user, we doen&#39;t need to check the response</span>
+
+        <span class="c1"># Kill slam nodes by killing the process which runs these. Because slam is not running every time,</span>
+        <span class="c1"># no error status response is generated when node is already stopped</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Shutting down mapping nodes if running&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully shutdown turtlebot nodes&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__start_mapping</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">:</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span>
+        <span class="n">response_data</span><span class="p">:</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for a service which starts the mapping. This is done by setting the amcl node to an \</span>
+<span class="sd">        inactive state so it doesn&#39;t operate anymore and starting the slam node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request_data (EmptyWithStatuscode.Request): The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                    Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \</span>
+<span class="sd">                                                                    Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Got service request to start mapping&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ------ Set AMCL in Inactive state -------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting AMCL to inactive state&quot;</span><span class="p">)</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">Transition</span><span class="o">.</span><span class="n">TRANSITION_DEACTIVATE</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__amcl_sclient_lifecycle</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
+
+            <span class="n">response</span><span class="p">:</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">UNKNOWN_ERROR</span>
+            <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t set AMCL node in inactive state&quot;</span><span class="p">)</span>
+                <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_ACTIVE</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t set AMCL node in inactive state: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ------ start slam toolbox ---------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting slam nodes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ros2 launch sopias4_framework slam.launch.py namespace:=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Couldn&#39;t start SLAM nodes: Nodes already running&quot;</span>
+            <span class="p">)</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_RUNNING</span>
+            <span class="c1">#  Error message for user in Case something goes wrong</span>
+            <span class="n">msg_request</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">msg_request</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t start mapping&quot;</span>
+            <span class="n">msg_request</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_ERROR</span>
+            <span class="n">msg_request</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">CONFIRM</span>
+            <span class="n">msg_request</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t start mapping. Check if the Turtlebot4 Nodes inside Sopias4 Application are running and thats theres no mapping already in progress&quot;</span>
+            <span class="n">future_dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">msg_request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future_dialog</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully started mapping&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__stop_mapping</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request_data</span><span class="p">:</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span>
+        <span class="n">response_data</span><span class="p">:</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for a service which stops the mapping. This is done by setting the amcl node to an \</span>
+<span class="sd">        active state so it does operate again and stopping the slam node. Furthermore, the map is saved on Sopias4 Map-Server</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request_data (StopMappingRequest): The data from the request. Look at service definition in srv/StopMapping.srv</span>
+<span class="sd">            response_data (StopMapping.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                    Look at service definition in srv/StopMapping.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            StopMapping.Response: A response which contains the statuscode of the operation.  \</span>
+<span class="sd">                                                     Look at service definition in srv/StopMapping.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Got service request to stop mapping&quot;</span><span class="p">)</span>
+        <span class="c1"># ------ Stop slam toolbox ---------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Stopping slam nodes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t stop slam nodes: Nodes already stopped&quot;</span><span class="p">)</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_STOPPED</span>
+
+        <span class="c1"># ------ Set AMCL in active state -------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting AMCL in active state&quot;</span><span class="p">)</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">Transition</span><span class="o">.</span><span class="n">TRANSITION_ACTIVATE</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__amcl_sclient_lifecycle</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">ChangeState</span><span class="o">.</span><span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dialog_request</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t stop mapping&quot;</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_INFO</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">CONFIRM_RETRY</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;AMCL couldn&#39;t be set in active state: Unkown Error&quot;</span>
+            <span class="p">)</span>
+            <span class="n">future_dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">dialog_request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future_dialog</span><span class="p">)</span>
+
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">UNKNOWN_ERROR</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Couldn&#39;t set AMCL in active state: Node already active&quot;</span>
+            <span class="p">)</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">EmptyWithStatuscode</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">ALREADY_ACTIVE</span>
+            <span class="k">return</span> <span class="n">response_data</span>
+
+        <span class="c1">#  Save map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving map&quot;</span><span class="p">)</span>
+        <span class="n">response_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__save_map</span><span class="p">(</span><span class="n">request_data</span><span class="p">,</span> <span class="n">response_data</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully stopped mapping&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__save_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">save_params</span><span class="p">:</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">response_data</span><span class="p">:</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles the map saving process itself. If an error occurs, it informs the user and ask if it should be retried</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \</span>
+<span class="sd">                                                                                                Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \</span>
+<span class="sd">                                                                    Look at service definition in srv/EmptyWithStatusCode.srv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">save_map_requ</span> <span class="o">=</span> <span class="n">SaveMap</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">save_map_requ</span><span class="o">.</span><span class="n">map_topic</span> <span class="o">=</span> <span class="n">save_params</span><span class="o">.</span><span class="n">map_topic</span>
+        <span class="n">save_map_requ</span><span class="o">.</span><span class="n">map_url</span> <span class="o">=</span> <span class="n">save_params</span><span class="o">.</span><span class="n">map_name</span>
+        <span class="n">save_map_requ</span><span class="o">.</span><span class="n">map_mode</span> <span class="o">=</span> <span class="n">save_params</span><span class="o">.</span><span class="n">map_mode</span>
+        <span class="n">save_map_requ</span><span class="o">.</span><span class="n">free_thresh</span> <span class="o">=</span> <span class="n">save_params</span><span class="o">.</span><span class="n">free_thres</span>
+        <span class="n">save_map_requ</span><span class="o">.</span><span class="n">occupied_thresh</span> <span class="o">=</span> <span class="n">save_params</span><span class="o">.</span><span class="n">occupied_thres</span>
+        <span class="c1"># save_map_requ.image_format = save_params.image_format</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Send service request to save map to Sopias4 Map-Server&quot;</span>
+        <span class="p">)</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ms_sclient_saveMap</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">save_map_requ</span><span class="p">)</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">SaveMap</span><span class="o">.</span><span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="c1"># Check if map was saved successfully</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">UNKNOWN_ERROR</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SUCCESS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SAVING_FAILED</span>
+
+            <span class="c1">#  Inform user</span>
+            <span class="n">dialog_request</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Saving map failed&quot;</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;The map couldn&#39;t be saved. Check Sopias4 Map-Server&quot;</span>
+            <span class="p">)</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">ICON_ERROR</span>
+            <span class="n">dialog_request</span><span class="o">.</span><span class="n">interaction_options</span> <span class="o">=</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">IGNORE_RETRY</span>
+
+            <span class="n">future_dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gui_sclient_showDialog</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">dialog_request</span><span class="p">)</span>
+            <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="p">,</span> <span class="n">future_dialog</span><span class="p">)</span>
+
+            <span class="c1"># User chose to retry operation</span>
+            <span class="n">user_response</span> <span class="o">=</span> <span class="n">future_dialog</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">user_response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SAVING_FAILED</span>
+            <span class="k">elif</span> <span class="n">user_response</span><span class="o">.</span><span class="n">selected_option</span> <span class="o">==</span> <span class="n">ShowDialog</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">RETRY</span><span class="p">:</span>
+                <span class="c1">#  Call function recursively to retry save operation</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__save_map</span><span class="p">(</span><span class="n">save_params</span><span class="p">,</span> <span class="n">response_data</span><span class="p">)</span>
+            <span class="c1">#  User chose to ignore error</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">response_data</span><span class="o">.</span><span class="n">statuscode</span> <span class="o">=</span> <span class="n">StopMapping</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">SAVING_FAILED</span>
+
+        <span class="k">return</span> <span class="n">response_data</span>
+
+    <span class="k">def</span> <span class="nf">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shell_process</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shutdown a process which runs over a shell i.e. was called with `subprocess.Popen()`</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shell_process (Popen or None): The shell process which should be should down</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Indicating if process was shutdown successfully or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">shell_process</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shell_process</span><span class="o">.</span><span class="n">send_signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">)</span>
+            <span class="n">shell_process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">shell_process</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="RobotManager.destroy_node"><a class="viewcode-back" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.destroy_node">[docs]</a>    <span class="k">def</span> <span class="nf">destroy_node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients</span>
+<span class="sd">        :meta private:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Shutting down node&quot;</span><span class="p">)</span>
+        <span class="c1"># Unregister namespace</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">Unregister</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">name_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc__sclient__unregister</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="c1"># Release service clients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_namespaces</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_robot_identity</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mrc_sclient_robots</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__amcl_sclient_lifecycle</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nav2_aclient_driveToPos</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__service_client_node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+        <span class="c1"># Release services</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launch_service</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_service</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_mapping_service</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_mapping_service</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drive_to_pos_action</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="c1"># Shutdown processes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__turtlebot_shell_process</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown_shell_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mapping_shell_process</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start the node. It basically initializes the ROS2 context and creates a instance of RobotManager</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize node context</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="c1"># Create ROS2 Node</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">RobotManager</span><span class="p">()</span>
+    <span class="c1"># Run node</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="c1"># Cleanup</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Apache-2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
