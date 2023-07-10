@@ -1,3 +1,58 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.9.1" xml:lang="en-US">
+  <compound refid="classplugin__bridges_1_1LayerBridge" kind="class"><name>plugin_bridges::LayerBridge</name>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a213b6bbd1d10699c6d1b8bea0eb67059" kind="variable"><name>last_min_x_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a1c13d5e517f5907b3c7c4d277b330cb1" kind="variable"><name>last_min_y_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a3e891e0e00ffe526b35b5fa2e8d15f80" kind="variable"><name>last_max_x_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1aa35034cd599709921f71849611fc9edb" kind="variable"><name>last_max_y_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a20fc735425374806861fc672eca381a8" kind="variable"><name>need_recalculation_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a1680f63a5fbc140b72ea8faf9a5732e7" kind="variable"><name>plugin_name_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a73a57187d55ab542cc5f5eb0c9fc50d2" kind="variable"><name>client_</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1ab17e775c8adc75820c1e15e23432b227" kind="function"><name>LayerBridge</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a35a423a0c981305af1deb4b1040666c7" kind="function"><name>onInitialize</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a1da83362598ee40374f6cb1432311a24" kind="function"><name>updateBounds</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1abe43b948789ff54b1c76d524159981bb" kind="function"><name>updateCosts</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a1de28a253da8b73824c1abd46d0317e8" kind="function"><name>reset</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1a35eb810cb30c462f111453c3b655c7e7" kind="function"><name>onFootprintChanged</name></member>
+    <member refid="classplugin__bridges_1_1LayerBridge_1acfac5188dedabb4de3d938553baf067c" kind="function"><name>isClearable</name></member>
+  </compound>
+  <compound refid="classplugin__bridges_1_1PlannerBridge" kind="class"><name>plugin_bridges::PlannerBridge</name>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1af373a04ae54999952e0f752ff9eb7469" kind="variable"><name>tf_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1aa38b62684b1c22cedf84ccc6abd2cba4" kind="variable"><name>node_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a31b66078802a0a6d5e5b4568b10efb43" kind="variable"><name>costmap_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a1a452ac5c46928af142127b1e946040c" kind="variable"><name>global_frame_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a04f776473c1b6ccdd5af36a046fb80e5" kind="variable"><name>name_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a9a97ee3bbb0643a218bdec8cbed1b6fb" kind="variable"><name>interpolation_resolution_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1aeaaa6875804cf1d2496f3e3af8685342" kind="variable"><name>plugin_name_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a957cc2862e5928ac1cd0a1eb2f968989" kind="variable"><name>client_</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a9803e365c6d9423be7ba72248498fc25" kind="function"><name>PlannerBridge</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1af14e6f44d6869abef23f05977ee8d01d" kind="function"><name>~PlannerBridge</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1afddad8c080565aa8708b4e8842c9a735" kind="function"><name>configure</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1af2901476f8583776c89e978770a3fe19" kind="function"><name>cleanup</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1ada445dac75b3262d4cc261d983b6da02" kind="function"><name>activate</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1a5efd0dbc1e0a66a9a0165c29fa07d4f6" kind="function"><name>deactivate</name></member>
+    <member refid="classplugin__bridges_1_1PlannerBridge_1aafff0207264528759aae206b0f84b5b4" kind="function"><name>createPlan</name></member>
+  </compound>
+  <compound refid="namespacenav2__core" kind="namespace"><name>nav2_core</name>
+  </compound>
+  <compound refid="namespacenav2__costmap__2d" kind="namespace"><name>nav2_costmap_2d</name>
+  </compound>
+  <compound refid="namespaceplugin__bridges" kind="namespace"><name>plugin_bridges</name>
+  </compound>
+  <compound refid="namespacesopias4__framework" kind="namespace"><name>sopias4_framework</name>
+  </compound>
+  <compound refid="namespacesopias4__framework_1_1tools" kind="namespace"><name>sopias4_framework::tools</name>
+    <member refid="msgs__utils_8hpp_1a35612efba29f36b6d782755417cc3002" kind="function"><name>costmap_2_costmap_msg</name></member>
+    <member refid="msgs__utils_8hpp_1a01f3a6a40465ca77f255d9cf706d08f7" kind="function"><name>update_costmap_with_msg</name></member>
+  </compound>
+  <compound refid="msgs__utils_8hpp" kind="file"><name>msgs_utils.hpp</name>
+  </compound>
+  <compound refid="plugin__bridge__layer_8hpp" kind="file"><name>plugin_bridge_layer.hpp</name>
+  </compound>
+  <compound refid="plugin__bridge__planner_8hpp" kind="file"><name>plugin_bridge_planner.hpp</name>
+  </compound>
+  <compound refid="dir_d44c64559bbebec7f509842c48db8b23" kind="dir"><name>/home/ws/src/sopias4_framework/include</name>
+  </compound>
+  <compound refid="dir_774e092f2086af800cce6a90090c21b8" kind="dir"><name>/home/ws/src/sopias4_framework/include/sopias4_framework</name>
+  </compound>
 </doxygenindex>

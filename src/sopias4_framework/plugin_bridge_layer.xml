@@ -1,0 +1,5 @@
+<library path="plugin_bridges">
+    <class name="plugin_bridges/LayerPlugin" type="plugin_bridges::LayerBridge" base_class_type="nav2_costmap_2d::CostmapLayer">
+        <description>A plugin bridge which allows you to implement your layer plugin in another language</description>
+    </class>
+</library>

@@ -27,6 +27,7 @@ find_package(tf2_ros REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(sopias4_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -62,10 +63,12 @@ set(dependencies
     nav2_costmap_2d
     nav2_core
     pluginlib
+    sopias4_msgs
 )
 # Add the plugin bridges source files here
 add_library(${library_name} SHARED
     src/plugin_bridge_planner.cpp
+    src/plugin_bridge_layer.cpp
 )
 # Include dependecies in compiled plugins
 ament_target_dependencies(${library_name}
@@ -75,6 +78,7 @@ ament_target_dependencies(${library_name}
 # Define plugins here
 target_compile_definitions(${library_name} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 pluginlib_export_plugin_description_file(nav2_core plugin_bridge_planner.xml)
+pluginlib_export_plugin_description_file(nav2_costmap_2d plugin_bridge_layer.xml)
 
 # Install C++ executables
 install(TARGETS ${library_name}
