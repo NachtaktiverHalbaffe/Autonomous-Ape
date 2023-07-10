@@ -1,0 +1,7 @@
+# Request
+geometry_msgs/PoseStamped current_pose
+geometry_msgs/PoseStamped goal_pose
+geometry_msgs/Twist current_vel_cmd
+---
+# Response
+geometry_msgs/TwistStamped cmd_vel

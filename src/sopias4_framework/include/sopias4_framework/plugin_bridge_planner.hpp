@@ -57,8 +57,6 @@ namespace plugin_bridges
         // The global frame of the costmap
         std::string global_frame_, name_;
 
-        double interpolation_resolution_;
-
         std::string plugin_name_; 
 
         rclcpp::Client<sopias4_msgs::srv::CreatePlan>::SharedPtr client_;

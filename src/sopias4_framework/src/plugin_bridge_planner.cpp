@@ -24,9 +24,6 @@ namespace plugin_bridges
     // Service client
 
     // Parameter initialization
-    nav2_util::declare_parameter_if_not_declared(
-        node_, name_ + ".interpolation_resolution", rclcpp::ParameterValue(0.1));
-    node_->get_parameter(name_ + ".interpolation_resolution", interpolation_resolution_);
     nav2_util::declare_parameter_if_not_declared(node_, name_ + ".plugin_name", rclcpp::ParameterValue("global_planner"));
     node_->get_parameter(name + ".plugin_name", plugin_name_);
   }
