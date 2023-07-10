@@ -3,6 +3,7 @@
 #include <memory>
 #include "nav2_util/node_utils.hpp"
 #include "sopias4_framework/plugin_bridge_planner.hpp"
+#include "sopias4_framework/msgs_utils.hpp"
 #include "sopias4_msgs/srv/create_plan.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -26,7 +27,8 @@ namespace plugin_bridges
     nav2_util::declare_parameter_if_not_declared(
         node_, name_ + ".interpolation_resolution", rclcpp::ParameterValue(0.1));
     node_->get_parameter(name_ + ".interpolation_resolution", interpolation_resolution_);
-
+    nav2_util::declare_parameter_if_not_declared(node_, name_ + ".plugin_name", rclcpp::ParameterValue("global_planner"));
+    node_->get_parameter(name + ".plugin_name", plugin_name_);
   }
 
   void PlannerBridge::cleanup()
@@ -41,8 +43,7 @@ namespace plugin_bridges
     RCLCPP_INFO(
         node_->get_logger(), "Activating plugin %s of type PlannerPluginBridge",
         name_.c_str());
-      // TODO Correct service naming
-    client_ = node_->create_client<sopias4_msgs::srv::CreatePlan>("create_plan");
+    client_ = node_->create_client<sopias4_msgs::srv::CreatePlan>(plugin_name_ + "/create_plan");
   }
 
   void PlannerBridge::deactivate()
@@ -76,8 +77,10 @@ namespace plugin_bridges
     }
 
     sopias4_msgs::srv::CreatePlan::Request::SharedPtr request = std::make_shared<sopias4_msgs::srv::CreatePlan::Request>();
+    // Generate service request
     request->start = start;
     request->goal = goal;
+    request->costmap = sopias4_framework::tools::costmap_2_costmap_msg(costmap_);
 
     auto future = client_->async_send_request(request);
     auto return_code = rclcpp::spin_until_future_complete(node_, future);

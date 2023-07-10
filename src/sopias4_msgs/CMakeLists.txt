@@ -39,6 +39,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/StopMapping.srv"
       # Plugin Bridges
       "srv/CreatePlan.srv"
+      "srv/UpdateCosts.srv"
       DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs nav2_msgs
 )
 
