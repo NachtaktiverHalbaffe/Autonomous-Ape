@@ -5,6 +5,7 @@
 #include "rmw/validate_namespace.h"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "sopias4_msgs/msg/robot.hpp"
+#include "sopias4_msgs/msg/namespaces.hpp"
 #include "sopias4_msgs/srv/get_namespaces.hpp"
 #include "sopias4_msgs/srv/get_robots.hpp"
 #include "sopias4_msgs/srv/get_robot_identity.hpp"
@@ -14,13 +15,14 @@
 class MultiRobotCoordinator : public rclcpp::Node {
 public:
 explicit MultiRobotCoordinator(const std::string & nodeName) : Node(nodeName){
-	get_namespaces_service =create_service<sopias4_msgs::srv::GetNamespaces>("get_namespaces", std::bind(&MultiRobotCoordinator::get_namespace_callback, this, std::placeholders::_1, std::placeholders::_2));
-	get_robot_identity_service= create_service<sopias4_msgs::srv::GetRobotIdentity>("get_robot_identity", std::bind(&MultiRobotCoordinator::get_robot_identity_callback, this,std::placeholders::_1, std::placeholders::_2));
-	get_robots_service = create_service<sopias4_msgs::srv::GetRobots>("get_robots", std::bind(&MultiRobotCoordinator::get_robots_callback, this, std::placeholders::_1, std::placeholders::_2) );
-	register_service = create_service<sopias4_msgs::srv::RegistryService>("register_namespace", std::bind(&MultiRobotCoordinator::register_callback, this, std::placeholders::_1, std::placeholders::_2));
-	unregister_service = create_service<sopias4_msgs::srv::RegistryService>("unregister_namespace", std::bind(&MultiRobotCoordinator::unregister_callback, this, std::placeholders::_1, std::placeholders::_2));
-	set_robot_path_service = create_service<sopias4_msgs::srv::SetRobotPath>("set_robot_path", std::bind(&MultiRobotCoordinator::set_robot_path_callback, this, std::placeholders::_1, std::placeholders::_2));
+	get_namespaces_service = this -> create_service<sopias4_msgs::srv::GetNamespaces>("get_namespaces", std::bind(&MultiRobotCoordinator::get_namespace_callback, this, std::placeholders::_1, std::placeholders::_2));
+	get_robot_identity_service= this -> create_service<sopias4_msgs::srv::GetRobotIdentity>("get_robot_identity", std::bind(&MultiRobotCoordinator::get_robot_identity_callback, this,std::placeholders::_1, std::placeholders::_2));
+	get_robots_service = this -> create_service<sopias4_msgs::srv::GetRobots>("get_robots", std::bind(&MultiRobotCoordinator::get_robots_callback, this, std::placeholders::_1, std::placeholders::_2) );
+	register_service = this -> create_service<sopias4_msgs::srv::RegistryService>("register_namespace", std::bind(&MultiRobotCoordinator::register_callback, this, std::placeholders::_1, std::placeholders::_2));
+	unregister_service = this -> create_service<sopias4_msgs::srv::RegistryService>("unregister_namespace", std::bind(&MultiRobotCoordinator::unregister_callback, this, std::placeholders::_1, std::placeholders::_2));
+	set_robot_path_service = this -> create_service<sopias4_msgs::srv::SetRobotPath>("set_robot_path", std::bind(&MultiRobotCoordinator::set_robot_path_callback, this, std::placeholders::_1, std::placeholders::_2));
 
+	publisher_ = this -> create_publisher<sopias4_msgs::msg::Namespaces>("registered_namespaces",10);
     RCLCPP_INFO(logger, "Started node");
 	logger.set_level(rclcpp::Logger::Level::Info);
 }
@@ -40,8 +42,10 @@ rclcpp::Service<sopias4_msgs::srv::GetRobots>::SharedPtr get_robots_service;
 rclcpp::Service<sopias4_msgs::srv::RegistryService>::SharedPtr register_service;
 rclcpp::Service<sopias4_msgs::srv::RegistryService>::SharedPtr unregister_service;
 rclcpp::Service<sopias4_msgs::srv::SetRobotPath>::SharedPtr set_robot_path_service;
+// Publisher when a new namespace is registered
+rclcpp::Publisher<sopias4_msgs::msg::Namespaces>::SharedPtr publisher_;
 
-void get_namespace_callback(const sopias4_msgs::srv::GetNamespaces::Request::SharedPtr request, sopias4_msgs::srv::GetNamespaces::Response::SharedPtr response ){
+void get_namespace_callback(const sopias4_msgs::srv::GetNamespaces::Request::SharedPtr, sopias4_msgs::srv::GetNamespaces::Response::SharedPtr response ){
 	RCLCPP_INFO(logger, "Got request to get all registered namespaces");
 	response->name_spaces = registered_namespaces;
 	return;
@@ -62,7 +66,7 @@ void get_robot_identity_callback(const sopias4_msgs::srv::GetRobotIdentity::Requ
 	return;
 }
 
-void get_robots_callback(const sopias4_msgs::srv::GetRobots::Request::SharedPtr request, sopias4_msgs::srv::GetRobots::Response::SharedPtr response){
+void get_robots_callback(const sopias4_msgs::srv::GetRobots::Request::SharedPtr, sopias4_msgs::srv::GetRobots::Response::SharedPtr response){
     RCLCPP_INFO(logger, "Got request to return states of all robots");
 	response->robots = robot_states;
 	return;
@@ -110,6 +114,11 @@ void register_callback(const sopias4_msgs::srv::RegistryService::Request::Shared
 	this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space+ std::string("/amcl_pose"), 10, callback_fcn);
 	this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space+ std::string("/pose"), 10, callback_fcn);
 
+	//  Publish registered namespaces 
+	sopias4_msgs::msg::Namespaces msg = sopias4_msgs::msg::Namespaces();
+	msg.name_spaces = registered_namespaces;
+	publisher_ ->publish(msg);
+
 	RCLCPP_INFO(logger, "Successfully registered namespace %s", request->name_space.c_str());
 }
 
@@ -138,6 +147,12 @@ void unregister_callback(const sopias4_msgs::srv::RegistryService::Request::Shar
     RCLCPP_DEBUG(logger, "Deleted state of robot with namespace %s", request -> name_space.c_str());
 
     RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request -> name_space.c_str());
+
+	//  Publish registered namespaces 
+	sopias4_msgs::msg::Namespaces msg = sopias4_msgs::msg::Namespaces();
+	msg.name_spaces = registered_namespaces;
+	publisher_ ->publish(msg);
+
 	return;
 }
 

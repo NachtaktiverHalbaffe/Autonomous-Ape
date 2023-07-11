@@ -1,7 +1,7 @@
 # Request
 geometry_msgs/PoseStamped start
 geometry_msgs/PoseStamped goal
-nav2_msgs/Costmap costmap
+nav_msgs/OccupancyGrid costmap
 ---
 # Response
 nav_msgs/Path global_path

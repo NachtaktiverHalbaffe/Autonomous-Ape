@@ -1,9 +1,9 @@
 # Request
-nav2_msgs/Costmap current_costmap
+nav_msgs/OccupancyGrid current_costmap
 int64 min_i
 int64 min_j
 int64 max_i
 int64 max_j
 ---
 #Response
-nav2_msgs/Costmap updated_costmap
+nav_msgs/OccupancyGrid updated_costmap

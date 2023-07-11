@@ -39,17 +39,17 @@ When using the plugin bridge, it is important to provide an parameter file which
 
 <!-- TODO Seperate actions out into the actions sec -->
 ### Services
-| **Service**                                              | **Service type**        | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**        |
-| -------------------------------------------------------- | ----------------------- | -------------------------- | --------------------------- | ---------------------- |
-| /<*namespace*>/<*plugin_name*>/update_costs              | UpdateCosts             | Layer Plugin PyBridge      | update_costs()              | Implementation pending |
-| /<*namespace*>/<*plugin_name*>/create_plan               | CreatePlan              | Planner Plugin PyBridge    | create_plan()               | Implementation pending |
-| /<*namespace*>/<*plugin_name*>/compute_velocity_commands | ComputeVelocityCommands | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | Navigator Plugin PyBridge  | get_default_bt_filepath()   | Implementation Pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | Navigator Plugin PyBridge  | goal_received()             | Implementation Pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | Navigator Plugin PyBridge  | goal_completed()            | Implementation Pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | Navigator Plugin PyBridge  | get_name()                  | Implementation Pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | BT Plugin PyBridge         | provide_ports()             | Implementation pending |
-| /<*namespace*>/<*plugin_name*>/                          |                         | Behavior Plugin PyBridge   | on_run()                    | Implementation pending |
+| **Service**                                              | **Service type**        | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**                                                                                                 |
+| -------------------------------------------------------- | ----------------------- | -------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| /<*namespace*>/<*plugin_name*>/update_costs              | UpdateCosts             | Layer Plugin PyBridge      | update_costs()              | Implementation pending                                                                                          |
+| /<*namespace*>/<*plugin_name*>/create_plan               | CreatePlan              | Planner Plugin PyBridge    | create_plan()               | Implementation pending                                                                                          |
+| /<*namespace*>/<*plugin_name*>/compute_velocity_commands | ComputeVelocityCommands | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending                                                                                          |
+| -                                                        | -                       | Navigator Plugin PyBridge  | get_default_bt_filepath()   | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
+| -                                                        | -                       | Navigator Plugin PyBridge  | goal_received()             | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
+| -                                                        | -                       | Navigator Plugin PyBridge  | goal_completed()            | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
+| -                                                        | -                       | Navigator Plugin PyBridge  | get_name()                  | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
+| -                                                        | -                       | BT Plugin PyBridge         | provide_ports()             | Implementation not useful, because behaviour plugin not implemented                                             |
+| -                                                        | -                       | Behavior Plugin PyBridge   | on_run()                    | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
 
 ### Actions
 

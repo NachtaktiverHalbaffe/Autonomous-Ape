@@ -26,6 +26,7 @@ find_package(rclcpp REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
       # Framework
       "msg/Robot.msg"
+      "msg/Namespaces.msg"
       "srv/ShowDialog.srv"
       "srv/RegistryService.srv"
       "srv/EmptyWithStatuscode.srv"
@@ -40,7 +41,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       # Plugin Bridges
       "srv/CreatePlan.srv"
       "srv/UpdateCosts.srv"
-      "srv/ComputeVelocityCommands.srv"c
+      "srv/ComputeVelocityCommands.srv"
       DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs nav2_msgs
 )
 
