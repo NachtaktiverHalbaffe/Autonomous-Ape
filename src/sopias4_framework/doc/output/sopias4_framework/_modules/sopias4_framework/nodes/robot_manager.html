@@ -82,6 +82,13 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#module-sopias4_framework.nodes.planner_pyplugin">sopias4_framework.nodes.planner_pyplugin module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin.generate_path"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin.generate_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="../../../sopias4_framework.nodes.html#module-sopias4_framework.nodes.robot_manager">sopias4_framework.nodes.robot_manager module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager"><code class="docutils literal notranslate"><span class="pre">RobotManager</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.drive_to_pos_action"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_to_pos_action</span></code></a></li>
@@ -116,6 +123,12 @@
 </li>
 <li class="toctree-l6"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html">sopias4_framework.tools.ros2 package</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2.costmap_tools">sopias4_framework.tools.ros2.costmap_tools module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.map_2_pose"><code class="docutils literal notranslate"><span class="pre">map_2_pose()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.pose_2_map"><code class="docutils literal notranslate"><span class="pre">pose_2_map()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.costmap_2_2darray"><code class="docutils literal notranslate"><span class="pre">costmap_2_2darray()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l7"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2.drive_tools">sopias4_framework.tools.ros2.drive_tools module</a><ul>
 <li class="toctree-l8"><a class="reference internal" href="../../../sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.drive_tools.generate_twist_msg"><code class="docutils literal notranslate"><span class="pre">generate_twist_msg()</span></code></a></li>
 </ul>
@@ -182,8 +195,6 @@
              
   <h1>Source code for sopias4_framework.nodes.robot_manager</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
-<span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">signal</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 
@@ -230,7 +241,6 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">other_robots</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__goal_handle</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__result_future</span> <span class="o">=</span> <span class="kc">None</span>
 

@@ -4,6 +4,14 @@ sopias4\_framework.tools.ros2 package
 Submodules
 ----------
 
+sopias4\_framework.tools.ros2.costmap\_tools module
+---------------------------------------------------
+
+.. automodule:: sopias4_framework.tools.ros2.costmap_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.tools.ros2.drive\_tools module
 -------------------------------------------------
 

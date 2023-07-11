@@ -85,6 +85,13 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="#module-sopias4_framework.nodes.planner_pyplugin">sopias4_framework.nodes.planner_pyplugin module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin.generate_path"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin.generate_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="#module-sopias4_framework.nodes.robot_manager">sopias4_framework.nodes.robot_manager module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#sopias4_framework.nodes.robot_manager.RobotManager"><code class="docutils literal notranslate"><span class="pre">RobotManager</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#sopias4_framework.nodes.robot_manager.RobotManager.drive_to_pos_action"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_to_pos_action</span></code></a></li>
@@ -119,6 +126,12 @@
 </li>
 <li class="toctree-l6"><a class="reference internal" href="sopias4_framework.tools.ros2.html">sopias4_framework.tools.ros2 package</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.ros2.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2.costmap_tools">sopias4_framework.tools.ros2.costmap_tools module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.map_2_pose"><code class="docutils literal notranslate"><span class="pre">map_2_pose()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.pose_2_map"><code class="docutils literal notranslate"><span class="pre">pose_2_map()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.costmap_tools.costmap_2_2darray"><code class="docutils literal notranslate"><span class="pre">costmap_2_2darray()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.tools.ros2.html#module-sopias4_framework.tools.ros2.drive_tools">sopias4_framework.tools.ros2.drive_tools module</a><ul>
 <li class="toctree-l8"><a class="reference internal" href="sopias4_framework.tools.ros2.html#sopias4_framework.tools.ros2.drive_tools.generate_twist_msg"><code class="docutils literal notranslate"><span class="pre">generate_twist_msg()</span></code></a></li>
 </ul>
@@ -244,6 +257,9 @@ Python class. The script is located in <cite>sopias4_framework/tools/scripts</ci
 <li><p>register_namespace(): Register namespace in Sopias4 Map-Server</p></li>
 <li><p>launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot</p></li>
 <li><p>stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot</p></li>
+<li><p>start_mapping(): Starts the mapping process</p></li>
+<li><p>stop_mapping(): Stops the mapping process and saves the map on the Sopias4 Map-Server</p></li>
+<li><p>drive(): Let the robot execute a specific drive command</p></li>
 </ul>
 </dd>
 <dt>It provides following ROS2-services:</dt><dd><ul class="simple">
@@ -620,6 +636,44 @@ should be fully launched and the mapping process running before running this ser
 <span class="sig-name descname"><span class="pre">destroy_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/gui_node.html#GrapficalNode.destroy_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.gui_node.GrapficalNode.destroy_node" title="Permalink to this definition"></a></dt>
 <dd><p>Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
 :meta private:</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sopias4_framework.nodes.planner_pyplugin">
+<span id="sopias4-framework-nodes-planner-pyplugin-module"></span><h2>sopias4_framework.nodes.planner_pyplugin module<a class="headerlink" href="#module-sopias4_framework.nodes.planner_pyplugin" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sopias4_framework.nodes.planner_pyplugin.</span></span><span class="sig-name descname"><span class="pre">PlannerPyPlugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sopias4_framework/nodes/planner_pyplugin.html#PlannerPyPlugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></p>
+<p>This class is a base planner plugin class with which you can write your own Navigation 2 planner. This class
+utilizes the planner plugin bridge so the planner can be implemented in python. This class handles all the service
+stuff under the hood, so the developer only has to implement the <cite>generate_path()</cite> method.</p>
+<p>The <cite>generate_path()</cite> method gives the start and goal pose and the current costmap. The method should then return the
+generated path as an nav_msgs/Path message. For this purpose, a suitable path finding algorithm should be implemented
+there.</p>
+<p>Also, the plugin bridge itself must be configurated in the Navigation2 Stack. For this purpose, make shure to configure the PlannerBridge
+as a planner plugin and give it the same plugin name as this class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin.generate_path">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PoseStamped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PoseStamped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PyCostmap2D</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="_modules/sopias4_framework/nodes/planner_pyplugin.html#PlannerPyPlugin.generate_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin.generate_path" title="Permalink to this definition"></a></dt>
+<dd><p>Here the path finding algorithm should be implemented</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>PoseStamped</em>) – The position from which the path should start</p></li>
+<li><p><strong>goal</strong> (<em>PoseStamped</em>) – The position in which the path should end</p></li>
+<li><p><strong>costmap</strong> (<em>Costmap</em>) – The current costmap which contains the costs of each region. Low costs means free regions and higher                                                costs that there may be an obstacle or other reasons why the robot should avoid this region</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated path</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

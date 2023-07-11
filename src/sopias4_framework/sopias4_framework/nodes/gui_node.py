@@ -78,6 +78,9 @@ class GUINode(QMainWindow):
         - register_namespace(): Register namespace in Sopias4 Map-Server
         - launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
         - stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot
+        - start_mapping(): Starts the mapping process
+        - stop_mapping(): Stops the mapping process and saves the map on the Sopias4 Map-Server
+        - drive(): Let the robot execute a specific drive command
 
     It provides following ROS2-services:
         - show_dialog: Show a dialog with the users. Also interaction options can be specified

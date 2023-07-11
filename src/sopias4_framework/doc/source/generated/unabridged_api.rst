@@ -38,6 +38,11 @@ Classes and Structs
 .. toctree::
    :maxdepth: 1
 
+   classplugin__bridges_1_1ControllerBridge.rst
+
+.. toctree::
+   :maxdepth: 1
+
    classplugin__bridges_1_1LayerBridge.rst
 
 .. toctree::
@@ -52,12 +57,12 @@ Functions
 .. toctree::
    :maxdepth: 1
 
-   function_msgs__utils_8hpp_1a35612efba29f36b6d782755417cc3002.rst
+   function_msgs__utils_8hpp_1a3b1ce4f95ea1f4d0849f7e8314ce6e79.rst
 
 .. toctree::
    :maxdepth: 1
 
-   function_msgs__utils_8hpp_1a01f3a6a40465ca77f255d9cf706d08f7.rst
+   function_msgs__utils_8hpp_1acdc66fc8aef2002df71ec5fdc67f4d92.rst
 
 Directories
 ***********
@@ -81,6 +86,11 @@ Files
    :maxdepth: 1
 
    file__home_ws_src_sopias4_framework_include_sopias4_framework_msgs_utils.hpp.rst
+
+.. toctree::
+   :maxdepth: 1
+
+   file__home_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_controller.hpp.rst
 
 .. toctree::
    :maxdepth: 1

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
-import os
 import signal
 import subprocess
 
@@ -47,7 +45,6 @@ class RobotManager(Node):
             super().__init__(node_name)  # type: ignore
         else:
             super().__init__(node_name, namespace=namespace)  # type: ignore
-        self.other_robots: list = []
         self.__goal_handle = None
         self.__result_future = None
 

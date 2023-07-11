@@ -85,6 +85,13 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="sopias4_framework.nodes.html#module-sopias4_framework.nodes.planner_pyplugin">sopias4_framework.nodes.planner_pyplugin module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.planner_pyplugin.PlannerPyPlugin.generate_path"><code class="docutils literal notranslate"><span class="pre">PlannerPyPlugin.generate_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="sopias4_framework.nodes.html#module-sopias4_framework.nodes.robot_manager">sopias4_framework.nodes.robot_manager module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager"><code class="docutils literal notranslate"><span class="pre">RobotManager</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="sopias4_framework.nodes.html#sopias4_framework.nodes.robot_manager.RobotManager.drive_to_pos_action"><code class="docutils literal notranslate"><span class="pre">RobotManager.drive_to_pos_action</span></code></a></li>
@@ -119,6 +126,12 @@
 </li>
 <li class="toctree-l6 current"><a class="current reference internal" href="#">sopias4_framework.tools.ros2 package</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#module-sopias4_framework.tools.ros2.costmap_tools">sopias4_framework.tools.ros2.costmap_tools module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#sopias4_framework.tools.ros2.costmap_tools.map_2_pose"><code class="docutils literal notranslate"><span class="pre">map_2_pose()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#sopias4_framework.tools.ros2.costmap_tools.pose_2_map"><code class="docutils literal notranslate"><span class="pre">pose_2_map()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#sopias4_framework.tools.ros2.costmap_tools.costmap_2_2darray"><code class="docutils literal notranslate"><span class="pre">costmap_2_2darray()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l7"><a class="reference internal" href="#module-sopias4_framework.tools.ros2.drive_tools">sopias4_framework.tools.ros2.drive_tools module</a><ul>
 <li class="toctree-l8"><a class="reference internal" href="#sopias4_framework.tools.ros2.drive_tools.generate_twist_msg"><code class="docutils literal notranslate"><span class="pre">generate_twist_msg()</span></code></a></li>
 </ul>
@@ -190,6 +203,71 @@
 <h1>sopias4_framework.tools.ros2 package<a class="headerlink" href="#sopias4-framework-tools-ros2-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-sopias4_framework.tools.ros2.costmap_tools">
+<span id="sopias4-framework-tools-ros2-costmap-tools-module"></span><h2>sopias4_framework.tools.ros2.costmap_tools module<a class="headerlink" href="#module-sopias4_framework.tools.ros2.costmap_tools" title="Permalink to this heading"></a></h2>
+<p>This contains multiple helpful functions to interact with a PyCostmap2D which is used in the Python implementations
+of the Navigation2 plugins. Most of them a wrapper around the own functions of PyCostmap2 and only apply more appropriate
+types to work with. Also the built-in functions of PyCostmap2D can often be helpful too.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sopias4_framework.tools.ros2.costmap_tools.map_2_pose">
+<span class="sig-prename descclassname"><span class="pre">sopias4_framework.tools.ros2.costmap_tools.</span></span><span class="sig-name descname"><span class="pre">map_2_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PyCostmap2D</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Pose</span></span></span><a class="reference internal" href="_modules/sopias4_framework/tools/ros2/costmap_tools.html#map_2_pose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.tools.ros2.costmap_tools.map_2_pose" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a PyCostmap2D map coordinate to an pose in the map frame by applying a transformation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>int</em>) – The x-index of the cell that should be converted</p></li>
+<li><p><strong>y</strong> (<em>int</em>) – The y-index of the cell zhat should be converted</p></li>
+<li><p><strong>costmap</strong> (<em>PyCostmap2D</em>) – The costmap in which the map is located</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The pose of the cell in the map frame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pose</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sopias4_framework.tools.ros2.costmap_tools.pose_2_map">
+<span class="sig-prename descclassname"><span class="pre">sopias4_framework.tools.ros2.costmap_tools.</span></span><span class="sig-name descname"><span class="pre">pose_2_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PyCostmap2D</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/sopias4_framework/tools/ros2/costmap_tools.html#pose_2_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.tools.ros2.costmap_tools.pose_2_map" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a pose from the global map frame to the indexes of a costmap map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pose</strong> (<em>Pose</em>) – The pose that should be converted</p></li>
+<li><p><strong>costmap</strong> (<em>PyCostmap2D</em>) – The costmap in which the cell should be located</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The x-index of the cell
+int: The y-index of the cell</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sopias4_framework.tools.ros2.costmap_tools.costmap_2_2darray">
+<span class="sig-prename descclassname"><span class="pre">sopias4_framework.tools.ros2.costmap_tools.</span></span><span class="sig-name descname"><span class="pre">costmap_2_2darray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PyCostmap2D</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/sopias4_framework/tools/ros2/costmap_tools.html#costmap_2_2darray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sopias4_framework.tools.ros2.costmap_tools.costmap_2_2darray" title="Permalink to this definition"></a></dt>
+<dd><p>Reshapes/creates a 2D array from the costmap which is a 1D array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>costmap</strong> (<em>PyCostmap2D</em>) – The costmap from which the 2D array should be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2-dimensional array of the costmap data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-sopias4_framework.tools.ros2.drive_tools">
 <span id="sopias4-framework-tools-ros2-drive-tools-module"></span><h2>sopias4_framework.tools.ros2.drive_tools module<a class="headerlink" href="#module-sopias4_framework.tools.ros2.drive_tools" title="Permalink to this heading"></a></h2>
