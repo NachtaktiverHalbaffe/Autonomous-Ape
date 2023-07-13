@@ -138,14 +138,19 @@ def __iterate_through_file(
     """
     if type(yaml_instance.mlget(item_key.split("."))) == ruamel.yaml.CommentedMap:
         for attr in yaml_instance.mlget(item_key.split(".")).items():
-            if type(attr[1]) is not ruamel.yaml.CommentedMap:
+            if (
+                type(attr[1]) is not ruamel.yaml.CommentedMap
+                and type(attr[1]) is not ruamel.yaml.CommentedSeq
+            ):
                 yaml_instance = __add_namespace_to_item(
                     yaml_instance, f"{item_key}.{attr[0]}", namespace
                 )
-            if type(attr[1]) is ruamel.yaml.CommentedMap:
+            else:
                 yaml_instance = __iterate_through_file(
                     yaml_instance, f"{item_key}.{attr[0]}", namespace
                 )
+    else:
+        print(yaml_instance.mlget(item_key.split(".")))
 
     return yaml_instance
 
@@ -167,7 +172,18 @@ def __add_namespace_to_item(
         ruamel.yaml.CommentedMap: A yaml_instance in which the namespace was added
     """
     last_key = item_key.split(".")[-1:][0]
+    # For yaml configs
     if last_key in ["topic", "scan_topic"]:
+        value = f"{namespace}/{yaml_instance.mlget(item_key.split('.'))}"
+        # Add leading / to namespace if it wasnt given in the argument
+        if namespace[0] != "/":
+            value = f"/{value}"
+        yaml_instance.mlput(path=item_key, value=value)
+
+    # For rviz config
+    # print(yaml_instance.mlget(item_key.split(".")))
+    if yaml_instance.mlget(item_key.split(".")) in ["robot_description", "scan"]:
+        print("Hit")
         value = f"{namespace}/{yaml_instance.mlget(item_key.split('.'))}"
         # Add leading / to namespace if it wasnt given in the argument
         if namespace[0] != "/":
