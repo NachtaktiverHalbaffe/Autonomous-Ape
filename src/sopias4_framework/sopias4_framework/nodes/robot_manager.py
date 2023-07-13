@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+import os
 import signal
 import subprocess
 
 import rclpy
+from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
@@ -12,6 +14,7 @@ from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.node import Node
 from rclpy.service import Service
+from sopias4_framework.tools.ros2.yaml_tools import insert_namespace_into_yaml_config
 
 from sopias4_msgs.srv import (
     Drive,
@@ -112,6 +115,7 @@ class RobotManager(Node):
         )
 
         # ---------- Publishers ----------------
+        print(f"{self.get_namespace()}/cmd_vel")
         self.__cmd_vel_pub = self.create_publisher(
             Twist, f"{self.get_namespace()}/cmd_vel", 10
         )
@@ -195,6 +199,7 @@ class RobotManager(Node):
                                         Look at service definition in srv/Drive.srv
         """
         try:
+            print(request_data)
             self.__cmd_vel_pub.publish(request_data.twist)
             response_data.statuscode = Drive.Response.SUCCESS
         except Exception as e:
@@ -235,6 +240,45 @@ class RobotManager(Node):
         self.get_logger().info(
             "Got service request to launch necessary turtlebot nodes"
         )
+
+        # --- Add namespace to yaml config of nav2 and amcl launch file ---
+        base_path = os.path.join(
+            get_package_share_directory("sopias4_framework"), "config"
+        )
+        insert_namespace_into_yaml_config(
+            namespace=self.get_namespace(),
+            path=os.path.join(
+                base_path,
+                "nav2_base.yaml",
+            ),
+            output_path=os.path.join(
+                base_path,
+                "nav2.yaml",
+            ),
+        )
+        insert_namespace_into_yaml_config(
+            namespace=self.get_namespace(),
+            path=os.path.join(
+                base_path,
+                "amcl_base.yaml",
+            ),
+            output_path=os.path.join(
+                base_path,
+                "amcl.yaml",
+            ),
+        )
+        insert_namespace_into_yaml_config(
+            namespace=self.get_namespace(),
+            path=os.path.join(
+                base_path,
+                "rviz_base.rviz",
+            ),
+            output_path=os.path.join(
+                base_path,
+                "rviz.rviz",
+            ),
+        )
+
         if self.__turtlebot_shell_process is None:
             # Launch launchfile
             cmd = f'ros2 launch sopias4_framework bringup_turtlebot.launch.py namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
@@ -335,6 +379,22 @@ class RobotManager(Node):
         """
         self.get_logger().info("Got service request to start mapping")
 
+        # --- Add namespace to yaml config of slam launch file --
+        base_path = os.path.join(
+            get_package_share_directory("sopias4_framework"), "config"
+        )
+        insert_namespace_into_yaml_config(
+            namespace=self.get_namespace(),
+            path=os.path.join(
+                base_path,
+                "slam_base.yaml",
+            ),
+            output_path=os.path.join(
+                base_path,
+                "slam.yaml",
+            ),
+        )
+
         # ------ Set AMCL in Inactive state -------
         self.get_logger().debug("Setting AMCL to inactive state")
         request: ChangeState.Request = ChangeState.Request()
@@ -357,7 +417,7 @@ class RobotManager(Node):
         # ------ start slam toolbox ---------
         self.get_logger().debug("Starting slam nodes")
         if self.__mapping_shell_process is None:
-            cmd = f"ros2 launch sopias4_framework slam.launch.py namespace:={self.get_namespace()}"
+            cmd = f"ros2 launch sopias4_framework bringup_slam.launch.py namespace:={self.get_namespace()}"
             self.__mapping_shell_process = subprocess.Popen(cmd.split(" "))
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:

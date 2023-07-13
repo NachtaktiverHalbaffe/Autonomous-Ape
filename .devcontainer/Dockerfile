@@ -50,6 +50,7 @@ RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2
 COPY ./requirements.txt /tmp/pip-tmp/requirements.txt
 RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 	&& rm -rf /tmp/pip-tmp
+
 ENV NVIDIA_VISIBLE_DEVICES \
 	${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \

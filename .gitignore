@@ -8,6 +8,7 @@ generated/
 amcl.yaml
 nav2.yaml 
 slam.yaml
+rviz.rviz
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/ros2,python,c++,cmake

@@ -1,14 +1,8 @@
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (
-    LaunchConfiguration,
-    NotSubstitution,
-    PathJoinSubstitution,
-)
-from launch_ros.actions import Node, PushRosNamespace
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
 ARGUMENTS = [
@@ -47,14 +41,6 @@ def generate_launch_description():
         ]
     )
 
-    turtlebot4_real = Node(
-        package="turtlebot4_node",
-        executable="turtlebot4_node",
-        name="turtlebot4_node_real",
-        namespace=namespace,
-        condition=IfCondition(NotSubstitution(use_gazebo)),
-    )
-
     amcl = GroupAction(
         [
             IncludeLaunchDescription(
@@ -72,11 +58,21 @@ def generate_launch_description():
         ]
     )
 
-    rviz2 = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        namespace=namespace,
+    rviz2 = GroupAction(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("sopias4_framework"),
+                            "launch",
+                            "rviz.launch.py",
+                        ]
+                    )
+                ),
+                launch_arguments=[("namespace", namespace)],
+            ),
+        ]
     )
 
     nav2 = GroupAction(
@@ -101,6 +97,5 @@ def generate_launch_description():
     ld.add_action(rviz2)
     ld.add_action(amcl)
     ld.add_action(turtlebot4_sim)
-    ld.add_action(turtlebot4_real)
 
     return ld

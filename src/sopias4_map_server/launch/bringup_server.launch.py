@@ -16,30 +16,30 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
-from launch.conditions import (
-    IfCondition,
-    LaunchConfigurationEquals,
-    LaunchConfigurationNotEquals,
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    SetEnvironmentVariable,
 )
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.conditions import LaunchConfigurationEquals, LaunchConfigurationNotEquals
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory("sopias4_map_server")
-    lifecycle_nodes = ["map_saver"]
 
-    namespace = LaunchConfiguration("namespace")
     map_yaml_file = LaunchConfiguration("map")
     params_file = LaunchConfiguration("params_file")
     use_respawn = LaunchConfiguration("use_respawn")
     log_level = LaunchConfiguration("log_level")
     configured_params = RewrittenYaml(
         source_file=params_file,
-        root_key=namespace,
         param_rewrites={},
         convert_types=True,
     )
@@ -48,10 +48,6 @@ def generate_launch_description():
 
     stdout_linebuf_envvar = SetEnvironmentVariable(
         "RCUTILS_LOGGING_BUFFERED_STREAM", "1"
-    )
-
-    declare_namespace_cmd = DeclareLaunchArgument(
-        "namespace", default_value="", description="Top-level namespace"
     )
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -78,7 +74,6 @@ def generate_launch_description():
 
     map_server_empty = Node(
         condition=LaunchConfigurationNotEquals("map", ""),
-        namespace=namespace,
         package="nav2_map_server",
         executable="map_server",
         name="map_server",
@@ -91,7 +86,6 @@ def generate_launch_description():
     )
     map_server_map_loaded = Node(
         condition=LaunchConfigurationEquals("map", ""),
-        namespace=namespace,
         package="nav2_map_server",
         executable="map_server",
         name="map_server",
@@ -102,18 +96,22 @@ def generate_launch_description():
         arguments=["--ros-args", "--log-level", log_level],
         remappings=remappings,
     )
-    start_lifecycle_manager_cmd = Node(
-        package="nav2_lifecycle_manager",
-        executable="lifecycle_manager",
-        name="lifecycle_manager_sopias4_map_server",
-        output="screen",
-        emulate_tty=True,  # https://github.com/ros2/launch/issues/188
-        parameters=[
-            {"use_sim_time": True},
-            {"autostart": True},
-            {"node_names": lifecycle_nodes},
-        ],
+    map_saver = GroupAction(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("nav2_map_server"),
+                            "launch",
+                            "map_saver_server.launch.py",
+                        ]
+                    )
+                ),
+            ),
+        ]
     )
+
     multi_robot_coordinator = Node(
         package="sopias4_map_server",
         executable="multi_robot_coordinator",
@@ -127,7 +125,6 @@ def generate_launch_description():
     ld.add_action(stdout_linebuf_envvar)
 
     # Declare the launch options
-    ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
@@ -137,6 +134,6 @@ def generate_launch_description():
     ld.add_action(map_server_empty)
     ld.add_action(map_server_map_loaded)
     ld.add_action(multi_robot_coordinator)
-    ld.add_action(start_lifecycle_manager_cmd)
+    ld.add_action(map_saver)
 
     return ld

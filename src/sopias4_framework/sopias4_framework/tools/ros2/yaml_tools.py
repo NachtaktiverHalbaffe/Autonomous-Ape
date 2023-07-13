@@ -136,16 +136,16 @@ def __iterate_through_file(
     Returns:
         ruamel.yaml.CommentedMap: A modified yaml_instance into which the namespace was added
     """
-    for attr in yaml_instance.mlget(item_key.split(".")).items():
-        # print(type(attr[1]))
-        if type(attr[1]) is not ruamel.yaml.CommentedMap:
-            yaml_instance = __add_namespace_to_item(
-                yaml_instance, f"{item_key}.{attr[0]}", namespace
-            )
-        if type(attr[1]) is ruamel.yaml.CommentedMap:
-            yaml_instance = __iterate_through_file(
-                yaml_instance, f"{item_key}.{attr[0]}", namespace
-            )
+    if type(yaml_instance.mlget(item_key.split("."))) == ruamel.yaml.CommentedMap:
+        for attr in yaml_instance.mlget(item_key.split(".")).items():
+            if type(attr[1]) is not ruamel.yaml.CommentedMap:
+                yaml_instance = __add_namespace_to_item(
+                    yaml_instance, f"{item_key}.{attr[0]}", namespace
+                )
+            if type(attr[1]) is ruamel.yaml.CommentedMap:
+                yaml_instance = __iterate_through_file(
+                    yaml_instance, f"{item_key}.{attr[0]}", namespace
+                )
 
     return yaml_instance
 
@@ -205,6 +205,6 @@ if __name__ == "__main__":
     )
     insert_namespace_into_yaml_config(
         "ape",
-        "/home/ws/src/sopias4_framework/config/nav2_base.yaml",
-        "/home/ws/src/sopias4_framework/config/nav2.yaml",
+        "/home/ws/src/sopias4_framework/config/rviz_base.rviz",
+        "/home/ws/src/sopias4_framework/config/rviz.rviz",
     )

@@ -1,3 +1,5 @@
+import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
@@ -12,6 +14,7 @@ ARGUMENTS = [
         choices=["true", "false"],
         description="Use sim time",
     ),
+    DeclareLaunchArgument("namespace", default_value="", description="Robot namespace"),
 ]
 
 
@@ -19,20 +22,14 @@ def generate_launch_description():
     pkg_sopias4_framework = get_package_share_directory("sopias4_framework")
     pkg_nav2_bringup = get_package_share_directory("nav2_bringup")
 
-    nav2_params_arg = DeclareLaunchArgument(
-        "params_file",
-        default_value=PathJoinSubstitution(
-            [pkg_sopias4_framework, "config", "nav2.yaml"]
-        ),
-        description="Nav2 parameters",
-    )
-
-    namespace_arg = DeclareLaunchArgument(
-        "namespace", default_value="", description="Robot namespace"
-    )
-
     namespace = LaunchConfiguration("namespace")
     use_sim_time = LaunchConfiguration("use_sim_time")
+
+    nav2_params_arg = DeclareLaunchArgument(
+        "params_file",
+        default_value=os.path.join(pkg_sopias4_framework, "config", "nav2.yaml"),
+        description="Nav2 parameters",
+    )
 
     nav2 = GroupAction(
         [
@@ -54,6 +51,5 @@ def generate_launch_description():
 
     ld = LaunchDescription(ARGUMENTS)
     ld.add_action(nav2_params_arg)
-    ld.add_action(namespace_arg)
     ld.add_action(nav2)
     return ld
