@@ -6,7 +6,7 @@ ARG USER_GID=$USER_UID
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
-	&& useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+	&&useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
 	# [Optional] Add sudo support. Omit if you don't need to install software after connecting.
 	&& apt-get update \
 	&& apt-get install -y sudo \
@@ -26,7 +26,11 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	figlet \
 	qttools5-dev-tools 	qttools5-dev \
 	python3-mock \ 
-	libgl1-mesa-glx libgl1-mesa-dri mesa-utils
+	libgl1-mesa-glx libgl1-mesa-dri mesa-utils 
+
+# Setup right middleware for communicating
+ENV FASTRTPS_DEFAULT_PROFILES_FILE /home/ws/.devcontainer/fastrtps-profile.xml
+ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
 
 # Install turtlebot4 dependencies
 RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
@@ -41,9 +45,11 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	ros-dev-tools gazebo ros-humble-aws-robomaker-small-warehouse-world
 
 # Install rosdoc2
-RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 \
-	&& pip3 install -e /home/rosdoc2 
+RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 
 
+COPY ./requirements.txt /tmp/pip-tmp/requirements.txt
+RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
+	&& rm -rf /tmp/pip-tmp
 ENV NVIDIA_VISIBLE_DEVICES \
 	${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \

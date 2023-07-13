@@ -4,6 +4,10 @@ output/
 cross_reference/
 generated/
 
+#  Temporary config files
+amcl.yaml
+nav2.yaml 
+slam.yaml
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/ros2,python,c++,cmake

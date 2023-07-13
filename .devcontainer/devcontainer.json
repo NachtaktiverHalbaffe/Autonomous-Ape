@@ -50,11 +50,13 @@
         "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
         "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
         "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "ROS_DOMAIN_ID": "0"
         // "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
     "runArgs": [
         "--net=host", // network access to host interfaces, e.g. eth0
-        // "--pid=host", // DDS discovery with host, without --network=host
+        "--ipc=host",
+        "--pid=host", // DDS discovery with host, without --network=host
         "-e",
         "DISPLAY=${env:DISPLAY}",
         "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",
@@ -63,7 +65,8 @@
     ],
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+        "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
     "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/",
     "initializeCommand": "xhost +local:root"

@@ -1,0 +1,5 @@
+# From repository https://github.com/ros-infrastructure/rosdoc2
+-e /home/rosdoc2 
+ruamel.yaml==0.17.32
+ruamel.yaml.clib==0.2.7
+
