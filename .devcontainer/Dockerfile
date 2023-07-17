@@ -40,10 +40,9 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	ros-humble-turtlebot4-description \
 	ros-humble-turtlebot4-msgs \ 
 	ros-humble-turtlebot4-navigation \ 
-	ros-humble-turtlebot4-node \
+	# ros-humble-turtlebot4-node \
 	ros-humble-turtlebot4-simulator ignition-fortress \
-	ros-dev-tools gazebo ros-humble-aws-robomaker-small-warehouse-world
-
+	ros-dev-tools gazebo 
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 
 
@@ -51,11 +50,11 @@ COPY ./requirements.txt /tmp/pip-tmp/requirements.txt
 RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 	&& rm -rf /tmp/pip-tmp
 
-ENV NVIDIA_VISIBLE_DEVICES \
-	${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES \
-	${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}
-ENV QT_X11_NO_MITSHM 1
+# ENV NVIDIA_VISIBLE_DEVICES \
+# 	${NVIDIA_VISIBLE_DEVICES:-all}
+# ENV NVIDIA_DRIVER_CAPABILITIES \
+# 	${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}
+# ENV QT_X11_NO_MITSHM 1
 
 ENV SHELL /bin/bash
 

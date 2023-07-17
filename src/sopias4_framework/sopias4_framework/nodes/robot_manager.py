@@ -14,7 +14,10 @@ from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.node import Node
 from rclpy.service import Service
-from sopias4_framework.tools.ros2.yaml_tools import insert_namespace_into_yaml_config
+from sopias4_framework.tools.ros2.yaml_tools import (
+    insert_namespace_into_rviz_config,
+    insert_namespace_into_yaml_config,
+)
 
 from sopias4_msgs.srv import (
     Drive,
@@ -267,7 +270,7 @@ class RobotManager(Node):
                 "amcl.yaml",
             ),
         )
-        insert_namespace_into_yaml_config(
+        insert_namespace_into_rviz_config(
             namespace=self.get_namespace(),
             path=os.path.join(
                 base_path,
