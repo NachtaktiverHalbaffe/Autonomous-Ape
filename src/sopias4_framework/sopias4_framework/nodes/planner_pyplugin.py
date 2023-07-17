@@ -68,5 +68,5 @@ class PlannerPyPlugin(Node):
                                                 costs that there may be an obstacle or other reasons why the robot should avoid this region
         
         Returns:
-            Path: The generated path
+            nav_msgs.Path: The generated path
         """

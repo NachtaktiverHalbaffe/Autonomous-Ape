@@ -146,7 +146,13 @@ namespace plugin_bridges
             updateWithMax(master_grid, min_i, min_j, max_i, max_j);
         }
     }
-
+        void LayerBridge::reset()
+        {
+        resetMaps();
+        current_ = false;
+        need_recalculation_ = true;
+        }
+        
 } // namespace plugin_bridges
 
 // This is the macro allowing a plugin_bridges::LayerBridge class

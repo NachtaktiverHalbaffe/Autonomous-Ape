@@ -15,25 +15,65 @@
 namespace plugin_bridges
 {
 
+    /**
+     * @class ControllerBridge
+     * @brief A plugin bridge that allows to write Nav2 controller plugins in another programming language than C++
+     */
     class ControllerBridge : public nav2_core::Controller
     {
     public:
+        /**
+         * @brief Controller Bridge constructor
+         */
         ControllerBridge() = default;
+        /**
+         * @brief Controller Bridge destructor
+        */
         ~ControllerBridge() override = default;
 
+        /**
+         * @param  parent pointer to user's node
+         * @param  costmap_ros A pointer to the costmap
+         */
         void configure(
             const rclcpp_lifecycle::LifecycleNode::WeakPtr &parent,
             std::string name, const std::shared_ptr<tf2_ros::Buffer> &tf,
             const std::shared_ptr<nav2_costmap_2d::Costmap2DROS> &costmap_ros);
 
+        /**
+         * @brief Method to cleanup resources.
+         */
         void cleanup() override;
+
+        /**
+         * @brief Method to active planner and any threads involved in execution.
+         */
         void activate() override;
+
+        /**
+         * @brief Method to deactive planner and any threads involved in execution.
+         */
         void deactivate() override;
 
+        /**
+         * @brief Controller computeVelocityCommands - calculates the best command given the current pose and velocity.
+         *
+         * Here the service client is implemented which has must have the name /<namespace>/<plugin_name>/compute_velocity_commands.
+         * This service client calls the implementation, written in the desired programming language, which must be run as an service server in his own node.
+         * It is presumed that the global plan is already set.
+         *
+         * @param pose Current robot pose
+         * @param velocity Current robot velocity
+         * @return The best command for the robot to drive
+         */
         geometry_msgs::msg::TwistStamped computeVelocityCommands(
             const geometry_msgs::msg::PoseStamped &pose,
             const geometry_msgs::msg::Twist &velocity) override;
 
+        /**
+         * @brief local setPlan - Sets the global plan
+         * @param path The global plan
+         */
         void setPlan(const nav_msgs::msg::Path &path) override;
 
     protected:
@@ -46,22 +86,59 @@ namespace plugin_bridges
             geometry_msgs::msg::PoseStamped &out_pose,
             const rclcpp::Duration &transform_tolerance) const;
 
+        /**
+         * A pointer to the underlying ROS2 node
+         */
         rclcpp_lifecycle::LifecycleNode::WeakPtr node_;
+        /**
+         * A pointer to the transformation tree
+         */
         std::shared_ptr<tf2_ros::Buffer> tf_;
+        /**
+         * Name of the controller
+         */
         std::string name_;
+        /**
+         * A pointer to the local costmap
+         */
         std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros_;
         rclcpp::Logger logger_{rclcpp::get_logger("ControllerBridge")};
+        /**
+         * A pointer to the clock
+         */
         rclcpp::Clock::SharedPtr clock_;
 
+        /**
+         * The linear velocity which is aimed to reach
+         */
         double desired_linear_vel_;
-        double lookahead_dist_;
+        /**
+         * The maximum rotating velocity the robot is allowed to take
+         */
         double max_angular_vel_;
+        /**
+         * How far to look ahead of the planned path
+         */
+        double lookahead_dist_;
+        /**
+         * Name of the plugin bridge. Needed to configure the service name of the bridge correctly.
+         * Should match with the bridge implementation
+         */
         std::string plugin_name_;
         rclcpp::Duration transform_tolerance_{0, 0};
 
+        /**
+         * The global path from the planner which the controller tries to follow
+         */
         nav_msgs::msg::Path global_plan_;
+        /**
+         * Publisher which publishes the global plan of the controller
+         */
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>> global_pub_;
 
+        /**
+         * Service client which bridges the compute_velocity_commands() method to a bridge implementation
+         */
         rclcpp::Client<sopias4_msgs::srv::ComputeVelocityCommands>::SharedPtr client_compute_vel_;
     };
 

@@ -57,6 +57,8 @@ def generate_docs(pkg_path: str | None = None):
                 f"{PKG_PATH}/doc/output",
                 "-d",
                 f"{PKG_PATH}/doc/build",
+                "-c",
+                f"{PKG_PATH}/doc/cross_reference",
             ]
         )
     else:
@@ -75,6 +77,8 @@ def generate_docs(pkg_path: str | None = None):
                 f"{pkg_path}/doc/output",
                 "-d",
                 f"{pkg_path}/doc/build",
+                "-c",
+                f"{pkg_path}/doc/cross_reference",
             ]
         )
 

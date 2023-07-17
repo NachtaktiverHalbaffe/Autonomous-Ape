@@ -17,7 +17,6 @@ namespace sopias4_framework::tools
      * @brief Updates a costmap with the new cost values from a costmap message
      * @param costmap_msg A pointer to the costmap message from which the updated values will be taken
      * @param costmap_array A pointer to the costmap array which costs should be updated
-     * @returns
      */
     void update_costmap_with_msg(nav_msgs::msg::OccupancyGrid *costmap_msg, unsigned char* costmap_array);
 }

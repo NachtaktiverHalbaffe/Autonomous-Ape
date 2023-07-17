@@ -73,8 +73,9 @@ class GUINode(QMainWindow):
         - connect_callbacks()
         - set_default_values()
         - set_initial_enabled_elements()
+        - connect_labels_to_subscriptions()
     
-    It also has builtin methods which you can use a callback functionas for certain tasks in Sopias4 (look further into documentation for more details):
+    It also has builtin methods which you can use as callback function for certain tasks in Sopias4 (look further into documentation for more details):
         - register_namespace(): Register namespace in Sopias4 Map-Server
         - launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
         - stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot

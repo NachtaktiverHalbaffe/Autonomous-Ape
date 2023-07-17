@@ -6,6 +6,7 @@ This is a workspace repository for Turtlebot4 implementation of the laboratory c
   - [Sopias4 Application](#sopias4-application)
   - [Sopias4 Framework](#sopias4-framework)
   - [Sopias4 Map-Server](#sopias4-map-server)
+  - [Sopias4 Messages](#sopias4-messages)
 - [Installation](#installation)
   - [Setting up ROS2 workspace](#setting-up-ros2-workspace)
   - [Installing ROS2 and necesary applications](#installing-ros2-and-necesary-applications)
@@ -19,6 +20,7 @@ There are three ROS2 packages within the workspace:
 -  [Sopias4 Application](#sopias4-application): This is the main  package where you build your application. Here you utilize the Sopias4 Framework to build the neccessary parts for navigation
 -  [Sopias4 Framework](#sopias4-framework): The Framework which includes all Tools which you need to develop the Sopias4-Application. This package doesn't need to be modified by you
 -  [Sopias4 Map-Server](#sopias4-map-server): The central map server which also includes the multi robot coordinator. Under normal circumstances, this package doesn't need to be modified and must only be run on one instance
+-  [Sopias4 Messages](#sopias4-messages): A package containing all custom ROS2 interface definitions
 
 In the following subsections the components are introduced in more details.
 
@@ -32,9 +34,9 @@ This is the main application which the user uses to control the system and is th
 More detailed information can be found in the README.md of the corresponding package
 
 ## Sopias4 Framework
-This package extends the ROS2 framework with additional tools, definitions and classes specific for this Sopias4 project. It provides all important message, service and action definitions, so that the ROS2 interfaces are standardized.
+This package extends the ROS2 framework with additional tools, definitions and classes specific for this Sopias4 project. 
 
-It also provides all necessary parts for the Python bridges for the Navigation2 package because it's plugins can originally be only written in C++, so we have to utilize ROS2 services and actions to enable Python usage for these plugins.
+It provides all necessary parts for the Python bridges for the Navigation2 package because it's plugins can originally be only written in C++, so we have to utilize ROS2 services and actions to enable Python usage for these plugins.
 
 It also provides basic ROS2 Nodes which can be extended for the Sopias4 usecases. In specific, it provides a basic node for the gui which can be used to develop the Pyqt5 plugin. The other nodes are the corresponding Python nodes for the Navigation2 plugins in which the Python implementation of the plugins can be done.
 
@@ -44,6 +46,11 @@ More detailed information can be found in the README.md of the corresponding pac
 
 ## Sopias4 Map-Server
 This package provides a central map server and a central identity provider. It provides a static map to all connected robots, prohibits namespace conflicts and collects/provides the states of all robots. This package don't need to be modified an can be used as it is. Make sure only one instance is running on the whole network.
+
+More detailed information can be found in the README.md of the corresponding package
+
+## Sopias4 Messages
+This package provides all important message, service and action definitions, so that the ROS2 interfaces are standardized. Also, the standard ROS2 message and action definitions are used. A overview for the standard ROS2 interfaces is given in this [Github repository](https://github.com/ros2/common_interfaces). 
 
 More detailed information can be found in the README.md of the corresponding package
 

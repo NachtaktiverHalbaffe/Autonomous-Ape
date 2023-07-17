@@ -47,6 +47,9 @@ class LayerPyPlugin(Node):
     def __update_costs_callback(
         self, request: UpdateCosts.Request, response: UpdateCosts.Response
     ) -> UpdateCosts.Response:
+        """
+        Callback function which executes when the update_costs service is called
+        """
         updated_costmap: PyCostmap2D = self.update_costs(
             min_i=request.min_i,
             min_j=request.min_j,

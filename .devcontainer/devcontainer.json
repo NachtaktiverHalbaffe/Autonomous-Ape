@@ -56,7 +56,7 @@
     "runArgs": [
         "--net=host", // network access to host interfaces, e.g. eth0
         "--ipc=host",
-        "--pid=host", // DDS discovery with host, without --network=host
+        // "--pid=host", // DDS discovery with host, without --network=host
         "-e",
         "DISPLAY=${env:DISPLAY}",
         "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",

@@ -37,7 +37,6 @@ This is only needed if you want to create your own clients for your PluginBridge
 
 When using the plugin bridge, it is important to provide an parameter file which gives the corresponding implementation name space. This is important if you operate more than one plugin of the same type at the same time, because then the implementation name space is important to correctly identifiy each bridge.
 
-<!-- TODO Seperate actions out into the actions sec -->
 ### Services
 | **Service**                                              | **Service type**        | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**                                                                                                 |
 | -------------------------------------------------------- | ----------------------- | -------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------- |

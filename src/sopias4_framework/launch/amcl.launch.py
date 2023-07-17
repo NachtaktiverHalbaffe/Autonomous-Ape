@@ -33,7 +33,7 @@ ARGUMENTS = [
     DeclareLaunchArgument(
         "use_respawn",
         default_value="False",
-        description="Whether to respawn if a node crashes. Applied when composition is disabled.",
+        description="Whether to respawn if a node crashes",
     ),
     DeclareLaunchArgument("log_level", default_value="info", description="log level"),
 ]

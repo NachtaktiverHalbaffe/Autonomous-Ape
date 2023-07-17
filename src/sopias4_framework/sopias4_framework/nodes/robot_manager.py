@@ -77,20 +77,7 @@ class RobotManager(Node):
         # ------------------- Service clients--------------------
         # Create own sub node for service clients so they can spin independently
         self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients", namespace=self.get_namespace())  # type: ignore
-        # # This service requests the states of the robot from the multi robot coordinator inside Sopias4 Map-Server
-        # TODO Remove if not
-        # self.__mrc_sclient_robots: Client = self.__service_client_node.create_client(
-        #     GetRobots, "/get_robots"
-        # )
-        # self.__mrc_sclient_robot_identity: Client = (
-        #     self.__service_client_node.create_client(
-        #         GetRobotIdentity, "/get_robot_identity"
-        #     )
-        # )
-        # # This service requests all registered namespaces of multi robot coordinator inside Sopias4 Map-Server
-        # self.__mrc_sclient_namespaces: Client = (
-        #     self.__service_client_node.create_client(GetNamespaces, "/get_namespaces")
-        # )
+
         # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
         # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
         self.__amcl_sclient_lifecycle: Client = (
@@ -595,10 +582,7 @@ class RobotManager(Node):
         request.name_space = self.get_namespace()
         self.__mrc__sclient__unregister.call_async(request)
         # Release service clients
-        # TODO Remove if not used
-        # self.__mrc_sclient_namespaces.destroy()
-        # self.__mrc_sclient_robot_identity.destroy()
-        # self.__mrc_sclient_robots.destroy()
+
         self.__amcl_sclient_lifecycle.destroy()
         self.__nav2_aclient_driveToPos.destroy()
         self.__service_client_node.destroy_node()

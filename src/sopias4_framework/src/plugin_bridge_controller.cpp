@@ -128,7 +128,6 @@ namespace plugin_bridges
     }
     auto goal_pose = goal_pose_it->pose;
 
-    // TODO Request
     auto request = std::make_shared<sopias4_msgs::srv::ComputeVelocityCommands::Request>();
     request->current_pose = pose;
     request->goal_pose = goal_pose;

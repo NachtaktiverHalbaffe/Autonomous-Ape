@@ -12,6 +12,14 @@ sopias4\_framework.nodes.gui\_node module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.nodes.layer\_pyplugin module
+-----------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.layer_pyplugin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.nodes.planner\_pyplugin module
 -------------------------------------------------
 
