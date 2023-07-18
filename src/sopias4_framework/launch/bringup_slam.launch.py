@@ -47,7 +47,7 @@ def generate_launch_description():
     sync = LaunchConfiguration("sync")
 
     slam_params_arg = DeclareLaunchArgument(
-        "params",
+        "params_file",
         default_value=PathJoinSubstitution(
             [pkg_sopias4_framework, "config", "slam.yaml"]
         ),

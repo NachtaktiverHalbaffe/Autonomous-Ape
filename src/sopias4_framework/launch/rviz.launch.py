@@ -45,12 +45,12 @@ ARGUMENTS = [
 def generate_launch_description():
     pkg_path = get_package_share_directory("sopias4_framework")
 
-    rviz2_config = LaunchConfiguration("params_file")
     rviz2_config_arg = DeclareLaunchArgument(
         "params_file",
         default_value=PathJoinSubstitution([pkg_path, "config", "rviz.rviz"]),
-        description="AMCL parameters",
+        description="Rviz parameters",
     )
+    rviz2_config = LaunchConfiguration("params_file")
     namespace = LaunchConfiguration("namespace")
     description = LaunchConfiguration("use_description")
 
@@ -91,6 +91,7 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(rviz)
     ld.add_action(rviz2_config_arg)
+    ld.add_action(rviz)
+
     return ld

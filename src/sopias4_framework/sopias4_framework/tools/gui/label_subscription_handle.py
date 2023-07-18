@@ -94,3 +94,7 @@ class LabelSubscriptionHandler:
         """
         vel = (msg.velocity_left + msg.velocity_right) / 2
         self.widget.setText(str(round(vel, 2)))
+
+
+if __name__ == "__main__":
+    print("This is only an library, dont execute this Python script at it's own")

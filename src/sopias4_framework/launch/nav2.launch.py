@@ -30,6 +30,7 @@ def generate_launch_description():
         default_value=os.path.join(pkg_sopias4_framework, "config", "nav2.yaml"),
         description="Nav2 parameters",
     )
+    nav2_param = LaunchConfiguration("params_file")
 
     nav2 = GroupAction(
         [
@@ -43,7 +44,7 @@ def generate_launch_description():
                 launch_arguments={
                     "use_sim_time": use_sim_time,
                     "use_composition": "False",
-                    "params_file": LaunchConfiguration("params_file"),
+                    "params_file": nav2_param,
                 }.items(),
             ),
         ]

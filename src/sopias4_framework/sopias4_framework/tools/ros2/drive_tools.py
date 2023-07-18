@@ -31,3 +31,7 @@ def generate_twist_msg(direction: str, vel_rel: float = 1.0) -> Twist:
             )
 
     return drive_msg
+
+
+if __name__ == "__main__":
+    print("This is only an library, dont execute this Python script at it's own")

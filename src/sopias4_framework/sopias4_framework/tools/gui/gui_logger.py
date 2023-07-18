@@ -75,3 +75,7 @@ class GuiLogger:
         formatted_log = f"[{msg.name}] {msg.msg}"
         self.widget.append(formatted_log)
         self.widget.moveCursor(QTextCursor.End)
+
+
+if __name__ == "__main__":
+    print("This is only an library, dont execute this Python script at it's own")
