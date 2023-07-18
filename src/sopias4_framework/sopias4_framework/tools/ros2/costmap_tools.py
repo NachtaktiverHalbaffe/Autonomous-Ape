@@ -4,12 +4,15 @@ of the Navigation2 plugins. Most of them a wrapper around the own functions of P
 types to work with. Also the built-in functions of PyCostmap2D can often be helpful too.
 """
 
+from math import sqrt
 from typing import Tuple
 
 import numpy as np
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import OccupancyGrid
+
+LETHAL_COST = 150
 
 
 def map_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
@@ -32,7 +35,7 @@ def map_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
     return pose
 
 
-def pose_2_map(pose: Pose, costmap: PyCostmap2D) -> Tuple[int, int]:
+def pose_2_map(pose: Pose | PoseStamped, costmap: PyCostmap2D) -> Tuple[int, int]:
     """
     Converts a pose from the global map frame to the indexes of a costmap map
 
@@ -46,7 +49,13 @@ def pose_2_map(pose: Pose, costmap: PyCostmap2D) -> Tuple[int, int]:
     """
     # x: int = int(round((pose.position.x - costmap.origin_x) / costmap.getResolution()))
     # y: int = int(round((pose.position.y - costmap.origin_y) / costmap.getResolution()))
-    x, y = costmap.worldToMap(pose.position.x, pose.position.y)
+    x: int = 0
+    y: int = 0
+
+    if type(pose) == Pose:
+        x, y = costmap.worldToMap(pose.position.x, pose.position.y)
+    elif type(pose) == PoseStamped:
+        x, y = costmap.worldToMap(pose.pose.position.x, pose.pose.position.y)
 
     return x, y
 
@@ -89,3 +98,126 @@ def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
     occ_grid.info.origin.position.y = pycostmap.origin_y
 
     return occ_grid
+
+
+def find_neighbors(
+    node: Tuple[int, int], costmap: PyCostmap2D
+) -> list[Tuple[Tuple[int, int], float]]:
+    """
+    Identifies neighbor nodes inspecting the 8 adjacent neighbors. Checks if neighbor is inside the map boundaries\
+    and if is not an obstacle according to a threshold. The costs of a neighbor is the sum of the distance between the node and the \
+    found neighbor and the cost of the pixel which the neighbor represents.
+
+    Args:
+        node (tuple(int,int)): The node as an x,y-coordinate in the costmap for which the neighbors should be found
+        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D)): The costmap in which it should be searched.
+    Returns:
+         list(tuple(tuple(int,int), float)): A list with valid neighbour nodes as a tuple with [x,y-coordinates, step_cost] pairs
+    """
+    neighbors = []
+    # length of diagonal = length of one side by the square root of 2 (1.41421)
+    diagonal_step_cost = costmap.getResolution() * 1.41421
+    # threshold value used to reject neighbor nodes as they are considered as obstacles [1-254]
+
+    # General approach:
+    # 1. Calculate new coordinate
+    # 2. Check if new coordinate is out of costmap
+    # 3. Check if new coordinate is lethal obstacle
+    # 4. If checks are successful, the calculate costs in meters
+    upper = (node[0], node[1] + 1)
+    if upper[1] <= costmap.getSizeInCellsY():
+        if costmap.getCostXY(upper[0], upper[1]) < LETHAL_COST:
+            step_cost = (
+                costmap.getResolution() + costmap.getCostXY(upper[0], upper[1]) / 255
+            )
+            neighbors.append((upper, step_cost))
+
+    left = (node[0] - 1, node[1])
+    if left[0] >= 0:
+        if costmap.getCostXY(left[0], left[1]) < LETHAL_COST:
+            step_cost = (
+                costmap.getResolution() + costmap.getCostXY(left[0], left[1]) / 255
+            )
+            neighbors.append((left, step_cost))
+
+    upper_left = (node[0] - 1, node[1] + 1)
+    if upper_left[0] >= 0 and upper_left[1] <= costmap.getSizeInCellsY():
+        if costmap.getCostXY(upper_left[0], upper_left[1]) < LETHAL_COST:
+            step_cost = (
+                diagonal_step_cost
+                + costmap.getCostXY(upper_left[0], upper_left[1]) / 255
+            )
+            neighbors.append((upper_left, step_cost))
+
+    upper_right = (node[0] + 1, node[1] + 1)
+    if (
+        upper_right[0] <= costmap.getSizeInCellsX()
+        and upper_right[1] <= costmap.getSizeInCellsY()
+    ):
+        if costmap.getCostXY(upper_right[0], upper_right[1]) < LETHAL_COST:
+            step_cost = (
+                diagonal_step_cost
+                + costmap.getCostXY(upper_right[0], upper_right[1]) / 255
+            )
+            neighbors.append((upper_right, step_cost))
+
+    right = (node[0] + 1, node[1])
+    if right[0] <= costmap.getSizeInCellsX():
+        if costmap.getCostXY(right[0], right[1]) < LETHAL_COST:
+            step_cost = (
+                costmap.getResolution() + costmap.getCostXY(right[0], right[1]) / 255
+            )
+            neighbors.append((right, step_cost))
+
+    lower_left = (node[0] - 1, node[1] - 1)
+    if lower_left[0] >= 0 and lower_left[1] >= 0:
+        if costmap.getCostXY(lower_left[0], lower_left[1]) < LETHAL_COST:
+            step_cost = (
+                diagonal_step_cost
+                + costmap.getCostXY(lower_left[0], lower_left[1]) / 255
+            )
+            neighbors.append((lower_left, step_cost))
+
+    lower = (node[0], node[1] - 1)
+    if lower[1] >= 0:
+        if costmap.getCostXY(lower[0], lower[1]) < LETHAL_COST:
+            step_cost = (
+                costmap.getResolution() + costmap.getCostXY(lower[0], lower[1]) / 255
+            )
+            neighbors.append((lower, step_cost))
+
+    lower_right = (node[0] + 1, node[1] - 1)
+    if lower_right[0] <= costmap.getSizeInCellsX() and lower_right[1] >= 0:
+        if costmap.getCostXY(lower_right[0], lower_right[1]) < LETHAL_COST:
+            step_cost = (
+                diagonal_step_cost
+                + costmap.getCostXY(lower_right[0], lower_right[1]) / 255
+            )
+            neighbors.append((lower_right, step_cost))
+
+    return neighbors
+
+
+def euclidian_distance(
+    start: Tuple[int, int], goal: Tuple[int, int], costmap: PyCostmap2D
+) -> float:
+    """
+    Calculates the euclidian distance between two coordinates in the costmap space.  For this purpose,\
+    it calculates the distance in the costmap domain (pixels) and them multiplies it with the resolution\
+    of the map to get the distance in meters.
+
+    Args:
+        start (tuple(int, int)): The start of the distance as an x,y-coordinate in the costmap
+        goal (tuple(int, int)): The goal of the distance as an x,y-coordinate in the costmap
+
+    Returns:
+        float: The euclidian distance in meters
+    """
+    return (
+        sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)
+        * costmap.getResolution()
+    )
+
+
+if __name__ == "__main__":
+    print("This is only an library, dont execute this Python script at it's own")

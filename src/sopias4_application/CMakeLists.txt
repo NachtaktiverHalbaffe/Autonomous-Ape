@@ -44,8 +44,12 @@ ament_python_install_package(${PROJECT_NAME})
 # Install executables
 install(PROGRAMS
   sopias4_application/gui.py
+  sopias4_application/astar.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+# Install launch files, configs, plugin descriptions
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
