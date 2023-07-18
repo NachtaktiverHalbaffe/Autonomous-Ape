@@ -27,11 +27,13 @@ class LayerPyPlugin(Node):
     as a layer plugin and give it the same plugin name as this class.
     """
 
-    def __init__(self, plugin_name, namespace: str | None = None) -> None:
+    def __init__(
+        self, node_name: str, plugin_name: str, namespace: str | None = None
+    ) -> None:
         if namespace is None:
-            super().__init__(plugin_name)  # type: ignore
+            super().__init__(node_name)  # type: ignore
         else:
-            super().__init__(plugin_name, namespace=namespace)  # type: ignore
+            super().__init__(node_name, namespace=namespace)  # type: ignore
 
         # Service server
         self.__plugin_bridge_server: Service = self.create_service(

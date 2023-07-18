@@ -1,10 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
-from launch.conditions import IfCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node, PushRosNamespace
-from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -24,8 +19,24 @@ def generate_launch_description():
         output="screen",
     )
 
+    robot_layer = Node(
+        package="sopias4_application",
+        executable="robot_layer.py",
+        name="robot_layer",
+        output="screen",
+    )
+
+    path_layer = Node(
+        package="sopias4_application",
+        executable="path_layer.py",
+        name="path_layer",
+        output="screen",
+    )
+
     ld = LaunchDescription()
     ld.add_action(astar)
     ld.add_action(gui)
+    ld.add_action(robot_layer)
+    ld.add_action(path_layer)
 
     return ld

@@ -45,6 +45,8 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   sopias4_application/gui.py
   sopias4_application/astar.py
+  sopias4_application/path_layer.py
+  sopias4_application/robot_layer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
