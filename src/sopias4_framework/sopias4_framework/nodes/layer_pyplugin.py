@@ -80,3 +80,8 @@ class LayerPyPlugin(Node):
         Returns:
             nav2_simplecommander.costmap_2d.PyCostmap2D: The updated costmap 
         """
+
+    def destroy_node(self):
+        self.get_logger().info("Shutting down node")
+        self.__plugin_bridge_server.destroy()
+        super().destroy_node()

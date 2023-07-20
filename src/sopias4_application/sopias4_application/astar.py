@@ -15,8 +15,13 @@ class Astar(PlannerPyPlugin):
     for an good explanation of the algorithm. This is a self contained node
     """
 
-    def __init__(self) -> None:
-        super().__init__(node_name="planner_astar", plugin_name="astar")
+    def __init__(self, namespace: str | None = None) -> None:
+        if namespace is None:
+            super().__init__(node_name="planner_astar", plugin_name="astar")
+        else:
+            super().__init__(
+                node_name="planner_astar", plugin_name="astar", namespace=namespace
+            )
         self.get_logger().info("Started node")
 
     def generate_path(
@@ -129,11 +134,6 @@ class Astar(PlannerPyPlugin):
 
         self.get_logger().info("A* finished generating a path")
         return path
-
-    def destroy_node(self):
-        self.get_logger().info("Shutting down node")
-        self.__plugin_bridge_server.destroy()
-        super().destroy_node()
 
 
 def main(args=None):

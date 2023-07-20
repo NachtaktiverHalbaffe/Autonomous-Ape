@@ -7,6 +7,9 @@ from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtWidgets import QApplication
 from rcl_interfaces.msg import Log
 from sensor_msgs.msg import BatteryState
+from sopias4_application.astar import Astar
+from sopias4_application.path_layer import PathLayer
+from sopias4_application.robot_layer import RobotLayer
 from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
@@ -19,6 +22,13 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow())
+        self.__astar_node: Astar = Astar(namespace=self.node.get_namespace())
+        self.__robot_layer_node: RobotLayer = RobotLayer(
+            namespace=self.node.get_namespace()
+        )
+        self.__path_layer_node: PathLayer = PathLayer(
+            namespace=self.node.get_namespace()
+        )
 
     def connect_labels_to_subscriptions(self):
         GuiLogger(widget=self.ui.textEdit, node=self.node)
@@ -165,19 +175,23 @@ class GUI(GUINode):
     def __register_turtlebot(self):
         if self.register_namespace(self.ui.lineEdit_namespace.text()):
             self.ui.pushButton_launch_turtlebot.setEnabled(True)
+            self.ui.pushButton_start_mapping.setEnabled(True)
+            self.ui.pushButton_stop_turtlebot.setEnabled(True)
             self.ui.pushButton_namespace.setEnabled(False)
 
     def __launch_turtlebot(self):
         self.launch_robot(use_simulation=self.ui.checkBox_use_simulation.isChecked())
-        self.ui.pushButton_start_mapping.setEnabled(True)
-        self.ui.pushButton_stop_turtlebot.setEnabled(True)
+        self.node_executor.add_node(self.__astar_node)
+        self.node_executor.add_node(self.__path_layer_node)
+        self.node_executor.add_node(self.__robot_layer_node)
         self.ui.pushButton_launch_turtlebot.setEnabled(False)
         self.__enable_drive_buttons(True)
 
     def __stop_turtlebot(self):
         self.stop_robot()
-        self.ui.pushButton_start_mapping.setEnabled(False)
-        self.ui.pushButton_stop_turtlebot.setEnabled(False)
+        self.node_executor.remove_node(self.__astar_node)
+        self.node_executor.remove_node(self.__path_layer_node)
+        self.node_executor.remove_node(self.__robot_layer_node)
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
         self.__enable_drive_buttons(False)

@@ -21,8 +21,15 @@ class PathLayer(LayerPyPlugin):
         ROBOT_RADIUS (float): The radius of the robots footprint. It is assumed that the robot has an circular footprint (Turtlebot 4)
     """
 
-    def __init__(self) -> None:
-        super().__init__(node_name="path_layer_node", plugin_name="path_layer")
+    def __init__(self, namespace: str | None = None) -> None:
+        if namespace is None:
+            super().__init__(node_name="path_layer_node", plugin_name="path_layer")
+        else:
+            super().__init__(
+                node_name="path_layer_node",
+                plugin_name="path_layer",
+                namespace=namespace,
+            )
         self.COST_ROBOTS: np.uint8 = np.uint8(100)
         self.ROBOT_RADIUS: float = 0.20
 

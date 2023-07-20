@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 import os
-import signal
 import subprocess
 
 import rclpy
@@ -14,10 +12,7 @@ from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.node import Node
 from rclpy.service import Service
-from sopias4_framework.tools.ros2.yaml_tools import (
-    insert_namespace_into_rviz_config,
-    insert_namespace_into_yaml_config,
-)
+from sopias4_framework.tools.ros2 import node_tools, yaml_tools
 
 from sopias4_msgs.srv import (
     Drive,
@@ -235,7 +230,7 @@ class RobotManager(Node):
         base_path = os.path.join(
             get_package_share_directory("sopias4_framework"), "config"
         )
-        insert_namespace_into_yaml_config(
+        yaml_tools.insert_namespace_into_yaml_config(
             namespace=self.get_namespace(),
             path=os.path.join(
                 base_path,
@@ -246,7 +241,7 @@ class RobotManager(Node):
                 "nav2.yaml",
             ),
         )
-        insert_namespace_into_yaml_config(
+        yaml_tools.insert_namespace_into_yaml_config(
             namespace=self.get_namespace(),
             path=os.path.join(
                 base_path,
@@ -257,7 +252,7 @@ class RobotManager(Node):
                 "amcl.yaml",
             ),
         )
-        insert_namespace_into_rviz_config(
+        yaml_tools.insert_namespace_into_rviz_config(
             namespace=self.get_namespace(),
             path=os.path.join(
                 base_path,
@@ -271,8 +266,11 @@ class RobotManager(Node):
 
         if self.__turtlebot_shell_process is None:
             # Launch launchfile
-            cmd = f'ros2 launch sopias4_framework bringup_turtlebot.launch.py namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
-            self.__turtlebot_shell_process = subprocess.Popen(cmd.split(" "))
+            self.__turtlebot_shell_process = node_tools.start_launch_file(
+                ros2_package="sopias4_framework",
+                launch_file="bringup_turtlebot.launch.py",
+                arguments=f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}',
+            )
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -321,7 +319,7 @@ class RobotManager(Node):
         self.get_logger().info("Got service rquest to stop turtlebot nodes")
 
         self.get_logger().debug("Shutting down turtlebot nodes")
-        if self.__shutdown_shell_process(self.__turtlebot_shell_process):
+        if node_tools.shutdown_nodes_launch_file(self.__turtlebot_shell_process):
             self.__turtlebot_shell_process = None
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
@@ -339,12 +337,6 @@ class RobotManager(Node):
             future = self.__gui_sclient_showDialog.call_async(dialog_request)
             rclpy.spin_until_future_complete(self.__service_client_node, future)
             # Because we only confirm the user, we doen't need to check the response
-
-        # Kill slam nodes by killing the process which runs these. Because slam is not running every time,
-        # no error status response is generated when node is already stopped
-        self.get_logger().debug("Shutting down mapping nodes if running")
-        if self.__shutdown_shell_process(self.__mapping_shell_process):
-            self.__mapping_shell_process = None
 
         self.get_logger().info("Successfully shutdown turtlebot nodes")
         return response_data
@@ -373,7 +365,7 @@ class RobotManager(Node):
         base_path = os.path.join(
             get_package_share_directory("sopias4_framework"), "config"
         )
-        insert_namespace_into_yaml_config(
+        yaml_tools.insert_namespace_into_yaml_config(
             namespace=self.get_namespace(),
             path=os.path.join(
                 base_path,
@@ -407,8 +399,11 @@ class RobotManager(Node):
         # ------ start slam toolbox ---------
         self.get_logger().debug("Starting slam nodes")
         if self.__mapping_shell_process is None:
-            cmd = f"ros2 launch sopias4_framework bringup_slam.launch.py namespace:={self.get_namespace()}"
-            self.__mapping_shell_process = subprocess.Popen(cmd.split(" "))
+            self.__mapping_shell_process = node_tools.start_launch_file(
+                ros2_package="sopias4_framework",
+                launch_file="bringup_slam.launch.py",
+                arguments=f"namespace:={self.get_namespace()}",
+            )
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -449,7 +444,7 @@ class RobotManager(Node):
         self.get_logger().info("Got service request to stop mapping")
         # ------ Stop slam toolbox ---------
         self.get_logger().debug("Stopping slam nodes")
-        if self.__shutdown_shell_process(self.__mapping_shell_process):
+        if node_tools.shutdown_nodes_launch_file(self.__mapping_shell_process):
             self.__mapping_shell_process = None
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
@@ -553,24 +548,6 @@ class RobotManager(Node):
 
         return response_data
 
-    def __shutdown_shell_process(self, shell_process: subprocess.Popen | None) -> bool:
-        """
-        Shutdown a process which runs over a shell i.e. was called with `subprocess.Popen()`
-
-        Args:
-            shell_process (Popen or None): The shell process which should be should down
-
-        Returns:
-            bool: Indicating if process was shutdown successfully or not
-        """
-        if shell_process is not None:
-            shell_process.send_signal(signal.SIGINT)
-            shell_process.wait(timeout=10)
-            shell_process = None
-            return True
-        else:
-            return False
-
     def destroy_node(self):
         """
         Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
@@ -581,20 +558,9 @@ class RobotManager(Node):
         request = RegistryService.Request()
         request.name_space = self.get_namespace()
         self.__mrc__sclient__unregister.call_async(request)
-        # Release service clients
 
-        self.__amcl_sclient_lifecycle.destroy()
-        self.__nav2_aclient_driveToPos.destroy()
-        self.__service_client_node.destroy_node()
-        # Release services
-        self.launch_service.destroy()
-        self.stop_service.destroy()
-        self.start_mapping_service.destroy()
-        self.stop_mapping_service.destroy()
-        self.drive_to_pos_action.destroy()
-        # Shutdown processes
-        self.__shutdown_shell_process(self.__turtlebot_shell_process)
-        self.__shutdown_shell_process(self.__mapping_shell_process)
+        node_tools.shutdown_nodes_launch_file(self.__turtlebot_shell_process)
+        node_tools.shutdown_nodes_launch_file(self.__mapping_shell_process)
 
         super().destroy_node()
 

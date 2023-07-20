@@ -10,7 +10,7 @@ from geometry_msgs.msg import Twist
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from rclpy.client import Client
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
 from sopias4_framework.tools.ros2 import drive_tools
@@ -124,9 +124,9 @@ class GUINode(QMainWindow):
             node_name=node_name,
             namespace=namespace,
         )
-        self.__executor = MultiThreadedExecutor()
-        self.__executor.add_node(self.node)
-        self.__spin_node_thread = Thread(target=self.__executor.spin)
+        self.node_executor = MultiThreadedExecutor()
+        self.node_executor.add_node(self.node)
+        self.__spin_node_thread = Thread(target=self.node_executor.spin)
         self.__spin_node_thread.start()
 
         # Setup GUI
@@ -227,18 +227,22 @@ class GUINode(QMainWindow):
         # SSH command "turtlebot4-setup"
 
         # Restart node with namespace
-        self.__executor.remove_node(self.node)
-        self.node.destroy_node()
+        self.node_executor.remove_node(self.node)
+        for node in self.node_executor.get_nodes():
+            node.destroy_node()
+            self.node_executor.remove_node(node)
+
         self.node = GrapficalNode(
             showed_dialog_signal=self.showed_dialog_signal,
             display_dialog_signal=self.display_dialog_signal,
             node_name=self.node_name,
             namespace=self.namespace,
         )
-        self.__executor.add_node(self.node)
-        # Start robot manager
         self.__rm_node = RobotManager(namespace=self.namespace)
-        self.__executor.add_node(self.__rm_node)
+        self.node_executor.add_node(self.node)
+        # Start robot manager
+
+        self.node_executor.add_node(self.__rm_node)
 
         self.connect_labels_to_subscriptions()
         return True
@@ -304,7 +308,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            if self.turtlebot_running and not self.is_mapping:
+            if not self.is_mapping:
                 status_response = self.node.start_mapping()
 
                 if status_response:
@@ -429,9 +433,11 @@ class GUINode(QMainWindow):
 
         :meta private:
         """
-        self.node.destroy_node()
-        if self.__rm_node is not None:
-            self.__rm_node.destroy_node()
+        for node in self.node_executor.get_nodes():
+            node.destroy_node()
+            self.node_executor.remove_node(node)
+        self.node_executor.shutdown()
+
         rclpy.shutdown()
         event.accept()
 
@@ -871,24 +877,6 @@ class GrapficalNode(Node):
 
     def __set_response_data(self, data: ShowDialog.Response):
         self.dialog_return_data = data
-
-    def destroy_node(self):
-        """
-        Clear up tasks when the node gets destroyed by e.g. a shutdown. Mainly releasing all service and action clients
-        :meta private:
-        """
-        # Release service clients
-        self.__rm_sclient_launch.destroy()
-        self.__rm_sclient_stop_robot.destroy()
-        self.__rm_sclient_start_mapping.destroy()
-        self.__rm_sclient_stop_mapping.destroy()
-        self.__mrc_sclient_register.destroy()
-        self.__service_client_node.destroy_node()
-        # Release services
-        self.show_dialog_service.destroy()
-        self.get_logger().info("Shutting down node")
-
-        super().destroy_node()
 
 
 if __name__ == "__main__":

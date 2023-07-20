@@ -5,30 +5,48 @@ import ruamel.yaml
 import ruamel.yaml.comments
 import ruamel.yaml.parser
 
-REMAPPING_VALUES_YAML_CONFIGS = ["topic", "scan_topic"]
+REMAPPING_VALUES_YAML_CONFIGS = [
+    # Topics
+    "topic",
+    "scan_topic",
+    "odom_topic",
+    # Tf frames Slam
+    "odom_frame",
+    "map_frame",
+    "base_frame",
+    # Base frame id
+    "base_frame_id",
+]
 
 REMAPPING_VALUES_RVIZ = [
+    # Turtlebot 4
     "robot_description",
     "scan",
+    "amcl_pose",
     "mobile_base/sensors/bumper_pointcloud",
     "particle_cloud",
+    "base_link",
+    "initialpose",
+    # Global costmap
     "global_costmap/costmap",
     "downsampled_costmap",
     "downsampled_costmap_updates",
     "plan",
     "global_costmap/voxel_marked_cloud",
     "global_costmap/published_footprint",
+    # Local costmap
     "local_costmap/costmap",
     "local_costmap/costmap_updates",
     "local_plan",
     "local_costmap/published_footprint",
     "local_costmap/voxel_marked_cloud",
+    # Intel realsense
     "intel_realsense_r200_depth/image_raw",
-    "marker",
     "intel_realsense_r200_depth/points",
+    "marker",
     "waypoints",
-    "initialpose",
     "clicked_point",
+    # "map",
 ]
 
 
