@@ -34,9 +34,9 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription()
-    ld.add_action(astar)
     ld.add_action(gui)
-    ld.add_action(robot_layer)
-    ld.add_action(path_layer)
+    # ld.add_action(astar)
+    # ld.add_action(robot_layer)
+    # ld.add_action(path_layer)
 
     return ld

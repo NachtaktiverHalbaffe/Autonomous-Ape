@@ -92,10 +92,28 @@ def generate_launch_description():
         ]
     )
 
+    tf_relay = GroupAction(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("sopias4_framework"),
+                            "launch",
+                            "tf_relay.launch.py",
+                        ]
+                    )
+                ),
+                launch_arguments=[("namespace", namespace)],
+            ),
+        ]
+    )
+
     ld = LaunchDescription(ARGUMENTS)
     ld.add_action(nav2)
     ld.add_action(rviz2)
     ld.add_action(amcl)
     ld.add_action(turtlebot4_sim)
+    ld.add_action(tf_relay)
 
     return ld

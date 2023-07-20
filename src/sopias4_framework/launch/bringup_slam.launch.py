@@ -55,7 +55,7 @@ def generate_launch_description():
     )
 
     slam_params = RewrittenYaml(
-        source_file=LaunchConfiguration("params"),
+        source_file=LaunchConfiguration("params_file"),
         root_key=namespace,
         param_rewrites={},
         convert_types=True,
