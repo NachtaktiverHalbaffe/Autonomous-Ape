@@ -113,8 +113,6 @@ class GUINode(QMainWindow):
         self.is_mapping: bool = False
         # Private class attributes
         self.__rm_node: RobotManager | None = None
-        self.__restart_flag = Event()
-
         self.display_dialog_signal.connect(self.__display_dialog)
 
         rclpy.init()
@@ -213,7 +211,6 @@ class GUINode(QMainWindow):
             if self.node.register_namespace(namespace):
                 self.namespace = namespace
                 # Set restart flag so GUI recognizes the node shutdown as intentional and doesn't close
-                self.__restart_flag.set()
             else:
                 return False
         except Exception as e:
@@ -222,15 +219,8 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Could'nt register name space: {e}")
             raise e
 
-        # Set namespace of physical turtlebot
-        # TODO send ssh command to turtlebGrot
-        # SSH command "turtlebot4-setup"
-
         # Restart node with namespace
         self.node_executor.remove_node(self.node)
-        for node in self.node_executor.get_nodes():
-            node.destroy_node()
-            self.node_executor.remove_node(node)
 
         self.node = GrapficalNode(
             showed_dialog_signal=self.showed_dialog_signal,
@@ -238,14 +228,39 @@ class GUINode(QMainWindow):
             node_name=self.node_name,
             namespace=self.namespace,
         )
+        # Start robot manager
         self.__rm_node = RobotManager(namespace=self.namespace)
         self.node_executor.add_node(self.node)
-        # Start robot manager
-
         self.node_executor.add_node(self.__rm_node)
+        self.node_executor.wake()
 
         self.connect_labels_to_subscriptions()
         return True
+
+    def unregister_namespace(self, namespace: str) -> bool:
+        """
+        Unregister a namespace on the Sopias4 Map-Server. It's basically a wrapper and calling the unregister_namespace
+        service client in the underlying node object. Shouldn't be needed in normal operation, but sometimes manually
+        unregistering is necessary.
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+
+        Args:
+            namespace (str): The namespace which should be registered
+
+        Returns:
+            bool: If namespace was registered successfully
+        """
+        try:
+            if self.node.unregister_namespace(namespace):
+                return True
+            else:
+                return False
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"Could'nt register name space: {e}")
+            raise e
 
     def launch_robot(self, use_simulation: bool = False) -> None:
         """
@@ -576,6 +591,13 @@ class GrapficalNode(Node):
         self.__mrc_sclient_register: Client = self.__service_client_node.create_client(
             RegistryService, "/register_namespace"
         )
+        # This service unregisters the namespace in the multi robot coordinator
+        # inside the Sopias4 Map-server
+        self.__mrc_sclient_manual_unregister: Client = (
+            self.__service_client_node.create_client(
+                RegistryService, "/unregister_namespace"
+            )
+        )
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
         self.__rm_sclient_launch: Client = self.__service_client_node.create_client(
@@ -654,6 +676,63 @@ class GrapficalNode(Node):
                     msg_2_user.content = (
                         "Namespace contains illegal characters. Choose another one"
                     )
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
+                case RegistryService.Response.UNKNOWN_ERROR:
+                    self.get_logger().error("Couldn't register namespace: Unkown error")
+                    msg_2_user.content = "Unknown error occured"
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+
+            user_response = self.__show_dialog(msg_2_user, ShowDialog.Response())
+
+            # If user response is to retry, then recursively call this function, otherwise return False
+            if user_response.selected_option == ShowDialog.Response.CONFIRMED:
+                return False
+            elif user_response.selected_option == ShowDialog.Response.RETRY:
+                return self.register_namespace(namespace)
+            else:
+                return False
+
+    def unregister_namespace(self, namespace: str):
+        """
+        Runs a service client to unregister the namespace in Sopias4 Map-Server.
+        On Failure, the user is informed and has a choice to retry
+
+        Args:
+            namespace (str): The namespace which should be registered
+
+        Returns:
+            bool: If namespace was registered successfully or not
+        """
+        self.get_logger().debug(
+            f"Sending service request to register namespace {namespace}"
+        )
+        request: RegistryService.Request = RegistryService.Request()
+        request.name_space = f"/{namespace}"
+        future = self.__mrc_sclient_manual_unregister.call_async(request)
+        self.get_logger().debug(
+            "Service request for unregistering namespace sent. Waiting for response"
+        )
+
+        # Make sure the node itself is spinnig
+        rclpy.spin_until_future_complete(self.__service_client_node, future)
+
+        response: RegistryService.Response | None = future.result()
+        if response is None:
+            return False
+        elif response.statuscode == RegistryService.Response.SUCCESS:
+            return True
+        else:
+            # Inform user about error
+            msg_2_user = ShowDialog.Request()
+            msg_2_user.title = "Error while unregistering namespace"
+            msg_2_user.icon = ShowDialog.Request.ICON_ERROR
+
+            match response.statuscode:
+                case RegistryService.Response.NS_NOT_FOUND:
+                    self.get_logger().error(
+                        "Couldn't unregister namespace: Namespace not found"
+                    )
+                    msg_2_user.content = "Namespace isn't registered. Choose another one or unregistering is not neccessary"
                     msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
                 case RegistryService.Response.UNKNOWN_ERROR:
                     self.get_logger().error("Couldn't register namespace: Unkown error")
