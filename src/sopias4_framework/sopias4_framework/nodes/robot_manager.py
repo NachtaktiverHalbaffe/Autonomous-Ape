@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
 import os
+import random
+import string
 import subprocess
 
 import rclpy
@@ -100,7 +103,6 @@ class RobotManager(Node):
         )
 
         # ---------- Publishers ----------------
-        print(f"{self.get_namespace()}/cmd_vel")
         self.__cmd_vel_pub = self.create_publisher(
             Twist, f"{self.get_namespace()}/cmd_vel", 10
         )
@@ -573,7 +575,7 @@ def main(args=None):
     # Initialize node context
     rclpy.init(args=args)
     # Create ROS2 Node
-    node = RobotManager()
+    node = RobotManager(namespace="".join(random.choices(string.ascii_lowercase, k=8)))
     # Run node
     rclpy.spin(node)
     # Cleanup
