@@ -15,7 +15,7 @@ from nav_msgs.msg import OccupancyGrid
 LETHAL_COST = 150
 
 
-def map_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
+def costmap_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
     """
     Converts a PyCostmap2D map coordinate to an pose in the map frame by applying a transformation
 
@@ -35,7 +35,7 @@ def map_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
     return pose
 
 
-def pose_2_map(pose: Pose | PoseStamped, costmap: PyCostmap2D) -> Tuple[int, int]:
+def pose_2_costmap(pose: Pose | PoseStamped, costmap: PyCostmap2D) -> Tuple[int, int]:
     """
     Converts a pose from the global map frame to the indexes of a costmap map
 
@@ -60,9 +60,9 @@ def pose_2_map(pose: Pose | PoseStamped, costmap: PyCostmap2D) -> Tuple[int, int
     return x, y
 
 
-def costmap_2_2darray(costmap: PyCostmap2D) -> np.ndarray:
+def costmap_2_grid(costmap: PyCostmap2D) -> np.ndarray:
     """
-    Reshapes/creates a 2D array from the costmap which is a 1D array
+    Reshapes/creates a grid (2D array) from the costmap which is a 1D array
 
     Args:
         costmap (PyCostmap2D):  The costmap from which the 2D array should be generated
@@ -75,6 +75,19 @@ def costmap_2_2darray(costmap: PyCostmap2D) -> np.ndarray:
     )
 
     return array2D
+
+
+def grid_2_costmap(grid: np.ndarray) -> np.ndarray:
+    """
+    Reshapes/flattes a grid (2d-array) to an array which the costmap uses internally for its costmap data
+
+    Args:
+        grid (np.ndarray): The grid which should be flattened
+
+    Returns:
+        np.ndarray: A 1-dimenionsal array
+    """
+    return grid.flatten()
 
 
 def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
@@ -110,7 +123,7 @@ def find_neighbors(
 
     Args:
         node (tuple(int,int)): The node as an x,y-coordinate in the costmap for which the neighbors should be found
-        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D)): The costmap in which it should be searched.
+        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched.
     Returns:
          list(tuple(tuple(int,int), float)): A list with valid neighbour nodes as a tuple with [x,y-coordinates, step_cost] pairs
     """
@@ -198,8 +211,30 @@ def find_neighbors(
     return neighbors
 
 
-def euclidian_distance(
+def euclidian_distance_map_domain(
     start: Tuple[int, int], goal: Tuple[int, int], costmap: PyCostmap2D
+) -> float:
+    """
+    Calculates the euclidian distance between two coordinates in the costmap space.  For this purpose,\
+    it calculates the distance in the costmap domain (pixels) and them multiplies it with the resolution\
+    of the map to get the distance in meters.
+
+    Args:
+        start (tuple(int, int)): The start of the distance as an x,y-coordinate in the costmap
+        goal (tuple(int, int)): The goal of the distance as an x,y-coordinate in the costmap
+        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which the distance is calculated
+
+    Returns:
+        float: The euclidian distance in meters
+    """
+    return (
+        sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)
+        * costmap.getResolution()
+    )
+
+
+def euclidian_distance_pixel_domain(
+    start: Tuple[int, int], goal: Tuple[int, int]
 ) -> float:
     """
     Calculates the euclidian distance between two coordinates in the costmap space.  For this purpose,\
@@ -213,10 +248,7 @@ def euclidian_distance(
     Returns:
         float: The euclidian distance in meters
     """
-    return (
-        sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)
-        * costmap.getResolution()
-    )
+    return sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)
 
 
 if __name__ == "__main__":

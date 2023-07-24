@@ -62,7 +62,7 @@ class RobotLayer(LayerPyPlugin):
 
         # Iterate through all known robot positions
         for position in self.robot_positions:
-            central_point = costmap_tools.pose_2_map(position.pose.pose, costmap)
+            central_point = costmap_tools.pose_2_costmap(position.pose.pose, costmap)
             radius_pixel: int = int(self.ROBOT_RADIUS * (1 / costmap.getResolution()))
             # The footprint is a circle => Only check if pixel in one quarter is within robot radius and
             # mirror setting costs to all 4 quadrants if pixel is within robot radius
@@ -71,7 +71,7 @@ class RobotLayer(LayerPyPlugin):
                 for y_offset in range(radius_pixel + 1):
                     # Check upper right quadrant
                     if (
-                        costmap_tools.euclidian_distance(
+                        costmap_tools.euclidian_distance_map_domain(
                             central_point,
                             (central_point[0] + x_offset, central_point[1] + y_offset),
                             costmap,

@@ -60,8 +60,10 @@ class PlannerPyPlugin(Node):
         in `generate_path()`
         """
         self.get_logger().info("Got request to generate a global path from the Planner")
-        start = costmap_tools.pose_2_map(request.start, PyCostmap2D(request.costmap))
-        goal = costmap_tools.pose_2_map(request.start, PyCostmap2D(request.costmap))
+        start = costmap_tools.pose_2_costmap(
+            request.start, PyCostmap2D(request.costmap)
+        )
+        goal = costmap_tools.pose_2_costmap(request.start, PyCostmap2D(request.costmap))
         self.costmap = PyCostmap2D(request.costmap)
 
         pixel_path: list[Tuple[int, int]] = self.generate_path(start=start, goal=goal)
@@ -72,7 +74,7 @@ class PlannerPyPlugin(Node):
         path: Path = Path()
         for node in pixel_path:
             path_node = Pose()
-            path_node = costmap_tools.map_2_pose(
+            path_node = costmap_tools.costmap_2_pose(
                 node[0], node[1], PyCostmap2D(request.costmap)
             )
             path.poses.append(path_node)  # type: ignore

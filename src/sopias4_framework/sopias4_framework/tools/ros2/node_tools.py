@@ -22,7 +22,7 @@ def shutdown_nodes_launch_file(shell_process: subprocess.Popen | None) -> bool:
     """
     if shell_process is not None:
         shell_process.send_signal(signal.SIGINT)
-        shell_process.wait(timeout=10)
+        shell_process.wait(timeout=30)
         shell_process = None
         return True
     else:

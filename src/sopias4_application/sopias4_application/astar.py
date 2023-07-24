@@ -53,7 +53,10 @@ class Astar(PlannerPyPlugin):
 
         # Append start node to
         list_open_canditates.append(
-            (start, costmap_tools.euclidian_distance(start, goal, self.costmap))
+            (
+                start,
+                costmap_tools.euclidian_distance_map_domain(start, goal, self.costmap),
+            )
         )
         # Dict for mapping children to parent
         parents = dict()
@@ -87,7 +90,7 @@ class Astar(PlannerPyPlugin):
                     continue
 
                 # Add heuristic (euclidian distance) to costs
-                final_cost = cost + costmap_tools.euclidian_distance(
+                final_cost = cost + costmap_tools.euclidian_distance_map_domain(
                     neighbor_node, goal, self.costmap
                 )
 
