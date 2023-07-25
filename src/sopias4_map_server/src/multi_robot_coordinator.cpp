@@ -4,6 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rmw/validate_namespace.h"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "sopias4_msgs/msg/robot.hpp"
 #include "sopias4_msgs/msg/namespaces.hpp"
 #include "sopias4_msgs/msg/robot_states.hpp"
@@ -126,13 +127,15 @@ private:
 
 		// Use a callback factory to pass a second argument to callback function (known bug in ros2, so this workaround is needed)
 		std::function<void(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)> callback_fcn = std::bind(&MultiRobotCoordinator::set_pose_callback, this, std::placeholders::_1, request->name_space);
+		std::function<void(const nav_msgs::msg::Path::SharedPtr msg)> callback_fcn_path = std::bind(&MultiRobotCoordinator::set_robot_path_sub_callback, this, std::placeholders::_1, request->name_space);
 
 		this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space + std::string("/amcl_pose"), 10, callback_fcn);
 		this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space + std::string("/pose"), 10, callback_fcn);
+		this->create_subscription<nav_msgs::msg::Path>(request->name_space + std::string("/plan"), 10, callback_fcn_path);
 
 		// --- Create state for registered robot --
 		sopias4_msgs::msg::Robot robot_state = sopias4_msgs::msg::Robot();
-		robot_state.name_space =request->name_space;
+		robot_state.name_space = request->name_space;
 		robot_states.push_back(robot_state);
 
 		//  Publish registered namespaces
@@ -140,9 +143,7 @@ private:
 		msg.name_spaces = registered_namespaces;
 		publisher_->publish(msg);
 		//  Publish registered robot_states
-		sopias4_msgs::msg::RobotStates states_msg = sopias4_msgs::msg::RobotStates();
-		states_msg.robot_states = robot_states;
-		publisher_robot_states_->publish(states_msg);
+		publish_robot_states();
 
 		RCLCPP_INFO(logger, "Successfully registered namespace %s", request->name_space.c_str());
 	}
@@ -176,13 +177,10 @@ private:
 		}
 		RCLCPP_DEBUG(logger, "Deleted state of robot with namespace %s", request->name_space.c_str());
 
-		RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request->name_space.c_str());
-
 		//  Publish registered namespaces
-		sopias4_msgs::msg::Namespaces msg = sopias4_msgs::msg::Namespaces();
-		msg.name_spaces = registered_namespaces;
-		publisher_->publish(msg);
+		publish_robot_states();
 
+		RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request->name_space.c_str());
 		return;
 	}
 
@@ -201,10 +199,25 @@ private:
 		}
 
 		// Publish updated state of robots
-		sopias4_msgs::msg::RobotStates msg = sopias4_msgs::msg::RobotStates();
-		msg.robot_states = robot_states;
-		publisher_robot_states_->publish(msg);
+		publish_robot_states();
 		RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", request->name_space.c_str());
+		return;
+	}
+
+	void set_robot_path_sub_callback(const nav_msgs::msg::Path::SharedPtr path, std::string name_space)
+	{
+		RCLCPP_INFO(logger, "Got request to set path for robot with namespace %s", name_space.c_str());
+		for (auto element = robot_states.begin(); element != robot_states.end(); ++element)
+		{
+			if (element->name_space == name_space)
+			{
+				element->nav_path = *path;
+				break;
+			}
+		}
+
+		publish_robot_states();
+		RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
 		return;
 	}
 
@@ -216,12 +229,18 @@ private:
 			{
 				element->pose = *pose;
 				// Publish updated state of robots
-				sopias4_msgs::msg::RobotStates msg = sopias4_msgs::msg::RobotStates();
-				msg.robot_states = robot_states;
-				publisher_robot_states_->publish(msg);
+				publish_robot_states();
 				return;
 			}
 		}
+	}
+
+	void publish_robot_states()
+	{
+		// Publish updated state of robots
+		sopias4_msgs::msg::RobotStates msg = sopias4_msgs::msg::RobotStates();
+		msg.robot_states = robot_states;
+		publisher_robot_states_->publish(msg);
 	}
 };
 

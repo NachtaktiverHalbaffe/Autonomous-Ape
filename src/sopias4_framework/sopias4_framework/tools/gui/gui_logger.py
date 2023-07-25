@@ -1,4 +1,5 @@
 import rclpy
+from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QColor, QFont, QTextCursor, QTextOption
 from PyQt5.QtWidgets import QTextEdit
 from rcl_interfaces.msg import Log
@@ -10,7 +11,7 @@ COLOR_WARNING = QColor(255, 255, 0)
 COLOR_ERROR = QColor(255, 0, 0)
 
 
-class GuiLogger:
+class GuiLogger(QObject):
     """
     This class takes a QTextEdit element as a widget and displays the ros_messages in this element. For this\
     purpose, it internally creates a subscription to the /rosout topic where all log messages are sent to.\
@@ -33,6 +34,8 @@ class GuiLogger:
                     GuiLogger(widget=self.ui.textEdit, node=self.node)
     """
 
+    value_signal = pyqtSignal(Log)
+
     def __init__(
         self,
         widget: QTextEdit,
@@ -50,8 +53,9 @@ class GuiLogger:
             namespace_filter (str, optional): Set a namespace which logs should only be shown. If not set, it will show all log messages of all nodes\
                                                                  which are visible on the DDS network. If set to "no_namespace", it will only display messages which arent namespaced
         """
-        super(GuiLogger, self).__init__(*args, **kwargs)
+        super().__init__()
         self.widget = widget
+        self.value_signal.connect(self.__add_log_msg)
         self.namespace_filter: str | None = namespace_filter
         if self.namespace_filter is not None:
             if self.namespace_filter[0] == "/":
@@ -66,9 +70,12 @@ class GuiLogger:
         self.widget.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
         self.widget.setWordWrapMode(QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere)
         self.widget.setTextColor(COLOR_INFO)
-        node.create_subscription(Log, "/rosout", self.add_log_msg, 10)
+        node.create_subscription(Log, "/rosout", self.__emit_msg, 10)
 
-    def add_log_msg(self, msg: Log):
+    def __emit_msg(self, msg: Log):
+        self.value_signal.emit(msg)
+
+    def __add_log_msg(self, msg: Log):
         """
         Appends a log message to the text box
 

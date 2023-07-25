@@ -1,10 +1,11 @@
 from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
+from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QLabel
 from rclpy.node import Node
 from sensor_msgs.msg import BatteryState
 
 
-class LabelSubscriptionHandler:
+class LabelSubscriptionHandler(QObject):
     """
     This class takes a QLabel element as a widget and connects it to an ROS2 subscription to\
     to display the content of its messages in the GUI
@@ -28,6 +29,8 @@ class LabelSubscriptionHandler:
 
     """
 
+    value_signal = pyqtSignal(str)
+
     def __init__(self, widget: QLabel, node: Node, message_type):
         """
         Args:
@@ -35,7 +38,9 @@ class LabelSubscriptionHandler:
             node (rclpy.Node): The gui node
             message_type: Type of the message which should be printed
         """
+        super().__init__()
         self.widget = widget
+        self.value_signal.connect(self.__set_text)
 
         if message_type == BatteryState:
             node.create_subscription(
@@ -70,30 +75,33 @@ class LabelSubscriptionHandler:
                 f"{type(message_type)} not implemented as a message type"
             )
 
+    def __set_text(self, msg: str):
+        self.widget.setText(msg)
+
     def set_label_kidnap_status(self, msg: KidnapStatus):
         """
         :meta private:
         """
-        self.widget.setText(str(msg.is_kidnapped))
+        self.value_signal.emit(str(msg.is_kidnapped))
 
     def set_label_battery(self, msg: BatteryState):
         """
         :meta private:
         """
-        self.widget.setText(str(round(msg.percentage, 2)))
+        self.value_signal.emit(str(round(msg.percentage, 2)))
 
     def set_label_dockstatus(self, msg: DockStatus):
         """
         :meta private:
         """
-        self.widget.setText(str(msg.is_docked))
+        self.value_signal.emit(str(msg.is_docked))
 
     def set_label_velocity(self, msg: WheelVels):
         """
         :meta private:
         """
         vel = (msg.velocity_left + msg.velocity_right) / 2
-        self.widget.setText(str(round(vel, 2)))
+        self.value_signal.emit(str(round(vel, 2)))
 
 
 if __name__ == "__main__":
