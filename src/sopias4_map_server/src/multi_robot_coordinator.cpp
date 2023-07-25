@@ -130,10 +130,19 @@ private:
 		this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space + std::string("/amcl_pose"), 10, callback_fcn);
 		this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(request->name_space + std::string("/pose"), 10, callback_fcn);
 
+		// --- Create state for registered robot --
+		sopias4_msgs::msg::Robot robot_state = sopias4_msgs::msg::Robot();
+		robot_state.name_space =request->name_space;
+		robot_states.push_back(robot_state);
+
 		//  Publish registered namespaces
 		sopias4_msgs::msg::Namespaces msg = sopias4_msgs::msg::Namespaces();
 		msg.name_spaces = registered_namespaces;
 		publisher_->publish(msg);
+		//  Publish registered robot_states
+		sopias4_msgs::msg::RobotStates states_msg = sopias4_msgs::msg::RobotStates();
+		states_msg.robot_states = robot_states;
+		publisher_robot_states_->publish(states_msg);
 
 		RCLCPP_INFO(logger, "Successfully registered namespace %s", request->name_space.c_str());
 	}

@@ -26,6 +26,7 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow())
+        self.node.get_logger().set_level(10)
         # Nav2 plugins
         self.__astar_node: Astar = Astar(namespace=self.node.get_namespace())
         self.__robot_layer_node: RobotLayer = RobotLayer(
@@ -41,7 +42,11 @@ class GUI(GUINode):
         self.__launch_process_tf_relay: subprocess.Popen | None = None
 
     def connect_labels_to_subscriptions(self):
-        GuiLogger(widget=self.ui.textEdit, node=self.node)
+        GuiLogger(
+            widget=self.ui.textEdit,
+            node=self.node,
+            namespace_filter=self.node.get_namespace(),
+        )
         try:
             LabelSubscriptionHandler(
                 widget=self.ui.label_battery, node=self.node, message_type=BatteryState

@@ -8,9 +8,9 @@ from threading import Event, Thread
 import rclpy
 from geometry_msgs.msg import Twist
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 from rclpy.client import Client
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
 from sopias4_framework.tools.ros2 import drive_tools
@@ -113,7 +113,7 @@ class GUINode(QMainWindow):
         self.is_mapping: bool = False
         # Private class attributes
         self.__rm_node: RobotManager | None = None
-        self.display_dialog_signal.connect(self.__display_dialog)
+        self.display_dialog_signal.connect(self.display_dialog)
 
         rclpy.init()
         self.node: GrapficalNode = GrapficalNode(
@@ -456,7 +456,7 @@ class GUINode(QMainWindow):
         rclpy.shutdown()
         event.accept()
 
-    def __display_dialog(self, request_data: ShowDialog.Request):
+    def display_dialog(self, request_data: ShowDialog.Request):
         """ """
         response_data = ShowDialog.Response()
         dlg = QMessageBox()
@@ -545,6 +545,57 @@ class GUINode(QMainWindow):
 
         self.showed_dialog_signal.emit(response_data)
 
+    def show_file_picker(
+        self, info_msg: str = "Open File", initial_path: str | None = None
+    ) -> str:
+        """
+        Opens a file picker to select a file
+
+        Args:
+            info_msg (str, optional): How the filepicker should be labeled. Defaults to "Open File"
+            intial_path (str, optional): If specified the filepicker opens at this path
+
+        Returns:
+            str: Path to the selected file
+        """
+        # Set initial path is one was given
+        if initial_path is not None:
+            file = QFileDialog.getOpenFileName(
+                self, info_msg, initial_path, "All Files (*)"
+            )
+        else:
+            file = QFileDialog.getOpenFileName(self, info_msg, "", "All Files (*)")
+
+        return file[0]
+
+    def show_filepath_picker(
+        self, info_msg: str = "Open Directory", initial_path: str | None = None
+    ) -> str:
+        """
+        Opens a file picker to select a path/directory
+
+        Args:
+            info_msg (str, optional): How the filepicker should be labeled. Defaults to "Open File"
+            intial_path (str, optional): If specified the filepicker opens at this path
+
+        Returns:
+            str: Path to the selected directory
+        """
+        # Set initial path is one was given
+        if initial_path is not None:
+            filepath = QFileDialog.getExistingDirectory(
+                self,
+                info_msg,
+                initial_path,
+            )
+        else:
+            filepath = QFileDialog.getExistingDirectory(
+                self,
+                info_msg,
+            )
+
+        return filepath
+
 
 class GrapficalNode(Node):
     """
@@ -575,7 +626,6 @@ class GrapficalNode(Node):
         showed_dialog_signal.connect(self.__set_response_data)
         self.dialog_return_data: ShowDialog.Response | None = None
         # Log level 10 is debug
-        self.get_logger().set_level(10)
         self.get_logger().info(f"Node started with namespace {self.get_namespace()}")
 
         # ---- Setup services -----
@@ -585,43 +635,41 @@ class GrapficalNode(Node):
 
         # --- Setup service clients ---
         # Create own sub node for service clients so they can spin independently
-        self.__service_client_node: Node = rclpy.create_node("_gui_service_clients", namespace=self.get_namespace())  # type: ignore
+        self.service_client_node: Node = rclpy.create_node("_gui_service_clients", namespace=self.get_namespace())  # type: ignore
         # This service registers the namespace in the multi robot coordinator
         # inside the Sopias4 Map-server
-        self.__mrc_sclient_register: Client = self.__service_client_node.create_client(
+        self.__mrc_sclient_register: Client = self.service_client_node.create_client(
             RegistryService, "/register_namespace"
         )
         # This service unregisters the namespace in the multi robot coordinator
         # inside the Sopias4 Map-server
         self.__mrc_sclient_manual_unregister: Client = (
-            self.__service_client_node.create_client(
+            self.service_client_node.create_client(
                 RegistryService, "/unregister_namespace"
             )
         )
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
-        self.__rm_sclient_launch: Client = self.__service_client_node.create_client(
+        self.__rm_sclient_launch: Client = self.service_client_node.create_client(
             LaunchTurtlebot, f"{self.get_namespace()}/launch"
         )
         # This service stops the running nodes of Sopias4 Application
         # so that the system isn't connected anymore to the physical robot
-        self.__rm_sclient_stop_robot: Client = self.__service_client_node.create_client(
+        self.__rm_sclient_stop_robot: Client = self.service_client_node.create_client(
             EmptyWithStatuscode, f"{self.get_namespace()}/stop"
         )
         # This service starts the mapping process
         self.__rm_sclient_start_mapping: Client = (
-            self.__service_client_node.create_client(
+            self.service_client_node.create_client(
                 EmptyWithStatuscode, f"{self.get_namespace()}/start_mapping"
             )
         )
         # This service stops the mapping provess
-        self.__rm_sclient_stop_mapping: Client = (
-            self.__service_client_node.create_client(
-                StopMapping, f"{self.get_namespace()}/stop_mapping"
-            )
+        self.__rm_sclient_stop_mapping: Client = self.service_client_node.create_client(
+            StopMapping, f"{self.get_namespace()}/stop_mapping"
         )
         # This service sends a manual drive command to the robot
-        self.__rm_sclient_drive: Client = self.__service_client_node.create_client(
+        self.__rm_sclient_drive: Client = self.service_client_node.create_client(
             Drive, f"{self.get_namespace()}/drive"
         )
 
@@ -647,7 +695,7 @@ class GrapficalNode(Node):
         )
 
         # Make sure the node itself is spinnig
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         response: RegistryService.Response | None = future.result()
         if response is None:
@@ -714,7 +762,7 @@ class GrapficalNode(Node):
         )
 
         # Make sure the node itself is spinnig
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         response: RegistryService.Response | None = future.result()
         if response is None:
@@ -765,7 +813,7 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Sent service request to launch Turtlebot. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         # Check response
         response: LaunchTurtlebot.Response | None = future.result()
@@ -794,7 +842,7 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to stop nodes sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         # Check response
         response: EmptyWithStatuscode.Response | None = future.result()
@@ -821,7 +869,7 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to start mapping sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         # Check response
         response: EmptyWithStatuscode.Response | None = future.result()
@@ -869,7 +917,7 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to start mapping sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
 
         # Check response
         response: StopMapping.Response | None = future.result()
@@ -910,7 +958,7 @@ class GrapficalNode(Node):
             request.twist = twist_msg
         future = self.__rm_sclient_drive.call_async(request)
 
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(self.service_client_node, future)
         response: Drive.Response | None = future.result()
 
         if response is None:

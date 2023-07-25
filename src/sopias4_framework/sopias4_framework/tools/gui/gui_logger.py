@@ -34,16 +34,28 @@ class GuiLogger:
     """
 
     def __init__(
-        self, widget: QTextEdit, node: Node, fontSize: int = 12, *args, **kwargs
+        self,
+        widget: QTextEdit,
+        node: Node,
+        fontSize: int = 12,
+        namespace_filter: str | None = None,
+        *args,
+        **kwargs,
     ):
         """
         Args:
             widget (QTextEdit): The QTextEdit widget which you want to convert to an logging box
             node (rclpy.Node): The node which runs the gui
             fontsize (int, optional): The font size of the log messages. Defaults to 12
+            namespace_filter (str, optional): Set a namespace which logs should only be shown. If not set, it will show all log messages of all nodes\
+                                                                 which are visible on the DDS network. If set to "no_namespace", it will only display messages which arent namespaced
         """
         super(GuiLogger, self).__init__(*args, **kwargs)
         self.widget = widget
+        self.namespace_filter: str | None = namespace_filter
+        if self.namespace_filter is not None:
+            if self.namespace_filter[0] == "/":
+                self.namespace_filter = self.namespace_filter[1::]
         # Disable the editability of the edittextbox
         self.widget.setReadOnly(True)
         # Set text Size
@@ -62,6 +74,15 @@ class GuiLogger:
 
         :meta private:
         """
+        # Filter out messages which arent under the namespace filter
+        if self.namespace_filter is not None:
+            if len(msg.name.split(".")) != 1:
+                if (
+                    self.namespace_filter == "no_namespace"
+                    or msg.name.split(".")[0] != self.namespace_filter
+                ):
+                    return
+
         match msg.level:
             case 10:
                 self.widget.setTextColor(COLOR_DEBUG)
