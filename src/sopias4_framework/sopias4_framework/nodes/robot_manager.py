@@ -89,7 +89,7 @@ class RobotManager(Node):
         )
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
         self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
-            SaveMap, "map_server/save_map"
+            SaveMap, "/map_server/save_map"
         )
         #  This service allows the robot manager to show a dialog with which the user can interact
         self.__gui_sclient_showDialog: Client = (
@@ -509,7 +509,7 @@ class RobotManager(Node):
         save_map_requ.map_mode = save_params.map_mode
         save_map_requ.free_thresh = save_params.free_thres
         save_map_requ.occupied_thresh = save_params.occupied_thres
-        # save_map_requ.image_format = save_params.image_format
+        save_map_requ.image_format = save_params.image_format
 
         self.get_logger().debug(
             "Send service request to save map to Sopias4 Map-Server"

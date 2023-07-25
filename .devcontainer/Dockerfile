@@ -63,10 +63,13 @@ ENV SHELL /bin/bash
 # ********************************************************
 
 # Happy Easter
-RUN echo 'figlet "Linux is great" ' >> /home/nachtaktiverhalbaffe/.bashrc 
+RUN echo 'figlet "Linux is great" ' >> /home/${USERNAME}/.bashrc 
 # Automatic sourcing of ROS2
-RUN echo 'source /opt/ros/humble/setup.bash' >>  /home/nachtaktiverhalbaffe/.bashrc
-RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/nachtaktiverhalbaffe/.bashrc
+RUN echo 'source /opt/ros/humble/setup.bash' >>  /home/${USERNAME}/.bashrc
+RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
+# Setup some aliases
+RUN echo 'alias sopias4-application="ros2 run sopias4_application gui.py"' >>  /home/${USERNAME}/.bashrc
+RUN echo 'alias sopias4-mapserver="ros2 run sopias4_map_server gui.py"' >>  /home/${USERNAME}/.bashrc
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
