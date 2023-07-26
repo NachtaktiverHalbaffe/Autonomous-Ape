@@ -36,13 +36,14 @@ ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
 RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	--mount=target=/var/cache/apt,type=cache,sharing=locked \
 	rm -f /etc/apt/apt.conf.d/docker-clean\
-	&& apt-get install -y --no-install-recommends \
+	&& apt-get update  && apt-get install -y \
 	ros-humble-turtlebot4-description \
 	ros-humble-turtlebot4-msgs \ 
 	ros-humble-turtlebot4-navigation \ 
-	# ros-humble-turtlebot4-node \
+	ros-humble-teleop-twist-keyboard \
 	ros-humble-turtlebot4-simulator ignition-fortress \
 	ros-dev-tools gazebo 
+	
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 
 

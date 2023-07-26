@@ -2,6 +2,7 @@ from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QLabel
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import BatteryState
 
 
@@ -47,28 +48,44 @@ class LabelSubscriptionHandler(QObject):
                 BatteryState,
                 f"{node.get_namespace()}/battery_state",
                 self.set_label_battery,
-                10,
+                QoSProfile(
+                    reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                    durability=QoSDurabilityPolicy.VOLATILE,
+                    depth=5,
+                ),
             )
         elif message_type == WheelVels:
             node.create_subscription(
                 WheelVels,
                 f"{node.get_namespace()}/wheel_vels",
                 self.set_label_velocity,
-                10,
+                QoSProfile(
+                    reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                    durability=QoSDurabilityPolicy.VOLATILE,
+                    depth=5,
+                ),
             )
         elif message_type == DockStatus:
             node.create_subscription(
                 DockStatus,
                 f"{node.get_namespace()}/dock",
                 self.set_label_dockstatus,
-                10,
+                QoSProfile(
+                    reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                    durability=QoSDurabilityPolicy.VOLATILE,
+                    depth=5,
+                ),
             )
         elif message_type == KidnapStatus:
             node.create_subscription(
                 KidnapStatus,
                 f"{node.get_namespace()}/kidnap_status",
                 self.set_label_kidnap_status,
-                10,
+                QoSProfile(
+                    reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                    durability=QoSDurabilityPolicy.VOLATILE,
+                    depth=5,
+                ),
             )
         else:
             raise NotImplementedError(

@@ -54,7 +54,7 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         "map",
-        default_value="",
+        default_value=os.path.join(sopias4_map_server_path, "maps", "default_map.yaml"),
         description="Full path to map yaml file to load",
     )
     declare_params_file_cmd = DeclareLaunchArgument(
@@ -88,7 +88,6 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[
             configured_params,
-            {"yaml_filename": map_yaml_file},
             {"topic_name": "map"},
             {"frame_id": "map"},
         ],
@@ -104,6 +103,7 @@ def generate_launch_description():
         respawn=use_respawn,
         parameters=[
             configured_params,
+            {"yaml_filename": map_yaml_file},
             {"topic_name": "map"},
             {"frame_id": "map"},
         ],
