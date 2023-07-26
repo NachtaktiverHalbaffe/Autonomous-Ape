@@ -68,6 +68,6 @@
         "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/",
+    "postCreateCommand": "sudo apt update && sudo apt upgrade -y && rosdep update && rosdep install --from-paths src --ignore-src -y && sudo chown -R nachtaktiverhalbaffe /home/ws/",
     "initializeCommand": "xhost +local:root"
 }

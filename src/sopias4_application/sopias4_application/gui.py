@@ -342,17 +342,17 @@ class GUI(GUINode):
         self.ui.pushButton_rotate_right.setEnabled(isEnabled)
 
     def closeEvent(self, event):
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_amcl)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_nav2)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_rviz2)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_tf_relay)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_amcl)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_nav2)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_rviz2)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_tf_relay)
         super().closeEvent(event)
 
     def destroy_node(self):
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_amcl)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_nav2)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_rviz2)
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_tf_relay)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_amcl)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_nav2)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_rviz2)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_tf_relay)
         super().destroy_node()
 
 
