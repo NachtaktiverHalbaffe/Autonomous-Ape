@@ -1,11 +1,12 @@
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node
-from nav2_common.launch import RewrittenYaml
+from launch_ros.actions import Node, PushRosNamespace, SetParameter
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import HasNodeParams, RewrittenYaml
 
 ARGUMENTS = [
     DeclareLaunchArgument(
@@ -25,20 +26,60 @@ ARGUMENTS = [
 
 
 def generate_launch_description():
-    slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    get_package_share_directory("turtlebot4_navigation"),
-                    "launch",
-                    "slam.launch.py",
-                ]
-            )
+    pkg_turtlebot4_navigation = get_package_share_directory("turtlebot4_navigation")
+
+    namespace = LaunchConfiguration("namespace")
+    sync = LaunchConfiguration("sync")
+    slam_params_arg = DeclareLaunchArgument(
+        "params",
+        default_value=PathJoinSubstitution(
+            [pkg_turtlebot4_navigation, "config", "slam.yaml"]
         ),
-        launch_arguments={
-            "namespace": LaunchConfiguration("namespace"),
-            "sync": LaunchConfiguration("sync"),
-        }.items(),
+        description="Robot namespace",
+    )
+
+    slam_params = RewrittenYaml(
+        source_file=LaunchConfiguration("params"),
+        root_key=namespace,
+        param_rewrites={},
+        convert_types=True,
+    )
+    remappings = [
+        ("/tf", "tf"),
+        ("/tf_static", "tf_static"),
+        ("/scan", "scan"),
+        # ("/map", "map"),
+        ("/map_metadata", "map_metadata"),
+    ]
+
+    slam = GroupAction(
+        [
+            PushRosNamespace(namespace),
+            Node(
+                package="slam_toolbox",
+                executable="sync_slam_toolbox_node",
+                name="slam_toolbox",
+                output="screen",
+                parameters=[
+                    slam_params,
+                    {"use_sim_time": LaunchConfiguration("use_sim_time")},
+                ],
+                remappings=remappings,
+                condition=IfCondition(sync),
+            ),
+            Node(
+                package="slam_toolbox",
+                executable="async_slam_toolbox_node",
+                name="slam_toolbox",
+                output="screen",
+                parameters=[
+                    slam_params,
+                    {"use_sim_time": LaunchConfiguration("use_sim_time")},
+                ],
+                remappings=remappings,
+                condition=UnlessCondition(sync),
+            ),
+        ]
     )
 
     rviz2 = IncludeLaunchDescription(
@@ -57,6 +98,7 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription(ARGUMENTS)
+    ld.add_action(slam_params_arg)
     ld.add_action(slam)
     ld.add_action(rviz2)
 

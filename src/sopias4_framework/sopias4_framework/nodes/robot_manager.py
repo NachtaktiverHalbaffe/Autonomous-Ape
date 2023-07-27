@@ -10,12 +10,14 @@ from geometry_msgs.msg import Twist
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from nav2_msgs.action import NavigateToPose
-from nav2_msgs.srv import SaveMap
 from rclpy.action import ActionClient
 from rclpy.client import Client
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.service import Service
+from slam_toolbox.srv import SaveMap
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
+from std_msgs.msg import String
 
 from sopias4_msgs.srv import (
     Drive,
@@ -89,7 +91,7 @@ class RobotManager(Node):
         )
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
         self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
-            SaveMap, "/map_server/save_map"
+            SaveMap, f"{self.get_namespace()}/slam_toolbox/save_map"
         )
         #  This service allows the robot manager to show a dialog with which the user can interact
         self.__gui_sclient_showDialog: Client = (
@@ -150,7 +152,7 @@ class RobotManager(Node):
         )
 
         # Wait until the goal is either accepted or rejected
-        rclpy.spin_until_future_complete(self, send_goal_future)
+        rclpy.spin_until_future_complete(self, send_goal_future, timeout_sec=5)
         self.__goal_handle = send_goal_future.result()
 
         # Check if goal was accepted and setting statuscode for response
@@ -321,7 +323,7 @@ class RobotManager(Node):
         self.get_logger().info("Got service rquest to stop turtlebot nodes")
 
         self.get_logger().debug("Shutting down turtlebot nodes")
-        if node_tools.shutdown_nodes_launch_file(self.__turtlebot_shell_process):
+        if node_tools.shutdown_ros_shell_process(self.__turtlebot_shell_process):
             self.__turtlebot_shell_process = None
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
@@ -337,7 +339,9 @@ class RobotManager(Node):
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
             future = self.__gui_sclient_showDialog.call_async(dialog_request)
-            rclpy.spin_until_future_complete(self.__service_client_node, future)
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=30
+            )
             # Because we only confirm the user, we doen't need to check the response
 
         self.get_logger().info("Successfully shutdown turtlebot nodes")
@@ -363,21 +367,21 @@ class RobotManager(Node):
         """
         self.get_logger().info("Got service request to start mapping")
 
-        # --- Add namespace to yaml config of slam launch file --
-        base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
-        )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "slam_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "slam.yaml",
-            ),
-        )
+        # # --- Add namespace to yaml config of slam launch file --
+        # base_path = os.path.join(
+        #     get_package_share_directory("sopias4_framework"), "config"
+        # )
+        # yaml_tools.insert_namespace_into_yaml_config(
+        #     namespace=self.get_namespace(),
+        #     path=os.path.join(
+        #         base_path,
+        #         "slam_base.yaml",
+        #     ),
+        #     output_path=os.path.join(
+        #         base_path,
+        #         "slam.yaml",
+        #     ),
+        # )
 
         # ------ Set AMCL in Inactive state -------
         self.get_logger().debug("Setting AMCL to inactive state")
@@ -385,7 +389,9 @@ class RobotManager(Node):
         request.transition.id = Transition.TRANSITION_DEACTIVATE
         try:
             future = self.__amcl_sclient_lifecycle.call_async(request)
-            rclpy.spin_until_future_complete(self.__service_client_node, future)
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=5
+            )
 
             response: ChangeState.Response | None = future.result()
             if response is None:
@@ -419,7 +425,9 @@ class RobotManager(Node):
             msg_request.interaction_options = ShowDialog.Request.CONFIRM
             msg_request.content = "Couldn't start mapping. Check if the Turtlebot4 Nodes inside Sopias4 Application are running and thats theres no mapping already in progress"
             future_dialog = self.__gui_sclient_showDialog.call_async(msg_request)
-            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future_dialog, timeout_sec=10
+            )
             return response_data
 
         self.get_logger().info("Successfully started mapping")
@@ -444,9 +452,16 @@ class RobotManager(Node):
                                                      Look at service definition in srv/StopMapping.srv
         """
         self.get_logger().info("Got service request to stop mapping")
+
+        #  Save map
+        self.get_logger().debug("Saving map")
+        # If saving failed, it will already popup a dialog here, so error handling is not necessary here
+        response_data = self.__save_map(request_data, response_data)  # type: ignore
+
         # ------ Stop slam toolbox ---------
         self.get_logger().debug("Stopping slam nodes")
-        if node_tools.shutdown_nodes_launch_file(self.__mapping_shell_process):
+
+        if node_tools.shutdown_ros_shell_process(self.__mapping_shell_process):
             self.__mapping_shell_process = None
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
@@ -457,34 +472,30 @@ class RobotManager(Node):
         self.get_logger().debug("Setting AMCL in active state")
         request: ChangeState.Request = ChangeState.Request()
         request.transition.id = Transition.TRANSITION_ACTIVATE
-        future = self.__amcl_sclient_lifecycle.call_async(request)
 
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
-        response: ChangeState.Response | None = future.result()
-        if response is None:
-            dialog_request = ShowDialog.Request()
-            dialog_request.title = "Couldn't stop mapping"
-            dialog_request.icon = ShowDialog.Request.ICON_INFO
-            dialog_request.interaction_options = ShowDialog.Request.CONFIRM_RETRY
-            dialog_request.content = (
-                "AMCL couldn't be set in active state: Unkown Error"
+        try:
+            future = self.__amcl_sclient_lifecycle.call_async(request)
+
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=10
             )
-            future_dialog = self.__gui_sclient_showDialog.call_async(dialog_request)
-            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
-
-            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
-        elif response.success:
-            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-        else:
+            response: ChangeState.Response | None = future.result()
+            if response is None:
+                self.get_logger().warning(
+                    "AMCL couldn't be set in active state after stopping mapping: Unknown Error"
+                )
+            elif response.success:
+                self.get_logger().debug(
+                    "AMCL successfully set in active state after stopping mapping"
+                )
+            else:
+                self.get_logger().warning(
+                    "Couldn't set AMCL in active state: Node already active"
+                )
+        except Exception as e:
             self.get_logger().warning(
-                "Couldn't set AMCL in active state: Node already active"
+                f"Couldn't set AMCL in active state after stopping mapping: {e}"
             )
-            response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
-            return response_data
-
-        #  Save map
-        self.get_logger().debug("Saving map")
-        response_data = self.__save_map(request_data, response_data)  # type: ignore
 
         self.get_logger().info("Successfully stopped mapping")
         return response_data
@@ -496,7 +507,7 @@ class RobotManager(Node):
         Handles the map saving process itself. If an error occurs, it informs the user and ask if it should be retried
 
         Args:
-            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \
+            response_data (EmptyWithStatuscode.Response): A response #object into which the data for the response is written. \
                                                                                                 Look at service definition in srv/EmptyWithStatusCode.srv
         
         Returns:
@@ -504,23 +515,23 @@ class RobotManager(Node):
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
         save_map_requ = SaveMap.Request()
-        save_map_requ.map_topic = save_params.map_topic
-        save_map_requ.map_url = save_params.map_name
-        save_map_requ.map_mode = save_params.map_mode
-        save_map_requ.free_thresh = save_params.free_thres
-        save_map_requ.occupied_thresh = save_params.occupied_thres
-        save_map_requ.image_format = save_params.image_format
+        map_name: String = String()
+        map_name.data = save_params.map_name
+        save_map_requ.name = map_name
 
         self.get_logger().debug(
             "Send service request to save map to Sopias4 Map-Server"
         )
         future = self.__ms_sclient_saveMap.call_async(save_map_requ)
-        rclpy.spin_until_future_complete(self.__service_client_node, future)
+        rclpy.spin_until_future_complete(
+            self.__service_client_node, future, timeout_sec=10
+        )
         response: SaveMap.Response | None = future.result()
         # Check if map was saved successfully
         if response is None:
+            self.get_logger().error("Couldn't save map: Unknown reason")
             response_data.statuscode = StopMapping.Response.UNKNOWN_ERROR
-        elif response.result:
+        elif response.result == SaveMap.Response.RESULT_SUCCESS:
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
             response_data.statuscode = StopMapping.Response.SAVING_FAILED
@@ -537,15 +548,15 @@ class RobotManager(Node):
             future_dialog = self.__gui_sclient_showDialog.call_async(dialog_request)
             rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
 
-            # User chose to retry operation
             user_response = future_dialog.result()
             if user_response is None:
                 response_data.statuscode = StopMapping.Response.SAVING_FAILED
             elif user_response.selected_option == ShowDialog.Response.RETRY:
+                # User chose to retry operation
                 #  Call function recursively to retry save operation
                 return self.__save_map(save_params, response_data)
-            #  User chose to ignore error
             else:
+                #  User chose to ignore error
                 response_data.statuscode = StopMapping.Response.SAVING_FAILED
 
         return response_data
@@ -561,8 +572,8 @@ class RobotManager(Node):
         request.name_space = self.get_namespace()
         self.__mrc__sclient__unregister.call_async(request)
 
-        node_tools.shutdown_nodes_launch_file(self.__turtlebot_shell_process)
-        node_tools.shutdown_nodes_launch_file(self.__mapping_shell_process)
+        node_tools.shutdown_ros_shell_process(self.__turtlebot_shell_process)
+        node_tools.shutdown_ros_shell_process(self.__mapping_shell_process)
 
         super().destroy_node()
 
@@ -574,10 +585,14 @@ def main(args=None):
     """
     # Initialize node context
     rclpy.init(args=args)
+    executor_rm = MultiThreadedExecutor()
     # Create ROS2 Node
     node = RobotManager(namespace="".join(random.choices(string.ascii_lowercase, k=8)))
     # Run node
-    rclpy.spin(node)
+    executor_rm.add_node(node)
+    executor_rm.wake()
+    executor_rm.spin()
+    # rclpy.spin(node)
     # Cleanup
     node.destroy_node()
     rclpy.shutdown()

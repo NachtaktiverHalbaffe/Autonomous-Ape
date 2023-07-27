@@ -83,19 +83,9 @@ class GUI(GUINode):
             lambda: Thread(target=self.__start_mapping).start()
         )
         self.ui.pushButton_stop_mapping.clicked.connect(
-            lambda: Thread(
-                target=self.__stop_mapping,
-                kwargs={
-                    "map_path": self.ui.lineEdit_map_name.text(),
-                    "map_topic": self.ui.lineEdit_map_topic.text(),
-                    "image_format": self.ui.comboBox_image_format.currentText(),
-                    "map_mode": self.ui.comboBox_map_mode.currentText(),
-                    "free_thres": float(self.ui.doubleSpinBox_free_thres.value()),
-                    "occupied_thres": float(
-                        self.ui.doubleSpinBox_occupied_thres.value()
-                    ),
-                },
-            ).start()
+            lambda: self.__stop_mapping(
+                map_name=self.ui.lineEdit_map_name.text(),
+            )
         )
         self.ui.pushButton_launch_amcl.clicked.connect(lambda: self.__launch_amcl())
         self.ui.pushButton_launch_nav2.clicked.connect(lambda: self.__launch_nav2())
@@ -174,14 +164,7 @@ class GUI(GUINode):
         )
 
     def set_default_values(self):
-        self.ui.comboBox_map_mode.addItems(["trinary", "scale", "raw"])
-        self.ui.comboBox_map_mode.setCurrentIndex(0)
-        self.ui.comboBox_image_format.addItems(["png", "pgm", "bmp"])
-        self.ui.comboBox_image_format.setCurrentIndex(0)
-        self.ui.lineEdit_map_name.setText("maps/default_map.yaml")
-        self.ui.lineEdit_map_topic.setText("/map")
-        self.ui.doubleSpinBox_free_thres.setValue(0.196)
-        self.ui.doubleSpinBox_occupied_thres.setValue(0.65)
+        self.ui.lineEdit_map_name.setText("default_map")
         self.ui.label_kidnapped.setText("Unknown")
         self.ui.label_battery.setText("Unknown")
         self.ui.label_docked.setText("Unknown")
@@ -315,20 +298,18 @@ class GUI(GUINode):
 
     def __stop_mapping(
         self,
-        map_path: str,
-        map_topic: str,
-        image_format: str,
-        map_mode: str,
-        free_thres: float,
-        occupied_thres: float,
+        map_name: str,
     ):
+        save_path = self.show_filepath_picker(
+            info_msg="Select saving path",
+            initial_path=str(
+                os.path.join(
+                    get_package_share_directory("sopias4_framework"),
+                )
+            ),
+        )
         self.stop_mapping(
-            map_path=map_path,
-            map_mode=map_mode,
-            map_topic=map_topic,
-            image_format=image_format,
-            free_thres=free_thres,
-            occupied_thres=occupied_thres,
+            map_path=f"{save_path}/{map_name}",
         )
         self.ui.pushButton_stop_mapping.setEnabled(False)
         self.ui.pushButton_start_mapping.setEnabled(True)

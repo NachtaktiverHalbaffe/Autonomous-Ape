@@ -15,14 +15,8 @@ from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
 from sopias4_framework.tools.ros2 import drive_tools
 
-from sopias4_msgs.srv import (
-    Drive,
-    EmptyWithStatuscode,
-    LaunchTurtlebot,
-    RegistryService,
-    ShowDialog,
-    StopMapping,
-)
+from sopias4_msgs.srv import (Drive, EmptyWithStatuscode, LaunchTurtlebot,
+                              RegistryService, ShowDialog, StopMapping)
 
 
 class GUINode(QMainWindow):
@@ -235,6 +229,9 @@ class GUINode(QMainWindow):
         self.node_executor.wake()
 
         self.connect_labels_to_subscriptions()
+        self.node.get_logger().info(
+            f"Successfully registered namespace {self.namespace}"
+        )
         return True
 
     def unregister_namespace(self, namespace: str) -> bool:
@@ -301,7 +298,6 @@ class GUINode(QMainWindow):
 
             if status_response:
                 self.turtlebot_running = False
-                self.namespace = None
                 self.node.get_logger().debug("Stopped robot")
             else:
                 self.turtlebot_running = True
@@ -328,7 +324,7 @@ class GUINode(QMainWindow):
 
                 if status_response:
                     self.is_mapping = True
-                    self.node.get_logger().debug("Started mapping")
+                    self.node.get_logger().info("Started mapping")
                 else:
                     self.is_mapping = False
                     self.node.get_logger().error(
@@ -346,7 +342,7 @@ class GUINode(QMainWindow):
 
     def stop_mapping(
         self,
-        map_path: str = "maps/map_default",
+        map_path: str = "map_default",
         map_topic: str = "/map",
         image_format: str = "png",
         map_mode: str = "trinary",
@@ -370,7 +366,7 @@ class GUINode(QMainWindow):
         """
 
         try:
-            if self.turtlebot_running and self.is_mapping:
+            if self.is_mapping:
                 status_response = self.node.stop_mapping(
                     image_format=image_format,
                     map_topic=map_topic,
@@ -381,6 +377,7 @@ class GUINode(QMainWindow):
                 )
                 if status_response:
                     self.turtlebot_running = True
+                    self.is_mapping = False
                     self.node.get_logger().debug("Stopped Mapping")
                 else:
                     self.turtlebot_running = False

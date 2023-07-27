@@ -26,14 +26,16 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow(), node_name="gui_sopias4_map_server")
+        self.__launch_process_system: subprocess.Popen | None = None
         self.__launch_process_mapserver: subprocess.Popen | None = None
+        self.__launch_process_mrc: subprocess.Popen | None = None
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
         self.__sclient_load_map: Client = self.node.create_client(
             LoadMap, "/map_server/load_map"
         )
         self.__sclient_save_map: Client = self.node.create_client(
-            SaveMap, "/map_server/save_map"
+            SaveMap, "/map_saver/save_map"
         )
 
         self.node.create_subscription(
@@ -49,12 +51,20 @@ class GUI(GUINode):
         )
 
     def connect_callbacks(self):
+        # Pushbuttons
         self.ui.pushButton_bringup_server.clicked.connect(
             lambda: Thread(target=self.__start_map_server).start()
         )
         self.ui.pushButton_stop_map_server.clicked.connect(
             lambda: Thread(target=self.__stop_map_server).start()
         )
+        self.ui.pushButton_launch_map_server.clicked.connect(
+            lambda: Thread(target=self.__launch_mapserver).start()
+        )
+        self.ui.pushButton_launch_mrv.clicked.connect(
+            lambda: Thread(target=self.__launch_mrc).start()
+        )
+        # Filepickers
         self.ui.pushButton_pick_params_file.clicked.connect(
             lambda: self.ui.lineEdit_path_params_file.setText(
                 self.show_file_picker(
@@ -117,7 +127,7 @@ class GUI(GUINode):
 
         # Launch launchfile in own subprocess
         launch_args: str = " ".join(launch_args_list)
-        self.__launch_process_mapserver = node_tools.start_launch_file(
+        self.__launch_process_system = node_tools.start_launch_file(
             ros2_package="sopias4_map_server",
             launch_file="bringup_server.launch.py",
             arguments=launch_args,
@@ -135,8 +145,8 @@ class GUI(GUINode):
         Stops the nodes itself. It is done by sending a SIG-INT signal (STRG+C) to the shell process which runs the nodes
         """
         self.node.get_logger().info("Stopping Sopias4 Mp-Server nodes")
-        if node_tools.shutdown_nodes_launch_file(self.__launch_process_mapserver):
-            self.__launch_process_mapserver = None
+        if node_tools.shutdown_ros_shell_process(self.__launch_process_system):
+            self.__launch_process_system = None
 
         # Enable buttons which are only useable when map server isn't running
         self.ui.pushButton_stop_map_server.setEnabled(False)
@@ -145,6 +155,18 @@ class GUI(GUINode):
         self.ui.pushButton_launch_map_server.setEnabled(True)
 
         self.node.get_logger().info("Successfully stopped Sopias4 Map-Server nodes")
+
+    def __launch_mrc(self):
+        self.__launch_process_mrc = node_tools.start_node(
+            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
+        )
+        self.ui.pushButton_launch_mrv.setEnabled(False)
+
+    def __launch_mapserver(self):
+        self.__launch_process_mapserver = node_tools.start_launch_file(
+            ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
+        )
+        self.ui.pushButton_launch_map_server.setEnabled(False)
 
     def __load_map(self):
         """
@@ -208,6 +230,7 @@ class GUI(GUINode):
 
         # Call map saver service
         self.node.get_logger().debug("Calling corresponding service")
+        print(f"{map_path}/{self.ui.lineEdit_map_name.text()}")
         req = SaveMap.Request()
         req.map_topic = self.ui.lineEdit_map_topic.text()
         req.map_url = f"{map_path}/{self.ui.lineEdit_map_name.text()}"
@@ -215,6 +238,7 @@ class GUI(GUINode):
         req.free_thresh = self.ui.doubleSpinBox_free_thres.value()
         req.occupied_thresh = self.ui.doubleSpinBox_occupied_thres.value()
         req.image_format = self.ui.comboBox_image_format.currentText()
+        print(req)
 
         future = self.__sclient_save_map.call_async(req)
         rclpy.spin_until_future_complete(
@@ -268,12 +292,16 @@ class GUI(GUINode):
 
     def closeEvent(self, event):
         """Cleanup process when GUI is closed"""
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_mapserver)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
         super().closeEvent(event)
 
     def destroy_node(self):
         """Cleanup process when GUI node is destroyed"""
-        node_tools.shutdown_nodes_launch_file(self.__launch_process_mapserver)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
+        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
         super().destroy_node()
 
 
