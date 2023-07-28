@@ -48,7 +48,7 @@ def generate_launch_description():
         ("/tf", "tf"),
         ("/tf_static", "tf_static"),
         ("/scan", "scan"),
-        # ("/map", "map"),
+        ("/map", "map"),
         ("/map_metadata", "map_metadata"),
     ]
 

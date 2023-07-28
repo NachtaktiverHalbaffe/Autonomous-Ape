@@ -15,8 +15,14 @@ from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
 from sopias4_framework.tools.ros2 import drive_tools
 
-from sopias4_msgs.srv import (Drive, EmptyWithStatuscode, LaunchTurtlebot,
-                              RegistryService, ShowDialog, StopMapping)
+from sopias4_msgs.srv import (
+    Drive,
+    EmptyWithStatuscode,
+    LaunchTurtlebot,
+    RegistryService,
+    ShowDialog,
+    StopMapping,
+)
 
 
 class GUINode(QMainWindow):
@@ -417,20 +423,14 @@ class GUINode(QMainWindow):
                                                      so e.g. 1.0 is maximum speed and 0 is standing still. Defaults to 1.0
         """
         try:
-            if self.turtlebot_running:
-                status_response = self.node.drive(twist_msg, direction, vel_rel)
-                if status_response:
-                    self.node.get_logger().debug(
-                        "Successfully send drive command t>o Turtlebot"
-                    )
-                else:
-                    self.node.get_logger().error(
-                        "Couldnt send drive command to Turtlebot du to unknown error"
-                    )
-                    # Inform user about failure and see for it's response
+            status_response = self.node.drive(twist_msg, direction, vel_rel)
+            if status_response:
+                self.node.get_logger().debug(
+                    "Successfully send drive command t>o Turtlebot"
+                )
             else:
-                self.node.get_logger().warning(
-                    "Couldn't send drive command to Turtlebot: Turtlebot is offline"
+                self.node.get_logger().error(
+                    "Couldnt send drive command to Turtlebot du to unknown error"
                 )
                 # Inform user about failure and see for it's response
         except Exception as e:

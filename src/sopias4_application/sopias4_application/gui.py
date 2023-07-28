@@ -16,9 +16,8 @@ from sopias4_application.robot_layer import RobotLayer
 from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
-from sopias4_framework.tools.gui.label_subscription_handle import (
-    LabelSubscriptionHandler,
-)
+from sopias4_framework.tools.gui.label_subscription_handle import \
+    LabelSubscriptionHandler
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
 
 
@@ -83,9 +82,19 @@ class GUI(GUINode):
             lambda: Thread(target=self.__start_mapping).start()
         )
         self.ui.pushButton_stop_mapping.clicked.connect(
-            lambda: self.__stop_mapping(
-                map_name=self.ui.lineEdit_map_name.text(),
-            )
+            lambda: Thread(
+                target=self.__stop_mapping,
+                kwargs={
+                    "map_name": self.ui.lineEdit_map_name.text(),
+                    "map_topic": self.ui.lineEdit_map_topic.text(),
+                    "image_format": self.ui.comboBox_image_format.currentText(),
+                    "map_mode": self.ui.comboBox_map_mode.currentText(),
+                    "free_thres": float(self.ui.doubleSpinBox_free_thres.value()),
+                    "occupied_thres": float(
+                        self.ui.doubleSpinBox_occupied_thres.value()
+                    ),
+                },
+            ).start()
         )
         self.ui.pushButton_launch_amcl.clicked.connect(lambda: self.__launch_amcl())
         self.ui.pushButton_launch_nav2.clicked.connect(lambda: self.__launch_nav2())
@@ -164,13 +173,21 @@ class GUI(GUINode):
         )
 
     def set_default_values(self):
+        self.ui.comboBox_map_mode.addItems(["trinary", "scale", "raw"])
+        self.ui.comboBox_map_mode.setCurrentIndex(0)
+        self.ui.comboBox_image_format.addItems(["png", "pgm", "bmp"])
+        self.ui.comboBox_image_format.setCurrentIndex(1)
         self.ui.lineEdit_map_name.setText("default_map")
+        self.ui.lineEdit_map_topic.setText("map")
+        self.ui.doubleSpinBox_free_thres.setValue(0.196)
+        self.ui.doubleSpinBox_occupied_thres.setValue(0.65)
         self.ui.label_kidnapped.setText("Unknown")
         self.ui.label_battery.setText("Unknown")
         self.ui.label_docked.setText("Unknown")
         self.ui.label_is_navigating.setText("Unknown")
         self.ui.label_kidnapped.setText("Unknown")
         self.ui.label_current_speed.setText("Unknown")
+        self.ui.horizontalSlider_velocity.setValue(100)
 
     def set_initial_disabled_elements(self):
         # --- Tab: System initialization and configuration ---
@@ -196,6 +213,7 @@ class GUI(GUINode):
             self.ui.pushButton_launch_relay.setEnabled(True)
             self.ui.pushButton_launch_rviz2.setEnabled(True)
             self.ui.pushButton_namespace.setEnabled(False)
+            self.__enable_drive_buttons(True)
 
     def __launch_turtlebot(self):
         self.launch_robot(use_simulation=self.ui.checkBox_use_simulation.isChecked())
@@ -299,17 +317,28 @@ class GUI(GUINode):
     def __stop_mapping(
         self,
         map_name: str,
+        map_topic: str,
+        image_format: str,
+        map_mode: str,
+        free_thres: float,
+        occupied_thres: float,
     ):
-        save_path = self.show_filepath_picker(
-            info_msg="Select saving path",
-            initial_path=str(
-                os.path.join(
-                    get_package_share_directory("sopias4_framework"),
-                )
-            ),
-        )
+        # save_path = self.show_filepath_picker(
+        #     info_msg="Select saving path",
+        #     initial_path=str(
+        #         os.path.join(
+        #             get_package_share_directory("sopias4_framework"),
+        #         )
+        #     ),
+        # )
         self.stop_mapping(
-            map_path=f"{save_path}/{map_name}",
+            # map_path=f"{save_path}/{map_name}",
+            map_path=map_name,
+            map_mode=map_mode,
+            map_topic=map_topic,
+            image_format=image_format,
+            free_thres=free_thres,
+            occupied_thres=occupied_thres,
         )
         self.ui.pushButton_stop_mapping.setEnabled(False)
         self.ui.pushButton_start_mapping.setEnabled(True)

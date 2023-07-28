@@ -9,13 +9,14 @@ from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
+from nav2_msgs import srv as nav2_srv
 from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.service import Service
-from slam_toolbox.srv import SaveMap
+from slam_toolbox import srv as slam_toolbox_srv
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
 from std_msgs.msg import String
 
@@ -90,8 +91,11 @@ class RobotManager(Node):
             self, NavigateToPose, "navigate_to_pose"
         )
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
+        # self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
+        #     slam_toolbox_srv.SaveMap, f"{self.get_namespace()}/slam_toolbox/save_map"
+        # )
         self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
-            SaveMap, f"{self.get_namespace()}/slam_toolbox/save_map"
+            nav2_srv.SaveMap, "/map_saver/save_map"
         )
         #  This service allows the robot manager to show a dialog with which the user can interact
         self.__gui_sclient_showDialog: Client = (
@@ -367,42 +371,35 @@ class RobotManager(Node):
         """
         self.get_logger().info("Got service request to start mapping")
 
-        # # --- Add namespace to yaml config of slam launch file --
-        # base_path = os.path.join(
-        #     get_package_share_directory("sopias4_framework"), "config"
-        # )
-        # yaml_tools.insert_namespace_into_yaml_config(
-        #     namespace=self.get_namespace(),
-        #     path=os.path.join(
-        #         base_path,
-        #         "slam_base.yaml",
-        #     ),
-        #     output_path=os.path.join(
-        #         base_path,
-        #         "slam.yaml",
-        #     ),
-        # )
-
         # ------ Set AMCL in Inactive state -------
         self.get_logger().debug("Setting AMCL to inactive state")
-        request: ChangeState.Request = ChangeState.Request()
-        request.transition.id = Transition.TRANSITION_DEACTIVATE
-        try:
-            future = self.__amcl_sclient_lifecycle.call_async(request)
-            rclpy.spin_until_future_complete(
-                self.__service_client_node, future, timeout_sec=5
-            )
+        if ("amcl", self.get_namespace()) in self.get_node_names_and_namespaces():
+            request: ChangeState.Request = ChangeState.Request()
+            request.transition.id = Transition.TRANSITION_DEACTIVATE
+            try:
+                future = self.__amcl_sclient_lifecycle.call_async(request)
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future, timeout_sec=10
+                )
 
-            response: ChangeState.Response | None = future.result()
-            if response is None:
-                response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
-            elif response.success:
-                response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
-            else:
-                self.get_logger().warning("Couldn't set AMCL node in inactive state")
-                response_data.statuscode = EmptyWithStatuscode.Response.ALREADY_ACTIVE
-        except Exception as e:
-            self.get_logger().warning(f"Couldn't set AMCL node in inactive state: {e}")
+                response: ChangeState.Response | None = future.result()
+                if response is None:
+                    response_data.statuscode = (
+                        EmptyWithStatuscode.Response.UNKNOWN_ERROR
+                    )
+                elif response.success:
+                    response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+                else:
+                    self.get_logger().warning(
+                        "Couldn't set AMCL node in inactive state"
+                    )
+                    response_data.statuscode = (
+                        EmptyWithStatuscode.Response.ALREADY_ACTIVE
+                    )
+            except Exception as e:
+                self.get_logger().warning(
+                    f"Couldn't set AMCL node in inactive state: {e}"
+                )
 
         # ------ start slam toolbox ---------
         self.get_logger().debug("Starting slam nodes")
@@ -470,32 +467,33 @@ class RobotManager(Node):
 
         # ------ Set AMCL in active state -------
         self.get_logger().debug("Setting AMCL in active state")
-        request: ChangeState.Request = ChangeState.Request()
-        request.transition.id = Transition.TRANSITION_ACTIVATE
+        if ("amcl", self.get_namespace()) in self.get_node_names_and_namespaces():
+            request: ChangeState.Request = ChangeState.Request()
+            request.transition.id = Transition.TRANSITION_ACTIVATE
 
-        try:
-            future = self.__amcl_sclient_lifecycle.call_async(request)
+            try:
+                future = self.__amcl_sclient_lifecycle.call_async(request)
 
-            rclpy.spin_until_future_complete(
-                self.__service_client_node, future, timeout_sec=10
-            )
-            response: ChangeState.Response | None = future.result()
-            if response is None:
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future, timeout_sec=10
+                )
+                response: ChangeState.Response | None = future.result()
+                if response is None:
+                    self.get_logger().warning(
+                        "AMCL couldn't be set in active state after stopping mapping: Unknown Error"
+                    )
+                elif response.success:
+                    self.get_logger().debug(
+                        "AMCL successfully set in active state after stopping mapping"
+                    )
+                else:
+                    self.get_logger().warning(
+                        "Couldn't set AMCL in active state: Node already active"
+                    )
+            except Exception as e:
                 self.get_logger().warning(
-                    "AMCL couldn't be set in active state after stopping mapping: Unknown Error"
+                    f"Couldn't set AMCL in active state after stopping mapping: {e}"
                 )
-            elif response.success:
-                self.get_logger().debug(
-                    "AMCL successfully set in active state after stopping mapping"
-                )
-            else:
-                self.get_logger().warning(
-                    "Couldn't set AMCL in active state: Node already active"
-                )
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't set AMCL in active state after stopping mapping: {e}"
-            )
 
         self.get_logger().info("Successfully stopped mapping")
         return response_data
@@ -514,24 +512,36 @@ class RobotManager(Node):
             EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
-        save_map_requ = SaveMap.Request()
-        map_name: String = String()
-        map_name.data = save_params.map_name
-        save_map_requ.name = map_name
+        # save_map_req = slam_toolbox_srv.SaveMap.Request()
+        # map_name: String = String()
+        # map_name.data = save_params.map_name
+        # save_map_req.name = map_name
+
+        save_map_req: nav2_srv.SaveMap.Request = nav2_srv.SaveMap.Request()
+        save_map_req.free_thresh = save_params.free_thres
+        save_map_req.occupied_thresh = save_params.occupied_thres
+        save_map_req.map_mode = save_params.map_mode
+        save_map_req.image_format = save_params.image_format
+        save_map_req.map_topic = save_params.map_topic
+        save_map_req.map_url = save_params.map_name
+
+        # Add namespace to topic if not given
+        if self.get_namespace() not in save_map_req.map_topic:
+            save_map_req.map_topic = f"{self.get_namespace()}/{save_map_req.map_topic}"
 
         self.get_logger().debug(
             "Send service request to save map to Sopias4 Map-Server"
         )
-        future = self.__ms_sclient_saveMap.call_async(save_map_requ)
+        future = self.__ms_sclient_saveMap.call_async(save_map_req)
         rclpy.spin_until_future_complete(
             self.__service_client_node, future, timeout_sec=10
         )
-        response: SaveMap.Response | None = future.result()
+        response: slam_toolbox_srv.SaveMap.Response | None = future.result()
         # Check if map was saved successfully
         if response is None:
             self.get_logger().error("Couldn't save map: Unknown reason")
             response_data.statuscode = StopMapping.Response.UNKNOWN_ERROR
-        elif response.result == SaveMap.Response.RESULT_SUCCESS:
+        elif response.result == slam_toolbox_srv.SaveMap.Response.RESULT_SUCCESS:
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
             response_data.statuscode = StopMapping.Response.SAVING_FAILED
@@ -585,14 +595,14 @@ def main(args=None):
     """
     # Initialize node context
     rclpy.init(args=args)
-    executor_rm = MultiThreadedExecutor()
+    # executor_rm = MultiThreadedExecutor()
     # Create ROS2 Node
     node = RobotManager(namespace="".join(random.choices(string.ascii_lowercase, k=8)))
     # Run node
-    executor_rm.add_node(node)
-    executor_rm.wake()
-    executor_rm.spin()
-    # rclpy.spin(node)
+    # executor_rm.add_node(node)
+    # executor_rm.wake()
+    # executor_rm.spin()
+    rclpy.spin(node)
     # Cleanup
     node.destroy_node()
     rclpy.shutdown()

@@ -204,25 +204,24 @@ private:
 		return;
 	}
 
-	void set_robot_path_sub_callback(const nav_msgs::msg::Path::SharedPtr path, std::string name_space)
+	void set_robot_path_sub_callback(const nav_msgs::msg::Path::SharedPtr path, const std::string name_space)
 	{
-		RCLCPP_INFO(logger, "Got request to set path for robot with namespace %s", name_space.c_str());
+		RCLCPP_DEBUG(logger, "Calling Subscription callback for pose for namespace %s", name_space.c_str());
 		for (auto element = robot_states.begin(); element != robot_states.end(); ++element)
 		{
 			if (element->name_space == name_space)
 			{
 				element->nav_path = *path;
-				break;
+				publish_robot_states();
+				RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
+				return;
 			}
 		}
-
-		publish_robot_states();
-		RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
-		return;
 	}
 
-	void set_pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose, std::string name_space)
+	void set_pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose, const std::string name_space)
 	{
+		RCLCPP_DEBUG(logger, "Calling Subscription callback for pose for namespace %s", name_space.c_str());
 		for (auto element = robot_states.begin(); element != robot_states.end(); ++element)
 		{
 			if (element->name_space == name_space)
