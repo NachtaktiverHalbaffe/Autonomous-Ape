@@ -114,6 +114,6 @@ def generate_launch_description():
     ld.add_action(rviz2)
     ld.add_action(amcl)
     ld.add_action(turtlebot4_sim)
-    ld.add_action(tf_relay)
+    # ld.add_action(tf_relay)
 
     return ld

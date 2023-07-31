@@ -35,17 +35,26 @@ ARGUMENTS = [
         default_value="False",
         description="Whether to respawn if a node crashes",
     ),
-    DeclareLaunchArgument("log_level", default_value="info", description="log level"),
+    DeclareLaunchArgument("log_level", default_value="warn", description="log level"),
+    DeclareLaunchArgument(
+        "autostart",
+        default_value="true",
+        description="Automatically startup the nav2 stack",
+    ),
 ]
 
 
 def generate_launch_description():
-    pkg_sopias4_framework = get_package_share_directory("sopias4_framework")
+    lifecycle_nodes = ["amcl"]
 
     amcl_params_arg = DeclareLaunchArgument(
         "params_file",
         default_value=PathJoinSubstitution(
-            [pkg_sopias4_framework, "config", "amcl.yaml"]
+            [
+                get_package_share_directory("sopias4_framework"),
+                "config",
+                "amcl.yaml",
+            ]
         ),
         description="AMCL parameters",
     )
@@ -55,7 +64,7 @@ def generate_launch_description():
     log_level = LaunchConfiguration("log_level")
     use_respawn = LaunchConfiguration("use_respawn")
 
-    remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
+    remappings = [("/tf", "tf"), ("/tf_static", "tf_static"), ("map", "/map")]
 
     configured_params = RewrittenYaml(
         source_file=params_file,
@@ -76,8 +85,21 @@ def generate_launch_description():
         remappings=remappings,
         namespace=namespace,
     )
+    lifecycle_manager = Node(
+        package="nav2_lifecycle_manager",
+        executable="lifecycle_manager",
+        name="lifecycle_manager_amcl",
+        output="screen",
+        namespace=namespace,
+        arguments=["--ros-args", "--log-level", log_level],
+        parameters=[
+            {"autostart": LaunchConfiguration("autostart")},
+            {"node_names": lifecycle_nodes},
+        ],
+    )
 
     ld = LaunchDescription(ARGUMENTS)
     ld.add_action(amcl_params_arg)
     ld.add_action(amcl)
+    ld.add_action(lifecycle_manager)
     return ld
