@@ -33,7 +33,7 @@ def generate_launch_description():
     slam_params_arg = DeclareLaunchArgument(
         "params",
         default_value=PathJoinSubstitution(
-            [pkg_turtlebot4_navigation, "config", "slam.yaml"]
+            [get_package_share_directory("sopias4_framework"), "config", "slam.yaml"]
         ),
         description="Robot namespace",
     )

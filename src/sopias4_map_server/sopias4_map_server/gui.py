@@ -187,7 +187,12 @@ class GUI(GUINode):
         req = LoadMap.Request()
         req.map_url = map_path
         future = self.__sclient_load_map.call_async(req)
-        rclpy.spin_until_future_complete(self.node.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(
+                self.node.service_client_node, future, timeout_sec=10
+            )
+        except Exception as e:
+            self.node.get_logger().warning(f"Couldn't spin node while loading map: {e}")
 
         response: LoadMap.Response | None = future.result()
         dlg_req = ShowDialog.Request()
@@ -230,7 +235,7 @@ class GUI(GUINode):
 
         # Call map saver service
         self.node.get_logger().debug("Calling corresponding service")
-        print(f"{map_path}/{self.ui.lineEdit_map_name.text()}")
+
         req = SaveMap.Request()
         req.map_topic = self.ui.lineEdit_map_topic.text()
         req.map_url = f"{map_path}/{self.ui.lineEdit_map_name.text()}"
@@ -238,12 +243,14 @@ class GUI(GUINode):
         req.free_thresh = self.ui.doubleSpinBox_free_thres.value()
         req.occupied_thresh = self.ui.doubleSpinBox_occupied_thres.value()
         req.image_format = self.ui.comboBox_image_format.currentText()
-        print(req)
 
         future = self.__sclient_save_map.call_async(req)
-        rclpy.spin_until_future_complete(
-            self.node.service_client_node, future, timeout_sec=5
-        )
+        try:
+            rclpy.spin_until_future_complete(
+                self.node.service_client_node, future, timeout_sec=5
+            )
+        except Exception as e:
+            self.node.get_logger().warning(f"Couldn't spin node while saving map: {e}")
 
         response: SaveMap.Response | None = future.result()
         if response is None:
@@ -269,10 +276,11 @@ class GUI(GUINode):
             self.ui.tableWidget_registered_robots.setItem(
                 row_position,
                 1,
-                QTableWidgetItem(f"({current_pose.x}, {current_pose.y})"),
+                QTableWidgetItem(
+                    f"({ round(current_pose.x, 2)}, {round(current_pose.y,2)})"
+                ),
             )
             # Current navigation goal
-            print(len(robot.nav_path.poses))
             if len(robot.nav_path.poses) != 0:
                 nav_goal: Point = robot.nav_path.poses[-1].pose.position
                 self.ui.tableWidget_registered_robots.setItem(

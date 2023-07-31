@@ -265,7 +265,7 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Could'nt register name space: {e}")
             raise e
 
-    def launch_robot(self, use_simulation: bool = False) -> None:
+    def connect_turtlebot(self, use_simulation: bool = False) -> None:
         """
         Launches all the nodes in Sopias4 Application so the system is connected to the Turtlebot. It's basically
         a wrapper and calling the launcg service client in the underlying node object. Before running this, a namespace
@@ -275,7 +275,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.launch_turtlebot(use_simulation=use_simulation)
+            status_response = self.node.connect_turtlebot(use_simulation=use_simulation)
 
             if status_response:
                 self.turtlebot_running = True
@@ -291,7 +291,7 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Couldnt launch robot: {e}")
             raise e
 
-    def stop_robot(self) -> None:
+    def disconnect_turtlebot(self) -> None:
         """
         Stops all the nodes in Sopias4 Application so the system is disconnected to the Turtlebot. It's basically
         a wrapper and calling the launch service client in the underlying node object. If the operation was
@@ -300,7 +300,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.stop_turtlebot()
+            status_response = self.node.disconnect_turtlebot()
 
             if status_response:
                 self.turtlebot_running = False
@@ -426,7 +426,7 @@ class GUINode(QMainWindow):
             status_response = self.node.drive(twist_msg, direction, vel_rel)
             if status_response:
                 self.node.get_logger().debug(
-                    "Successfully send drive command t>o Turtlebot"
+                    "Successfully send drive command to Turtlebot"
                 )
             else:
                 self.node.get_logger().error(
@@ -436,7 +436,9 @@ class GUINode(QMainWindow):
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
-            self.node.get_logger().error(f"Couldnt stop mapping: {e}")
+            self.node.get_logger().error(
+                f"Couldnt send drive command to Turtlebot: {e}"
+            )
             raise e
 
     def closeEvent(self, event):
@@ -648,12 +650,12 @@ class GrapficalNode(Node):
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
         self.__rm_sclient_launch: Client = self.service_client_node.create_client(
-            LaunchTurtlebot, f"{self.get_namespace()}/launch"
+            LaunchTurtlebot, f"{self.get_namespace()}/connect"
         )
         # This service stops the running nodes of Sopias4 Application
         # so that the system isn't connected anymore to the physical robot
         self.__rm_sclient_stop_robot: Client = self.service_client_node.create_client(
-            EmptyWithStatuscode, f"{self.get_namespace()}/stop"
+            EmptyWithStatuscode, f"{self.get_namespace()}/disconnect"
         )
         # This service starts the mapping process
         self.__rm_sclient_start_mapping: Client = (
@@ -691,8 +693,15 @@ class GrapficalNode(Node):
             "Service request for registering namespace sent. Waiting for response"
         )
 
-        # Make sure the node itself is spinnig
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        # Make sure the node itself is spinning
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=10
+            )
+        except Exception as e:
+            self.get_logger().warning(
+                f"Couldn't spin node when registering namespace: {e}"
+            )
 
         response: RegistryService.Response | None = future.result()
         if response is None:
@@ -759,7 +768,14 @@ class GrapficalNode(Node):
         )
 
         # Make sure the node itself is spinnig
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=10
+            )
+        except Exception as e:
+            self.get_logger().warning(
+                f"Couldn't spin node during unregistering namespace: {e}"
+            )
 
         response: RegistryService.Response | None = future.result()
         if response is None:
@@ -794,7 +810,7 @@ class GrapficalNode(Node):
             else:
                 return False
 
-    def launch_turtlebot(self, use_simulation: bool = False) -> bool:
+    def connect_turtlebot(self, use_simulation: bool = False) -> bool:
         """
         Runs a service client to start the nodes in Sopias4 Application so the system is connected
         to the robot and ready for operation.
@@ -810,7 +826,14 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Sent service request to launch Turtlebot. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=240
+            )
+        except Exception as e:
+            self.get_logger().warning(
+                f"Couldn't spin node when connecting to turtlebot: {e}"
+            )
 
         # Check response
         response: LaunchTurtlebot.Response | None = future.result()
@@ -821,7 +844,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def stop_turtlebot(self) -> bool:
+    def disconnect_turtlebot(self) -> bool:
         """
         Runs a service client to stop the nodes in Sopias4 Application so the system is disconnected
         from the robot and ready for operation.
@@ -839,7 +862,14 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to stop nodes sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=120
+            )
+        except Exception as e:
+            self.get_logger().warning(
+                f"Couldn't spin node when disconnecting from turtlebot: {e}"
+            )
 
         # Check response
         response: EmptyWithStatuscode.Response | None = future.result()
@@ -866,7 +896,12 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to start mapping sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=240
+            )
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node when starting mapping: {e}")
 
         # Check response
         response: EmptyWithStatuscode.Response | None = future.result()
@@ -914,7 +949,10 @@ class GrapficalNode(Node):
         self.get_logger().debug(
             "Service request to start mapping sent. Waiting for response"
         )
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(self.service_client_node, future)
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node when stopping mapping: {e}")
 
         # Check response
         response: StopMapping.Response | None = future.result()
@@ -955,7 +993,13 @@ class GrapficalNode(Node):
             request.twist = twist_msg
         future = self.__rm_sclient_drive.call_async(request)
 
-        rclpy.spin_until_future_complete(self.service_client_node, future)
+        try:
+            rclpy.spin_until_future_complete(self.service_client_node, future)
+        except Exception as e:
+            self.get_logger().warning(
+                f"Couldn't spin node when sending drive command: {e}"
+            )
+
         response: Drive.Response | None = future.result()
 
         if response is None:

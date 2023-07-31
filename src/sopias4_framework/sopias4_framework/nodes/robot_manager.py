@@ -63,10 +63,10 @@ class RobotManager(Node):
             Drive, "drive", self.__drive_callback
         )
         self.launch_service: Service = self.create_service(
-            LaunchTurtlebot, "launch", self.__launch_robot
+            LaunchTurtlebot, "connect", self.__connect_robot
         )
         self.stop_service: Service = self.create_service(
-            EmptyWithStatuscode, "stop", self.__stop_robot
+            EmptyWithStatuscode, "disconnect", self.__disconnect_robot
         )
         self.start_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "start_mapping", self.__start_mapping
@@ -192,7 +192,6 @@ class RobotManager(Node):
                                         Look at service definition in srv/Drive.srv
         """
         try:
-            print(request_data)
             self.__cmd_vel_pub.publish(request_data.twist)
             response_data.statuscode = Drive.Response.SUCCESS
         except Exception as e:
@@ -210,7 +209,7 @@ class RobotManager(Node):
             )
         return response_data
 
-    def __launch_robot(
+    def __connect_robot(
         self,
         request_data: LaunchTurtlebot.Request,
         response_data: LaunchTurtlebot.Response,
@@ -232,44 +231,6 @@ class RobotManager(Node):
         """
         self.get_logger().info(
             "Got service request to launch necessary turtlebot nodes"
-        )
-
-        # --- Add namespace to yaml config of nav2 and amcl launch file ---
-        base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
-        )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "nav2_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "nav2.yaml",
-            ),
-        )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "amcl_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "amcl.yaml",
-            ),
-        )
-        yaml_tools.insert_namespace_into_rviz_config(
-            namespace=self.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "rviz_base.rviz",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "rviz.rviz",
-            ),
         )
 
         if self.__turtlebot_shell_process is None:
@@ -297,15 +258,20 @@ class RobotManager(Node):
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
             future = self.__gui_sclient_showDialog.call_async(dialog_request)
-            rclpy.spin_until_future_complete(
-                self.__service_client_node, future, timeout_sec=10
-            )
+            try:
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future, timeout_sec=10
+                )
+            except Exception as e:
+                self.get_logger().warning(
+                    f"Couldn't spin node while showing error dialog: {e}"
+                )
             # Because we only confirm the user, we doen't need to check the response
 
         self.get_logger().info("Successfully started turtlebot nodes")
         return response_data
 
-    def __stop_robot(
+    def __disconnect_robot(
         self,
         _: EmptyWithStatuscode.Request,
         response_data: EmptyWithStatuscode.Response,
@@ -343,9 +309,14 @@ class RobotManager(Node):
             dialog_request.interaction_options = ShowDialog.Request.CONFIRM
 
             future = self.__gui_sclient_showDialog.call_async(dialog_request)
-            rclpy.spin_until_future_complete(
-                self.__service_client_node, future, timeout_sec=30
-            )
+            try:
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future, timeout_sec=30
+                )
+            except Exception as e:
+                self.get_logger().warning(
+                    f"Couldn't spin node while showing error dialog: {e}"
+                )
             # Because we only confirm the user, we doen't need to check the response
 
         self.get_logger().info("Successfully shutdown turtlebot nodes")
@@ -378,9 +349,14 @@ class RobotManager(Node):
             request.transition.id = Transition.TRANSITION_DEACTIVATE
             try:
                 future = self.__amcl_sclient_lifecycle.call_async(request)
-                rclpy.spin_until_future_complete(
-                    self.__service_client_node, future, timeout_sec=10
-                )
+                try:
+                    rclpy.spin_until_future_complete(
+                        self.__service_client_node, future, timeout_sec=10
+                    )
+                except Exception as e:
+                    self.get_logger().warning(
+                        f"Couldn't spin node while starting mapping: {e}"
+                    )
 
                 response: ChangeState.Response | None = future.result()
                 if response is None:
@@ -422,9 +398,16 @@ class RobotManager(Node):
             msg_request.interaction_options = ShowDialog.Request.CONFIRM
             msg_request.content = "Couldn't start mapping. Check if the Turtlebot4 Nodes inside Sopias4 Application are running and thats theres no mapping already in progress"
             future_dialog = self.__gui_sclient_showDialog.call_async(msg_request)
-            rclpy.spin_until_future_complete(
-                self.__service_client_node, future_dialog, timeout_sec=10
-            )
+
+            try:
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future_dialog, timeout_sec=10
+                )
+            except Exception as e:
+                self.get_logger().warning(
+                    f"Couldn't spin node while showing error dialog: {e}"
+                )
+
             return response_data
 
         self.get_logger().info("Successfully started mapping")
@@ -474,9 +457,15 @@ class RobotManager(Node):
             try:
                 future = self.__amcl_sclient_lifecycle.call_async(request)
 
-                rclpy.spin_until_future_complete(
-                    self.__service_client_node, future, timeout_sec=10
-                )
+                try:
+                    rclpy.spin_until_future_complete(
+                        self.__service_client_node, future, timeout_sec=10
+                    )
+                except Exception as e:
+                    self.get_logger().warning(
+                        f"Couldn't spin node while setting AMCL node to active state: {e}"
+                    )
+
                 response: ChangeState.Response | None = future.result()
                 if response is None:
                     self.get_logger().warning(
@@ -533,15 +522,19 @@ class RobotManager(Node):
             "Send service request to save map to Sopias4 Map-Server"
         )
         future = self.__ms_sclient_saveMap.call_async(save_map_req)
-        rclpy.spin_until_future_complete(
-            self.__service_client_node, future, timeout_sec=10
-        )
-        response: slam_toolbox_srv.SaveMap.Response | None = future.result()
+        try:
+            rclpy.spin_until_future_complete(
+                self.__service_client_node, future, timeout_sec=10
+            )
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node while saving map: {e}")
+
+        response: nav2_srv.SaveMap.Response | None = future.result()
         # Check if map was saved successfully
         if response is None:
             self.get_logger().error("Couldn't save map: Unknown reason")
             response_data.statuscode = StopMapping.Response.UNKNOWN_ERROR
-        elif response.result == slam_toolbox_srv.SaveMap.Response.RESULT_SUCCESS:
+        elif response.result:
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
             response_data.statuscode = StopMapping.Response.SAVING_FAILED
@@ -556,7 +549,14 @@ class RobotManager(Node):
             dialog_request.interaction_options = ShowDialog.Request.IGNORE_RETRY
 
             future_dialog = self.__gui_sclient_showDialog.call_async(dialog_request)
-            rclpy.spin_until_future_complete(self.__service_client_node, future_dialog)
+            try:
+                rclpy.spin_until_future_complete(
+                    self.__service_client_node, future_dialog
+                )
+            except Exception as e:
+                self.get_logger().warning(
+                    f"Couldn't spin node while showing error dialog: {e}"
+                )
 
             user_response = future_dialog.result()
             if user_response is None:
@@ -595,13 +595,9 @@ def main(args=None):
     """
     # Initialize node context
     rclpy.init(args=args)
-    # executor_rm = MultiThreadedExecutor()
     # Create ROS2 Node
     node = RobotManager(namespace="".join(random.choices(string.ascii_lowercase, k=8)))
     # Run node
-    # executor_rm.add_node(node)
-    # executor_rm.wake()
-    # executor_rm.spin()
     rclpy.spin(node)
     # Cleanup
     node.destroy_node()

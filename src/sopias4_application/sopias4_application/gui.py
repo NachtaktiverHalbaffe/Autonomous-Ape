@@ -5,7 +5,7 @@ import subprocess
 import sys
 from threading import Thread
 
-from ament_index_python import get_package_share_directory
+import ament_index_python
 from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtWidgets import QApplication
 from rcl_interfaces.msg import Log
@@ -16,8 +16,9 @@ from sopias4_application.robot_layer import RobotLayer
 from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
-from sopias4_framework.tools.gui.label_subscription_handle import \
-    LabelSubscriptionHandler
+from sopias4_framework.tools.gui.label_subscription_handle import (
+    LabelSubscriptionHandler,
+)
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
 
 
@@ -72,29 +73,24 @@ class GUI(GUINode):
             ).start()
         )
         self.ui.pushButton_launch_turtlebot.clicked.connect(
-            lambda: Thread(target=self.__launch_turtlebot).start()
+            lambda: Thread(target=self.__connect_turtlebot).start()
         )
         self.ui.pushButton_stop_turtlebot.clicked.connect(
-            lambda: Thread(target=self.__stop_turtlebot).start()
+            lambda: Thread(target=self.__disconnect_turtlebot).start()
         )
         # ---  Tab: Mapping ---
         self.ui.pushButton_start_mapping.clicked.connect(
             lambda: Thread(target=self.__start_mapping).start()
         )
         self.ui.pushButton_stop_mapping.clicked.connect(
-            lambda: Thread(
-                target=self.__stop_mapping,
-                kwargs={
-                    "map_name": self.ui.lineEdit_map_name.text(),
-                    "map_topic": self.ui.lineEdit_map_topic.text(),
-                    "image_format": self.ui.comboBox_image_format.currentText(),
-                    "map_mode": self.ui.comboBox_map_mode.currentText(),
-                    "free_thres": float(self.ui.doubleSpinBox_free_thres.value()),
-                    "occupied_thres": float(
-                        self.ui.doubleSpinBox_occupied_thres.value()
-                    ),
-                },
-            ).start()
+            lambda: self.__stop_mapping(
+                map_name=self.ui.lineEdit_map_name.text(),
+                map_topic=self.ui.lineEdit_map_topic.text(),
+                image_format=self.ui.comboBox_image_format.currentText(),
+                map_mode=self.ui.comboBox_map_mode.currentText(),
+                free_thres=float(self.ui.doubleSpinBox_free_thres.value()),
+                occupied_thres=float(self.ui.doubleSpinBox_occupied_thres.value()),
+            )
         )
         self.ui.pushButton_launch_amcl.clicked.connect(lambda: self.__launch_amcl())
         self.ui.pushButton_launch_nav2.clicked.connect(lambda: self.__launch_nav2())
@@ -215,8 +211,10 @@ class GUI(GUINode):
             self.ui.pushButton_namespace.setEnabled(False)
             self.__enable_drive_buttons(True)
 
-    def __launch_turtlebot(self):
-        self.launch_robot(use_simulation=self.ui.checkBox_use_simulation.isChecked())
+    def __connect_turtlebot(self):
+        self.connect_turtlebot(
+            use_simulation=self.ui.checkBox_use_simulation.isChecked()
+        )
         self.node_executor.add_node(self.__astar_node)
         self.node_executor.add_node(self.__path_layer_node)
         self.node_executor.add_node(self.__robot_layer_node)
@@ -225,18 +223,8 @@ class GUI(GUINode):
 
     def __launch_rviz2(self):
         base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
-        )
-        yaml_tools.insert_namespace_into_rviz_config(
-            namespace=self.node.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "rviz_base.rviz",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "rviz.rviz",
-            ),
+            ament_index_python.get_package_share_directory("sopias4_framework"),
+            "config",
         )
 
         self.__launch_process_rviz2 = node_tools.start_launch_file(
@@ -247,21 +235,6 @@ class GUI(GUINode):
         self.ui.pushButton_launch_rviz2.setEnabled(False)
 
     def __launch_nav2(self):
-        base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
-        )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.node.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "nav2_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "nav2.yaml",
-            ),
-        )
-
         self.__launch_process_nav2 = node_tools.start_launch_file(
             ros2_package="sopias4_framework",
             launch_file="nav2.launch.py",
@@ -271,18 +244,8 @@ class GUI(GUINode):
 
     def __launch_amcl(self):
         base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
-        )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.node.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "amcl_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "amcl.yaml",
-            ),
+            ament_index_python.get_package_share_directory("sopias4_framework"),
+            "config",
         )
 
         self.__launch_process_amcl = node_tools.start_launch_file(
@@ -300,8 +263,8 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_relay.setEnabled(False)
 
-    def __stop_turtlebot(self):
-        self.stop_robot()
+    def __disconnect_turtlebot(self):
+        self.disconnect_turtlebot()
         self.node_executor.remove_node(self.__astar_node)
         self.node_executor.remove_node(self.__path_layer_node)
         self.node_executor.remove_node(self.__robot_layer_node)
@@ -323,23 +286,29 @@ class GUI(GUINode):
         free_thres: float,
         occupied_thres: float,
     ):
-        # save_path = self.show_filepath_picker(
-        #     info_msg="Select saving path",
-        #     initial_path=str(
-        #         os.path.join(
-        #             get_package_share_directory("sopias4_framework"),
-        #         )
-        #     ),
-        # )
-        self.stop_mapping(
-            # map_path=f"{save_path}/{map_name}",
-            map_path=map_name,
-            map_mode=map_mode,
-            map_topic=map_topic,
-            image_format=image_format,
-            free_thres=free_thres,
-            occupied_thres=occupied_thres,
+        save_path = self.show_filepath_picker(
+            info_msg="Select saving path",
+            initial_path=str(
+                os.path.join(
+                    ament_index_python.get_package_share_directory(
+                        "sopias4_map_server"
+                    ),
+                    "maps",
+                )
+            ),
         )
+        Thread(
+            target=self.stop_mapping,
+            kwargs={
+                "map_path": f"{save_path}/{map_name}",
+                # "map_path": map_name,
+                "map_mode": map_mode,
+                "map_topic": map_topic,
+                "image_format": image_format,
+                "free_thres": free_thres,
+                "occupied_thres": occupied_thres,
+            },
+        ).start()
         self.ui.pushButton_stop_mapping.setEnabled(False)
         self.ui.pushButton_start_mapping.setEnabled(True)
 

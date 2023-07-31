@@ -130,7 +130,7 @@ def generate_launch_description():
     lifecycle_manager = Node(
         package="nav2_lifecycle_manager",
         executable="lifecycle_manager",
-        name="lifecycle_map_server",
+        name="lifecycle_manager_map_server",
         output="screen",
         arguments=["--ros-args", "--log-level", log_level],
         parameters=[{"autostart": autostart}, {"node_names": lifecycle_nodes}],
