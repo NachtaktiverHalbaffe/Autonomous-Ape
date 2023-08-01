@@ -35,7 +35,7 @@ ARGUMENTS = [
         default_value="False",
         description="Whether to respawn if a node crashes",
     ),
-    DeclareLaunchArgument("log_level", default_value="warn", description="log level"),
+    DeclareLaunchArgument("log_level", default_value="error", description="log level"),
     DeclareLaunchArgument(
         "autostart",
         default_value="true",

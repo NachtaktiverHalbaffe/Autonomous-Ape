@@ -72,7 +72,7 @@ def generate_launch_description():
                 parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
                 remappings=remappings,
                 output="screen",
-                ros_arguments=["--log-level", "error"],
+                ros_arguments=["--log-level", "FATAL"],
                 condition=LaunchConfigurationNotEquals("params_file", ""),
             ),
             # --- Use Turtlebot4 param file ---
@@ -92,7 +92,7 @@ def generate_launch_description():
                 ],
                 parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
                 remappings=remappings,
-                ros_arguments=["--log-level", "error"],
+                ros_arguments=["--log-level", "ERROR"],
                 output="screen",
                 condition=LaunchConfigurationEquals("params_file", ""),
             ),

@@ -34,10 +34,6 @@ def generate_launch_description():
     nav2 = GroupAction(
         [
             PushRosNamespace(namespace),
-            # SetRemap("map", "/map"),
-            # SetRemap("/tf", "tf"),
-            # SetRemap("/tf_static", "/tf_static"),
-            # SetRemap("/odom", "odom"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(

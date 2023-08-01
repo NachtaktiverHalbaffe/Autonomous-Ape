@@ -7,6 +7,7 @@ import subprocess
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist
+from irobot_create_msgs.action import Dock, Undock
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
 from nav2_msgs import srv as nav2_srv
@@ -18,7 +19,7 @@ from rclpy.node import Node
 from rclpy.service import Service
 from slam_toolbox import srv as slam_toolbox_srv
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
-from std_msgs.msg import String
+from std_srvs.srv import Empty
 
 from sopias4_msgs.srv import (
     Drive,
@@ -45,6 +46,8 @@ class RobotManager(Node):
         stop_service (Service): A service to stop/disconnect from the Turtlebot. The service can be accessed via the service "<namespace>/stop"
         start_mapping_service (Service): A service to start the mapping. The service can be accessed via the service "<namespace>/start_mapping". It uses the lifecycles in the background to set the slam node into an active state
         stop_mapping_service (Service): A service to stop the mapping. The service can be accessed via the service "<namespace>/stop_mapping". It uses the lifecycles in the background to set the slam node into an inactive state
+        dock_service (Service): A service to let the turtlebot dock to its charging station. The service can be accessed via the service "<namespace>/dock"
+        undock_service (Service): A service to let the turtlebot dock from its charging station. The service can be accessed via the service "<namespace>/undock"
     """
 
     def __init__(self, node_name="robot_manager", namespace: str | None = None) -> None:
@@ -74,6 +77,12 @@ class RobotManager(Node):
         self.stop_mapping_service: Service = self.create_service(
             StopMapping, "stop_mapping", self.__stop_mapping
         )
+        self.dock_service: Service = self.create_service(
+            EmptyWithStatuscode, "dock", self.__dock
+        )
+        self.undock_service: Service = self.create_service(
+            EmptyWithStatuscode, "undock", self.__dock
+        )
 
         # ------------------- Service clients--------------------
         # Create own sub node for service clients so they can spin independently
@@ -85,10 +94,6 @@ class RobotManager(Node):
             self.__service_client_node.create_client(
                 ChangeState, f"{self.get_namespace()}/amcl/change_state"
             )
-        )
-        # This action lets the robot drive autonomously to an goal position
-        self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
-            self, NavigateToPose, "navigate_to_pose"
         )
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
         # self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
@@ -106,6 +111,22 @@ class RobotManager(Node):
         # This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver
         self.__mrc__sclient__unregister = self.__service_client_node.create_client(
             RegistryService, "/unregister_namespace"
+        )
+
+        # ------- Action clients ---------------
+        # This action lets the robot drive autonomously to an goal position
+        self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
+            self.__service_client_node,
+            NavigateToPose,
+            f"{self.get_namespace()}/navigate_to_pose",
+        )
+        # This action lets the turtlebot dock to its charging station
+        self.__tb4_aclient_dock: ActionClient = ActionClient(
+            self.__service_client_node, Dock, f"{self.get_namespace()}/dock"
+        )
+        # This action lets the turtlebot undock from its charging station
+        self.__tb4_aclient_undock: ActionClient = ActionClient(
+            self.__service_client_node, Undock, f"{self.get_namespace()}/undock"
         )
 
         # ---------- Publishers ----------------
@@ -501,10 +522,6 @@ class RobotManager(Node):
             EmptyWithStatuscode.Response: A response which contains the statuscode of the operation.  \
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
-        # save_map_req = slam_toolbox_srv.SaveMap.Request()
-        # map_name: String = String()
-        # map_name.data = save_params.map_name
-        # save_map_req.name = map_name
 
         save_map_req: nav2_srv.SaveMap.Request = nav2_srv.SaveMap.Request()
         save_map_req.free_thresh = save_params.free_thres
@@ -568,6 +585,78 @@ class RobotManager(Node):
             else:
                 #  User chose to ignore error
                 response_data.statuscode = StopMapping.Response.SAVING_FAILED
+
+        return response_data
+
+    def __dock(
+        self,
+        _: EmptyWithStatuscode.Request,
+        response_data: EmptyWithStatuscode.Response,
+    ):
+        """
+        Callback function for a service which let the turtlebot dock to its charging station. It uses the underlying action from the icreate3 robot
+
+        Args:
+            request_data (EmptyWithStatuscode.Request): The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv
+            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \
+                                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+        
+        Returns:
+            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation. \
+                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+        """
+        goal_msg = Dock.Goal()
+        self.__tb4_aclient_dock.wait_for_server()
+
+        future = self.__tb4_aclient_dock.send_goal_async(goal_msg)
+        try:
+            rclpy.spin_until_future_complete(self.__service_client_node, future)
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node while docking: {e}")
+
+        response: Dock.Result | None = future.result()
+        if response is None:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+        elif response:
+            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+        else:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+
+        return response_data
+
+    def __undock(
+        self,
+        _: EmptyWithStatuscode.Request,
+        response_data: EmptyWithStatuscode.Response,
+    ):
+        """
+        Callback function for a service which let the turtlebot undock from its charging station. It uses the underlying action from the icreate3 robot
+
+        Args:
+            request_data (EmptyWithStatuscode.Request): The data from the request. Look at service definition in srv/EmptyWithStatusCode.srv
+            response_data (EmptyWithStatuscode.Response): A response object into which the data for the response is written. \
+                                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+        
+        Returns:
+            EmptyWithStatuscode.Response: A response which contains the statuscode of the operation. \
+                                                                    Look at service definition in srv/EmptyWithStatusCode.srv
+        """
+        goal_msg = Undock.Goal()
+        self.__tb4_aclient_dock.wait_for_server()
+
+        future = self.__tb4_aclient_undock.send_goal_async(goal_msg)
+        try:
+            rclpy.spin_until_future_complete(self.__service_client_node, future)
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node while docking: {e}")
+
+        response: Undock.Result | None = future.result()
+        if response is None:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
+        elif response:
+            response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
+        else:
+            response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
 
         return response_data
 

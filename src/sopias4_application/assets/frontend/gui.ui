@@ -1,775 +1,820 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>MainWindow</class>
-    <widget class="QMainWindow" name="MainWindow">
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>1580</width>
-                <height>650</height>
-            </rect>
-        </property>
-        <property name="windowTitle">
-            <string>MainWindow</string>
-        </property>
-        <widget class="QWidget" name="centralwidget">
-            <layout class="QVBoxLayout" name="verticalLayout">
-                <item>
-                    <widget class="QTabWidget" name="tabWidget">
-                        <property name="currentIndex">
-                            <number>0</number>
-                        </property>
-                        <widget class="QWidget" name="tab_conf_init">
-                            <attribute name="title">
-                                <string>Initialization/Configuration</string>
-                            </attribute>
-                            <layout class="QVBoxLayout" name="verticalLayout_2">
-                                <item>
-                                    <widget class="QLabel" name="label">
-                                        <property name="text">
-                                            <string># Initialization and Configuration</string>
-                                        </property>
-                                        <property name="textFormat">
-                                            <enum>Qt::MarkdownText</enum>
-                                        </property>
-                                        <property name="alignment">
-                                            <set>Qt::AlignCenter</set>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_3">
-                                        <item>
-                                            <widget class="QLabel" name="label_2">
-                                                <property name="text">
-                                                    <string>## Register a namespace</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_3">
-                                                <property name="text">
-                                                    <string>Register a unique namespace in the system. The name space is used to identify the individual robot. Because of this, this has to be done before launching the Turtlebot itself. Make shure the IP adress of the robot is set correctly before starting this process.</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QGridLayout" name="gridLayout">
-                                                <item row="2" column="1">
-                                                    <widget class="QLineEdit" name="lineEdit_namespace"/>
-                                                </item>
-                                                <item row="2" column="0">
-                                                    <widget class="QLabel" name="label_4">
-                                                        <property name="text">
-                                                            <string>**Name space:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="3">
-                                                    <widget class="QPushButton" name="pushButton_unregister">
-                                                        <property name="text">
-                                                            <string>Unregister</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="4">
-                                                    <widget class="QPushButton" name="pushButton_namespace">
-                                                        <property name="text">
-                                                            <string>Register</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_4">
-                                        <item>
-                                            <widget class="QLabel" name="label_5">
-                                                <property name="text">
-                                                    <string>## Manage Turtlebot</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QHBoxLayout" name="horizontalLayout"/>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_8">
-                                                <property name="text">
-                                                    <string>Before launching the Turtlebot, make sure the name space is registered. If using the simulation, then make sure to set the namespace also inside gazebo</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QCheckBox" name="checkBox_use_simulation">
-                                                <property name="text">
-                                                    <string>Use simulation</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QHBoxLayout" name="horizontalLayout_2">
-                                                <item>
-                                                    <widget class="QPushButton" name="pushButton_launch_turtlebot">
-                                                        <property name="text">
-                                                            <string>Launch Turtlebot</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item>
-                                                    <widget class="QPushButton" name="pushButton_stop_turtlebot">
-                                                        <property name="text">
-                                                            <string>Stop Turtlebot</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_6">
-                                                <property name="text">
-                                                    <string>### Manual launch sub-components</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_7">
-                                                <property name="text">
-                                                    <string>By launching sub-components individually, the &quot;Stop Turtlebot&quot; button doesn't work as intended.</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QGridLayout" name="gridLayout_6">
-                                                <item row="1" column="1">
-                                                    <widget class="QPushButton" name="pushButton_launch_nav2">
-                                                        <property name="text">
-                                                            <string>Launch Navigation2</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="2">
-                                                    <widget class="QPushButton" name="pushButton_launch_relay">
-                                                        <property name="text">
-                                                            <string>Launch TF Relay</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="3">
-                                                    <widget class="QPushButton" name="pushButton_launch_amcl">
-                                                        <property name="text">
-                                                            <string>Launch AMCL</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="0">
-                                                    <widget class="QPushButton" name="pushButton_launch_rviz2">
-                                                        <property name="text">
-                                                            <string>Launch Rviz2</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <spacer name="verticalSpacer">
-                                        <property name="orientation">
-                                            <enum>Qt::Vertical</enum>
-                                        </property>
-                                        <property name="sizeHint" stdset="0">
-                                            <size>
-                                                <width>20</width>
-                                                <height>40</height>
-                                            </size>
-                                        </property>
-                                    </spacer>
-                                </item>
-                            </layout>
-                        </widget>
-                        <widget class="QWidget" name="tab_2">
-                            <attribute name="title">
-                                <string>Monitoring</string>
-                            </attribute>
-                            <layout class="QVBoxLayout" name="verticalLayout_7">
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_6">
-                                        <item>
-                                            <widget class="QLabel" name="label_14">
-                                                <property name="text">
-                                                    <string># Monitoring</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                                <property name="alignment">
-                                                    <set>Qt::AlignCenter</set>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_10">
-                                                <property name="text">
-                                                    <string>## Turtlebot state</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_11">
-                                                <property name="text">
-                                                    <string>### Navigation</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QGridLayout" name="gridLayout_2">
-                                                <item row="0" column="2">
-                                                    <widget class="QLabel" name="label_13">
-                                                        <property name="text">
-                                                            <string>**Is navigating:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="0">
-                                                    <widget class="QLabel" name="label_12">
-                                                        <property name="text">
-                                                            <string>**Current speed:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="3">
-                                                    <widget class="QLabel" name="label_is_navigating">
-                                                        <property name="text">
-                                                            <string>TextLabel</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="1">
-                                                    <widget class="QLabel" name="label_current_speed">
-                                                        <property name="text">
-                                                            <string>TextLabel</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_15">
-                                                <property name="text">
-                                                    <string>### Turtlebot status</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QGridLayout" name="gridLayout_3">
-                                                <item row="0" column="4">
-                                                    <widget class="QLabel" name="label_18">
-                                                        <property name="text">
-                                                            <string>**Kidnapped:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="1">
-                                                    <widget class="QLabel" name="label_battery">
-                                                        <property name="text">
-                                                            <string>TextLabel</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="3">
-                                                    <widget class="QLabel" name="label_docked">
-                                                        <property name="text">
-                                                            <string>TextLabel</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="0">
-                                                    <widget class="QLabel" name="label_16">
-                                                        <property name="text">
-                                                            <string>**Battery:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="2">
-                                                    <widget class="QLabel" name="label_17">
-                                                        <property name="text">
-                                                            <string>**Docked:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="0" column="5">
-                                                    <widget class="QLabel" name="label_kidnapped">
-                                                        <property name="text">
-                                                            <string>TextLabel</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_5">
-                                        <item>
-                                            <widget class="QLabel" name="label_9">
-                                                <property name="text">
-                                                    <string>## Logging</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QTextEdit" name="textEdit"/>
-                                        </item>
-                                    </layout>
-                                </item>
-                            </layout>
-                        </widget>
-                        <widget class="QWidget" name="tab">
-                            <attribute name="title">
-                                <string>Mapping</string>
-                            </attribute>
-                            <layout class="QVBoxLayout" name="verticalLayout_10">
-                                <item>
-                                    <widget class="QLabel" name="label_19">
-                                        <property name="text">
-                                            <string># Mapping</string>
-                                        </property>
-                                        <property name="textFormat">
-                                            <enum>Qt::MarkdownText</enum>
-                                        </property>
-                                        <property name="alignment">
-                                            <set>Qt::AlignCenter</set>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_8">
-                                        <item>
-                                            <widget class="QLabel" name="label_20">
-                                                <property name="text">
-                                                    <string>## Operating</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_21">
-                                                <property name="text">
-                                                    <string>Starting and stopping the mapping process. When stopped, the map is saved on the Sopias4 Map-Server with the confiugation settings below</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QHBoxLayout" name="horizontalLayout_3">
-                                                <item>
-                                                    <widget class="QPushButton" name="pushButton_start_mapping">
-                                                        <property name="text">
-                                                            <string>Start Mapping</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item>
-                                                    <widget class="QPushButton" name="pushButton_stop_mapping">
-                                                        <property name="text">
-                                                            <string>Stop Mapping/Saving map</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_9">
-                                        <item>
-                                            <widget class="QLabel" name="label_22">
-                                                <property name="text">
-                                                    <string>## Configuration for saving map</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_23">
-                                                <property name="text">
-                                                    <string>Configure the parameters with which the map is saved on the Sopias4 Map-Server. The default configuration is the map which is automatically loaded when launchong Sopias4 Map-Server without passing parameters</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QGridLayout" name="gridLayout_4">
-                                                <item row="0" column="1">
-                                                    <widget class="QLineEdit" name="lineEdit_map_name"/>
-                                                </item>
-                                                <item row="0" column="0">
-                                                    <widget class="QLabel" name="label_24">
-                                                        <property name="text">
-                                                            <string>**Map name:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="3">
-                                                    <widget class="QComboBox" name="comboBox_image_format"/>
-                                                </item>
-                                                <item row="0" column="2">
-                                                    <widget class="QLabel" name="label_27">
-                                                        <property name="text">
-                                                            <string>**Map topic:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="2">
-                                                    <widget class="QLabel" name="label_26">
-                                                        <property name="text">
-                                                            <string>**Image format:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="1" column="1">
-                                                    <widget class="QComboBox" name="comboBox_map_mode"/>
-                                                </item>
-                                                <item row="0" column="3">
-                                                    <widget class="QLineEdit" name="lineEdit_map_topic"/>
-                                                </item>
-                                                <item row="1" column="0">
-                                                    <widget class="QLabel" name="label_25">
-                                                        <property name="text">
-                                                            <string>**Map mode:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="0">
-                                                    <widget class="QLabel" name="label_28">
-                                                        <property name="text">
-                                                            <string>**Threshold occupied:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="1">
-                                                    <widget class="QDoubleSpinBox" name="doubleSpinBox_occupied_thres">
-                                                        <property name="maximum">
-                                                            <double>1.000000000000000</double>
-                                                        </property>
-                                                        <property name="singleStep">
-                                                            <double>0.010000000000000</double>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="2">
-                                                    <widget class="QLabel" name="label_29">
-                                                        <property name="text">
-                                                            <string>**Free threshold:**</string>
-                                                        </property>
-                                                        <property name="textFormat">
-                                                            <enum>Qt::MarkdownText</enum>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item row="2" column="3">
-                                                    <widget class="QDoubleSpinBox" name="doubleSpinBox_free_thres">
-                                                        <property name="maximum">
-                                                            <double>1.000000000000000</double>
-                                                        </property>
-                                                        <property name="singleStep">
-                                                            <double>0.010000000000000</double>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <spacer name="verticalSpacer_2">
-                                        <property name="orientation">
-                                            <enum>Qt::Vertical</enum>
-                                        </property>
-                                        <property name="sizeHint" stdset="0">
-                                            <size>
-                                                <width>20</width>
-                                                <height>446</height>
-                                            </size>
-                                        </property>
-                                    </spacer>
-                                </item>
-                            </layout>
-                        </widget>
-                        <widget class="QWidget" name="tab_4">
-                            <attribute name="title">
-                                <string>Advanced/Manual operation</string>
-                            </attribute>
-                            <layout class="QVBoxLayout" name="verticalLayout_13">
-                                <item>
-                                    <widget class="QLabel" name="label_30">
-                                        <property name="text">
-                                            <string># Manual operation and advanced features</string>
-                                        </property>
-                                        <property name="textFormat">
-                                            <enum>Qt::MarkdownText</enum>
-                                        </property>
-                                        <property name="alignment">
-                                            <set>Qt::AlignCenter</set>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item>
-                                    <layout class="QVBoxLayout" name="verticalLayout_12">
-                                        <item>
-                                            <widget class="QLabel" name="label_32">
-                                                <property name="text">
-                                                    <string>## Driving</string>
-                                                </property>
-                                                <property name="textFormat">
-                                                    <enum>Qt::MarkdownText</enum>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <widget class="QLabel" name="label_33">
-                                                <property name="text">
-                                                    <string>Manual driving the robot. Note that there are no safety features in place to prevent you from crashing</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item>
-                                            <layout class="QHBoxLayout" name="horizontalLayout_4">
-                                                <item>
-                                                    <layout class="QGridLayout" name="gridLayout_5">
-                                                        <item row="1" column="1">
-                                                            <widget class="QPushButton" name="pushButton_rotate_left">
-                                                                <property name="text">
-                                                                    <string>Rotate Left</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="2" column="3">
-                                                            <widget class="QPushButton" name="pushButton_right">
-                                                                <property name="text">
-                                                                    <string>Right</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="2" column="1">
-                                                            <widget class="QPushButton" name="pushButton_left">
-                                                                <property name="text">
-                                                                    <string>Left</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="2" column="2">
-                                                            <widget class="QPushButton" name="pushButton_back">
-                                                                <property name="text">
-                                                                    <string>Backwards</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="1" column="0">
-                                                            <spacer name="horizontalSpacer">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Horizontal</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>40</width>
-                                                                        <height>20</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                        <item row="1" column="2">
-                                                            <widget class="QPushButton" name="pushButton_forward">
-                                                                <property name="text">
-                                                                    <string>Forward</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="1" column="3">
-                                                            <widget class="QPushButton" name="pushButton_rotate_right">
-                                                                <property name="text">
-                                                                    <string>Rotate Right</string>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item row="3" column="2">
-                                                            <spacer name="verticalSpacer_4">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Vertical</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>20</width>
-                                                                        <height>40</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                        <item row="0" column="2">
-                                                            <spacer name="verticalSpacer_5">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Vertical</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>20</width>
-                                                                        <height>40</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                        <item row="1" column="4">
-                                                            <spacer name="horizontalSpacer_2">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Horizontal</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>40</width>
-                                                                        <height>20</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                    </layout>
-                                                </item>
-                                                <item>
-                                                    <layout class="QVBoxLayout" name="verticalLayout_11">
-                                                        <item>
-                                                            <spacer name="verticalSpacer_6">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Vertical</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>20</width>
-                                                                        <height>40</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                        <item>
-                                                            <widget class="QSlider" name="horizontalSlider_velocity">
-                                                                <property name="maximum">
-                                                                    <number>100</number>
-                                                                </property>
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Horizontal</enum>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item>
-                                                            <widget class="QLabel" name="label_31">
-                                                                <property name="text">
-                                                                    <string>**Velocity (m/s)**</string>
-                                                                </property>
-                                                                <property name="textFormat">
-                                                                    <enum>Qt::MarkdownText</enum>
-                                                                </property>
-                                                                <property name="alignment">
-                                                                    <set>Qt::AlignCenter</set>
-                                                                </property>
-                                                            </widget>
-                                                        </item>
-                                                        <item>
-                                                            <spacer name="verticalSpacer_7">
-                                                                <property name="orientation">
-                                                                    <enum>Qt::Vertical</enum>
-                                                                </property>
-                                                                <property name="sizeHint" stdset="0">
-                                                                    <size>
-                                                                        <width>20</width>
-                                                                        <height>40</height>
-                                                                    </size>
-                                                                </property>
-                                                            </spacer>
-                                                        </item>
-                                                    </layout>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item>
-                                    <spacer name="verticalSpacer_3">
-                                        <property name="orientation">
-                                            <enum>Qt::Vertical</enum>
-                                        </property>
-                                        <property name="sizeHint" stdset="0">
-                                            <size>
-                                                <width>20</width>
-                                                <height>330</height>
-                                            </size>
-                                        </property>
-                                    </spacer>
-                                </item>
-                            </layout>
-                        </widget>
-                    </widget>
-                </item>
-            </layout>
-        </widget>
-    </widget>
-    <resources/>
-    <connections/>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1580</width>
+    <height>650</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Sopias4 Application</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab_conf_init">
+       <attribute name="title">
+        <string>Initialization/Configuration</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string># Initialization and Configuration</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>## Register a namespace</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Register a unique namespace in the system. The name space is used to identify the individual robot. Because of this, this has to be done before launching the Turtlebot itself</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEdit_namespace"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>**Name space:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="pushButton_unregister">
+              <property name="text">
+               <string>Unregister</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4">
+             <widget class="QPushButton" name="pushButton_namespace">
+              <property name="text">
+               <string>Register</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>## Manage Turtlebot</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Before launching the Turtlebot, make sure the name space is registered. If using the simulation, then make sure to set the namespace also inside gazebo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_use_simulation">
+            <property name="text">
+             <string>Use simulation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="pushButton_launch_turtlebot">
+              <property name="text">
+               <string>Launch navigation stack</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_stop_turtlebot">
+              <property name="text">
+               <string>Stop navigation stack</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>### Manual launch sub-components</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>By launching sub-components individually, the &quot;Stop Turtlebot&quot; button doesn't work as intended.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pushButton_launch_rviz2">
+              <property name="text">
+               <string>Launch Rviz2</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_launch_nav2">
+              <property name="text">
+               <string>Launch Navigation2</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="pushButton_launch_amcl">
+              <property name="text">
+               <string>Launch AMCL</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Monitoring</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string># Monitoring</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>## Turtlebot state</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>### Navigation</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>**Is navigating:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>**Current speed:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_is_navigating">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_current_speed">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>### Turtlebot status</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>**Kidnapped:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_battery">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_docked">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>**Battery:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>**Docked:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLabel" name="label_kidnapped">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>## Logging</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTextEdit" name="textEdit"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Mapping</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string># Mapping</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>## Operating</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Starting and stopping the mapping process. When stopped, the map is saved on the Sopias4 Map-Server with the confiugation settings below</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="pushButton_start_mapping">
+              <property name="text">
+               <string>Start Mapping</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_stop_mapping">
+              <property name="text">
+               <string>Stop Mapping and save map</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>## Configuration for saving map</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Configure the parameters with which the map is saved on the Sopias4 Map-Server. The default configuration is the map which is automatically loaded when launchong Sopias4 Map-Server without passing parameters</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEdit_map_name"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_24">
+              <property name="text">
+               <string>**Map name:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QComboBox" name="comboBox_image_format"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_27">
+              <property name="text">
+               <string>**Map topic:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>**Image format:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBox_map_mode"/>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="lineEdit_map_topic"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>**Map mode:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_28">
+              <property name="text">
+               <string>**Threshold occupied:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_occupied_thres">
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>**Free threshold:**</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::MarkdownText</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_free_thres">
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>446</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>Advanced/Manual operation</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_14">
+        <item>
+         <widget class="QLabel" name="label_30">
+          <property name="text">
+           <string># Manual operation and advanced features</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <widget class="QLabel" name="label_32">
+            <property name="text">
+             <string>## Driving</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Manual driving the robot. Note that there are no safety features in place to prevent you from crashing</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="pushButton_rotate_left">
+                <property name="text">
+                 <string>Rotate Left</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="pushButton_right">
+                <property name="text">
+                 <string>Right</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="pushButton_left">
+                <property name="text">
+                 <string>Left</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QPushButton" name="pushButton_back">
+                <property name="text">
+                 <string>Backwards</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pushButton_forward">
+                <property name="text">
+                 <string>Forward</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="pushButton_rotate_right">
+                <property name="text">
+                 <string>Rotate Right</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="2">
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="4">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QSlider" name="horizontalSlider_velocity">
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_31">
+                <property name="text">
+                 <string>**Velocity (%)**</string>
+                </property>
+                <property name="textFormat">
+                 <enum>Qt::MarkdownText</enum>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <widget class="QLabel" name="label_34">
+            <property name="text">
+             <string>## Docking</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_35">
+            <property name="text">
+             <string>Perform docking operations. Make sure Turtlebot is docked or in reasonable range to dock</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="pushButton_dock">
+              <property name="text">
+               <string>Dock</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="pushButton_undock">
+              <property name="text">
+               <string>Undock</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>330</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

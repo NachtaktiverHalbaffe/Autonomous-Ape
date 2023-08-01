@@ -9,6 +9,7 @@ import rclpy
 from geometry_msgs.msg import Twist
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox
+from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
@@ -349,6 +350,46 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Couldnt start mapping: {e}")
             raise e
 
+    def dock(self) -> None:
+        """
+        Starts the docking process. This can only be done if the namespace is registered. It's basically a wrapper and calling the
+        dock service client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        try:
+            status_response = self.node.dock()
+
+            if status_response:
+                self.node.get_logger().info("Docked")
+            else:
+                self.node.get_logger().error("Couldnt dock: Unknown error occured")
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"Couldnt dock: {e}")
+            raise e
+
+    def undock(self) -> None:
+        """
+        Starts the undocking process. This can only be done if the namespace is registered. It's basically a wrapper and calling the
+        dock service client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+        try:
+            status_response = self.node.undock()
+
+            if status_response:
+                self.node.get_logger().info("Undocked")
+            else:
+                self.node.get_logger().error("Couldnt undock: Unknown error occured")
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"Couldnt undock: {e}")
+            raise e
+
     def stop_mapping(
         self,
         map_path: str = "map_default",
@@ -673,6 +714,15 @@ class GrapficalNode(Node):
         # This service sends a manual drive command to the robot
         self.__rm_sclient_drive: Client = self.service_client_node.create_client(
             Drive, f"{self.get_namespace()}/drive"
+        )
+
+        # This service lets the tutlebot dock to its charging station
+        self.__rm_sclient_dock: Client = self.service_client_node.create_client(
+            EmptyWithStatuscode, f"{self.get_namespace()}/dock"
+        )
+        # This service lets the tutlebot undock from its charging station
+        self.__rm_sclient_undock: Client = self.service_client_node.create_client(
+            EmptyWithStatuscode, f"{self.get_namespace()}/undock"
         )
 
     def register_namespace(self, namespace: str):
@@ -1008,6 +1058,62 @@ class GrapficalNode(Node):
         if response is None:
             return False
         elif response.statuscode == Drive.Response.SUCCESS:
+            return True
+        else:
+            return False
+
+    def dock(self) -> bool:
+        """
+        Runs a service client to start the docking process. The namespace should be registered before running this service
+
+        Returns:
+            bool: If operation was successful
+        """
+        self.get_logger().debug("Send service request to dock")
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_dock.call_async(request)
+
+        self.get_logger().debug("Service request to dock sent. Waiting for response")
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=240
+            )
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node when docking: {e}")
+
+        # Check response
+        response: EmptyWithStatuscode.Response | None = future.result()
+        if response is None:
+            return False
+        elif response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
+            return True
+        else:
+            return False
+
+    def undock(self) -> bool:
+        """
+        Runs a service client to start the undocking process. The namespace should be registered before running this service
+
+        Returns:
+            bool: If operation was successful
+        """
+        self.get_logger().debug("Send service request to undock")
+        request = EmptyWithStatuscode.Request()
+        future = self.__rm_sclient_undock.call_async(request)
+
+        self.get_logger().debug("Service request to undock sent. Waiting for response")
+        try:
+            rclpy.spin_until_future_complete(
+                self.service_client_node, future, timeout_sec=240
+            )
+        except Exception as e:
+            self.get_logger().warning(f"Couldn't spin node when undocking: {e}")
+
+        # Check response
+        response: EmptyWithStatuscode.Response | None = future.result()
+        if response is None:
+            return False
+        elif response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
             return True
         else:
             return False

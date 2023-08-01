@@ -95,9 +95,6 @@ class GUI(GUINode):
         self.ui.pushButton_launch_amcl.clicked.connect(lambda: self.__launch_amcl())
         self.ui.pushButton_launch_nav2.clicked.connect(lambda: self.__launch_nav2())
         self.ui.pushButton_launch_rviz2.clicked.connect(lambda: self.__launch_rviz2())
-        self.ui.pushButton_launch_relay.clicked.connect(
-            lambda: self.__launch_tf_relay()
-        )
         # --- Tab: Advanced/Manual operation ---
         # Each button is connected to two signals: Pressed which sends the corresponding drive command
         # and released which sends a stop command when the button is released
@@ -109,6 +106,7 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_back.setAutoRepeat(True)
         self.ui.pushButton_back.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
@@ -120,6 +118,7 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_forward.setAutoRepeat(True)
         self.ui.pushButton_forward.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
@@ -131,6 +130,7 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_left.setAutoRepeat(True)
         self.ui.pushButton_left.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
@@ -142,6 +142,7 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_right.setAutoRepeat(True)
         self.ui.pushButton_right.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
@@ -153,6 +154,7 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_rotate_right.setAutoRepeat(True)
         self.ui.pushButton_rotate_right.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
@@ -164,8 +166,16 @@ class GUI(GUINode):
                 )
             ).start()
         )
+        self.ui.pushButton_rotate_left.setAutoRepeat(True)
         self.ui.pushButton_rotate_left.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
+        )
+
+        self.ui.pushButton_dock.clicked.connect(
+            lambda: Thread(target=self.dock).start()
+        )
+        self.ui.pushButton_undock.clicked.connect(
+            lambda: Thread(target=self.undock).start()
         )
 
     def set_default_values(self):
@@ -191,13 +201,14 @@ class GUI(GUINode):
         self.ui.pushButton_stop_turtlebot.setEnabled(False)
         self.ui.pushButton_launch_amcl.setEnabled(False)
         self.ui.pushButton_launch_nav2.setEnabled(False)
-        self.ui.pushButton_launch_relay.setEnabled(False)
         self.ui.pushButton_launch_rviz2.setEnabled(False)
         # --- Tab: Mapping ---
         self.ui.pushButton_start_mapping.setEnabled(False)
         self.ui.pushButton_stop_mapping.setEnabled(False)
         # --- Tab: Manual and advanced operation ---
         self.__enable_drive_buttons(False)
+        self.ui.pushButton_dock.setEnabled(False)
+        self.ui.pushButton_undock.setEnabled(False)
 
     def __register_turtlebot(self):
         if self.register_namespace(self.ui.lineEdit_namespace.text()):
@@ -206,10 +217,11 @@ class GUI(GUINode):
             self.ui.pushButton_stop_turtlebot.setEnabled(True)
             self.ui.pushButton_launch_amcl.setEnabled(True)
             self.ui.pushButton_launch_nav2.setEnabled(True)
-            self.ui.pushButton_launch_relay.setEnabled(True)
             self.ui.pushButton_launch_rviz2.setEnabled(True)
             self.ui.pushButton_namespace.setEnabled(False)
             self.__enable_drive_buttons(True)
+            self.ui.pushButton_dock.setEnabled(True)
+            self.ui.pushButton_undock.setEnabled(True)
 
     def __connect_turtlebot(self):
         self.connect_turtlebot(
@@ -255,14 +267,6 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_amcl.setEnabled(False)
 
-    def __launch_tf_relay(self):
-        self.__launch_process_tf_relay = node_tools.start_launch_file(
-            ros2_package="sopias4_framework",
-            launch_file="tf_relay.launch.py",
-            arguments=f"namespace:={self.node.get_namespace()}",
-        )
-        self.ui.pushButton_launch_relay.setEnabled(False)
-
     def __disconnect_turtlebot(self):
         self.disconnect_turtlebot()
         self.node_executor.remove_node(self.__astar_node)
@@ -271,6 +275,8 @@ class GUI(GUINode):
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
         self.__enable_drive_buttons(False)
+        self.ui.pushButton_dock.setEnabled(False)
+        self.ui.pushButton_undock.setEnabled(False)
 
     def __start_mapping(self):
         self.start_mapping()
