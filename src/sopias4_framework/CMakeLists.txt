@@ -28,6 +28,7 @@ find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(sopias4_msgs REQUIRED)
+# find_package(teb_local_planner REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)

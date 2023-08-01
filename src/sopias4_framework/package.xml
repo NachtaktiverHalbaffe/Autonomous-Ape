@@ -40,6 +40,7 @@
   <depend>nav2_costmap_2d</depend>
   <depend>nav2_core</depend>
   <depend>pluginlib</depend>
+  <!-- <depend>teb_local_planner</depend> -->
 
   <!-- Message, service and action definition generators -->
   <build_depend>rosidl_default_generators</build_depend>
