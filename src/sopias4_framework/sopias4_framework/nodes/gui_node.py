@@ -221,6 +221,9 @@ class GUINode(QMainWindow):
 
         # Restart node with namespace
         self.node_executor.remove_node(self.node)
+        for node in self.node_executor.get_nodes():
+            self.node_executor.remove_node(node)
+            node.destroy_node()
 
         self.node = GrapficalNode(
             showed_dialog_signal=self.showed_dialog_signal,

@@ -5,17 +5,15 @@ import ruamel.yaml
 import ruamel.yaml.comments
 import ruamel.yaml.parser
 
+REMAPPING_KEYS_YAML_CONFIGS = [
+    # Nav2
+    "global_frame",
+    "robot_base_frame",
+]
 REMAPPING_VALUES_YAML_CONFIGS = [
-    # Topics
-    "topic",
-    "scan_topic",
-    "odom_topic",
-    # Tf frames Slam
-    "odom_frame",
-    "map_frame",
-    "base_frame",
-    # Base frame id
-    "base_frame_id",
+    # Nav2
+    "odom",
+    "base_link",
 ]
 
 REMAPPING_VALUES_RVIZ = [
@@ -323,11 +321,15 @@ def __add_namespace_to_item(
     """
     last_key = __get_yaml_key(item_key)[-1:][0]
     # For yaml configs
-    if last_key in REMAPPING_VALUES_YAML_CONFIGS:
+    if (
+        last_key in REMAPPING_KEYS_YAML_CONFIGS
+        and yaml_instance.mlget(__get_yaml_key(item_key))
+        in REMAPPING_VALUES_YAML_CONFIGS
+    ):
         value = f"{namespace}/{yaml_instance.mlget(__get_yaml_key(item_key))}"
         # Add leading / to namespace if it wasnt given in the argument
-        if namespace[0] != "/":
-            value = f"/{value}"
+        if namespace[0] == "/":
+            value = value[1::]
         yaml_instance.mlput(path=item_key, value=value)
         return yaml_instance
 
@@ -391,13 +393,8 @@ if __name__ == "__main__":
         "Only run this if used for testing or manual operation. It was designed to be used inside a program which handles launching a ROS2 launch file with config parameters"
     )
 
-    # insert_namespace_into_yaml_config(
-    #     "ape",
-    #     "/home/ws/src/sopias4_framework/config/nav2_base.yaml",
-    #     "/home/ws/src/sopias4_framework/config/nav2.yaml",
-    # )
-    insert_namespace_into_rviz_config(
+    insert_namespace_into_yaml_config(
         "ape",
-        "/home/ws/src/sopias4_framework/config/rviz_base.rviz",
-        "/home/ws/src/sopias4_framework/config/rviz.rviz",
+        "/home/ws/src/sopias4_framework/config/nav2_base.yaml",
+        "/home/ws/src/sopias4_framework/config/nav2.yaml",
     )
