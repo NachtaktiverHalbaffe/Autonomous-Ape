@@ -28,13 +28,9 @@ class GUI(GUINode):
         super().__init__(Ui_MainWindow())
         self.node.get_logger().set_level(10)
         # Nav2 plugins
-        self.__astar_node: Astar = Astar(namespace=self.node.get_namespace())
-        self.__robot_layer_node: RobotLayer = RobotLayer(
-            namespace=self.node.get_namespace()
-        )
-        self.__path_layer_node: PathLayer = PathLayer(
-            namespace=self.node.get_namespace()
-        )
+        self.__astar_node: Astar | None = None
+        self.__robot_layer_node: RobotLayer | None = None
+        self.__path_layer_node: PathLayer | None = None
         # launch file processes
         self.__launch_process_amcl: subprocess.Popen | None = None
         self.__launch_process_nav2: subprocess.Popen | None = None
@@ -73,10 +69,10 @@ class GUI(GUINode):
             ).start()
         )
         self.ui.pushButton_launch_turtlebot.clicked.connect(
-            lambda: Thread(target=self.__connect_turtlebot).start()
+            lambda: Thread(target=self.__launch_nav_stack).start()
         )
         self.ui.pushButton_stop_turtlebot.clicked.connect(
-            lambda: Thread(target=self.__disconnect_turtlebot).start()
+            lambda: Thread(target=self.__stop_nav_stack).start()
         )
         # ---  Tab: Mapping ---
         self.ui.pushButton_start_mapping.clicked.connect(
@@ -146,30 +142,6 @@ class GUI(GUINode):
         self.ui.pushButton_right.released.connect(
             lambda: Thread(target=self.drive(direction="stop")).start()
         )
-        self.ui.pushButton_rotate_right.pressed.connect(
-            lambda: Thread(
-                target=self.drive(
-                    direction="rotate_right",
-                    vel_rel=float(self.ui.horizontalSlider_velocity.value() / 100),
-                )
-            ).start()
-        )
-        self.ui.pushButton_rotate_right.setAutoRepeat(True)
-        self.ui.pushButton_rotate_right.released.connect(
-            lambda: Thread(target=self.drive(direction="stop")).start()
-        )
-        self.ui.pushButton_rotate_left.pressed.connect(
-            lambda: Thread(
-                target=self.drive(
-                    direction="rotate_left",
-                    vel_rel=float(self.ui.horizontalSlider_velocity.value() / 100),
-                )
-            ).start()
-        )
-        self.ui.pushButton_rotate_left.setAutoRepeat(True)
-        self.ui.pushButton_rotate_left.released.connect(
-            lambda: Thread(target=self.drive(direction="stop")).start()
-        )
 
         self.ui.pushButton_dock.clicked.connect(
             lambda: Thread(target=self.dock).start()
@@ -223,13 +195,18 @@ class GUI(GUINode):
             self.ui.pushButton_dock.setEnabled(True)
             self.ui.pushButton_undock.setEnabled(True)
 
-    def __connect_turtlebot(self):
-        self.connect_turtlebot(
+    def __launch_nav_stack(self):
+        self.launch_nav_stack(
             use_simulation=self.ui.checkBox_use_simulation.isChecked()
         )
+        self.__astar_node = Astar(namespace=self.node.get_namespace())
+        self.__robot_layer_node = RobotLayer(namespace=self.node.get_namespace())
+        self.__path_layer_node = PathLayer(namespace=self.node.get_namespace())
+
         self.node_executor.add_node(self.__astar_node)
         self.node_executor.add_node(self.__path_layer_node)
         self.node_executor.add_node(self.__robot_layer_node)
+        self.node_executor.wake()
         self.ui.pushButton_launch_turtlebot.setEnabled(False)
         self.__enable_drive_buttons(True)
 
@@ -267,11 +244,15 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_amcl.setEnabled(False)
 
-    def __disconnect_turtlebot(self):
-        self.disconnect_turtlebot()
-        self.node_executor.remove_node(self.__astar_node)
-        self.node_executor.remove_node(self.__path_layer_node)
-        self.node_executor.remove_node(self.__robot_layer_node)
+    def __stop_nav_stack(self):
+        self.stop_nav_stack()
+
+        if self.__astar_node is not None:
+            self.node_executor.remove_node(self.__astar_node)
+        if self.__path_layer_node is not None:
+            self.node_executor.remove_node(self.__path_layer_node)
+        if self.__robot_layer_node is not None:
+            self.node_executor.remove_node(self.__robot_layer_node)
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
         self.__enable_drive_buttons(False)
@@ -323,8 +304,6 @@ class GUI(GUINode):
         self.ui.pushButton_back.setEnabled(isEnabled)
         self.ui.pushButton_left.setEnabled(isEnabled)
         self.ui.pushButton_right.setEnabled(isEnabled)
-        self.ui.pushButton_rotate_left.setEnabled(isEnabled)
-        self.ui.pushButton_rotate_right.setEnabled(isEnabled)
 
     def closeEvent(self, event):
         node_tools.shutdown_ros_shell_process(self.__launch_process_amcl)

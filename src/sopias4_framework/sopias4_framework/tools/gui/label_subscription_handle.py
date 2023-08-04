@@ -44,7 +44,7 @@ class LabelSubscriptionHandler(QObject):
         self.value_signal.connect(self.__set_text)
 
         if message_type == BatteryState:
-            node.create_subscription(
+            self.sub = node.create_subscription(
                 BatteryState,
                 f"{node.get_namespace()}/battery_state",
                 self.set_label_battery,
@@ -55,7 +55,7 @@ class LabelSubscriptionHandler(QObject):
                 ),
             )
         elif message_type == WheelVels:
-            node.create_subscription(
+            self.sub = node.create_subscription(
                 WheelVels,
                 f"{node.get_namespace()}/wheel_vels",
                 self.set_label_velocity,
@@ -66,9 +66,9 @@ class LabelSubscriptionHandler(QObject):
                 ),
             )
         elif message_type == DockStatus:
-            node.create_subscription(
+            self.sub = node.create_subscription(
                 DockStatus,
-                f"{node.get_namespace()}/dock",
+                f"{node.get_namespace()}/dock_status",
                 self.set_label_dockstatus,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -77,7 +77,7 @@ class LabelSubscriptionHandler(QObject):
                 ),
             )
         elif message_type == KidnapStatus:
-            node.create_subscription(
+            self.sub = node.create_subscription(
                 KidnapStatus,
                 f"{node.get_namespace()}/kidnap_status",
                 self.set_label_kidnap_status,
@@ -91,6 +91,9 @@ class LabelSubscriptionHandler(QObject):
             raise NotImplementedError(
                 f"{type(message_type)} not implemented as a message type"
             )
+
+    def __del__(self):
+        self.sub.destroy()
 
     def __set_text(self, msg: str):
         self.widget.setText(msg)

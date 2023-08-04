@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import abc
+import multiprocessing
 import random
 import string
 import time
@@ -209,7 +210,7 @@ class GUINode(QMainWindow):
             bool: If namespace was registered successfully
         """
         try:
-            if self.node.register_namespace(namespace):
+            if self.node._register_namespace(namespace):
                 self.namespace = namespace
                 # Set restart flag so GUI recognizes the node shutdown as intentional and doesn't close
             else:
@@ -225,6 +226,7 @@ class GUINode(QMainWindow):
         for node in self.node_executor.get_nodes():
             self.node_executor.remove_node(node)
             node.destroy_node()
+        self.node_executor.wake()
 
         self.node = GrapficalNode(
             showed_dialog_signal=self.showed_dialog_signal,
@@ -259,7 +261,7 @@ class GUINode(QMainWindow):
             bool: If namespace was registered successfully
         """
         try:
-            if self.node.unregister_namespace(namespace):
+            if self.node._unregister_namespace(namespace):
                 return True
             else:
                 return False
@@ -269,9 +271,9 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Could'nt register name space: {e}")
             raise e
 
-    def connect_turtlebot(self, use_simulation: bool = False) -> None:
+    def launch_nav_stack(self, use_simulation: bool = False) -> None:
         """
-        Launches all the nodes in Sopias4 Application so the system is connected to the Turtlebot. It's basically
+        Launches all the nodes in Sopias4 Application so the system is ready for autonomous navigation. It's basically
         a wrapper and calling the launcg service client in the underlying node object. Before running this, a namespace
         must already be registered and the gui node needs to be running under this namespace. If the operation was
         successful, then it sets `self.turtlebot_running` to `True`
@@ -279,7 +281,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.connect_turtlebot(use_simulation=use_simulation)
+            status_response = self.node._launch_nav_stack(use_simulation=use_simulation)
 
             if status_response:
                 self.turtlebot_running = True
@@ -295,16 +297,16 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Couldnt launch robot: {e}")
             raise e
 
-    def disconnect_turtlebot(self) -> None:
+    def stop_nav_stack(self) -> None:
         """
-        Stops all the nodes in Sopias4 Application so the system is disconnected to the Turtlebot. It's basically
+        Stops all the nodes in Sopias4 Application so the system cant navigate autonomously anymore. It's basically
         a wrapper and calling the launch service client in the underlying node object. If the operation was
         successful, then it sets `self.turtlebot_running` to `True`
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.disconnect_turtlebot()
+            status_response = self.node._disconnect_turtlebot()
 
             if status_response:
                 self.turtlebot_running = False
@@ -330,7 +332,7 @@ class GUINode(QMainWindow):
         """
         try:
             if not self.is_mapping:
-                status_response = self.node.start_mapping()
+                status_response = self.node._start_mapping()
 
                 if status_response:
                     self.is_mapping = True
@@ -358,7 +360,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.dock()
+            status_response = self.node._dock()
 
             if status_response:
                 self.node.get_logger().info("Docked")
@@ -378,7 +380,7 @@ class GUINode(QMainWindow):
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            status_response = self.node.undock()
+            status_response = self.node._undock()
 
             if status_response:
                 self.node.get_logger().info("Undocked")
@@ -417,7 +419,7 @@ class GUINode(QMainWindow):
 
         try:
             if self.is_mapping:
-                status_response = self.node.stop_mapping(
+                status_response = self.node._stop_mapping(
                     image_format=image_format,
                     map_topic=map_topic,
                     map_path=map_path,
@@ -467,7 +469,7 @@ class GUINode(QMainWindow):
                                                      so e.g. 1.0 is maximum speed and 0 is standing still. Defaults to 1.0
         """
         try:
-            status_response = self.node.drive(twist_msg, direction, vel_rel)
+            status_response = self.node._drive(twist_msg, direction, vel_rel)
             if status_response:
                 self.node.get_logger().debug(
                     "Successfully send drive command to Turtlebot"
@@ -494,6 +496,7 @@ class GUINode(QMainWindow):
         for node in self.node_executor.get_nodes():
             node.destroy_node()
             self.node_executor.remove_node(node)
+        self.node_executor.wake()
         self.node_executor.shutdown()
 
         rclpy.shutdown()
@@ -725,7 +728,7 @@ class GrapficalNode(Node):
             EmptyWithStatuscode, f"{self.get_namespace()}/undock"
         )
 
-    def register_namespace(self, namespace: str):
+    def _register_namespace(self, namespace: str):
         """
         Runs a service client to register the namespace in Sopias4 Map-Server.
         On Failure, the user is informed and has a choice to retry
@@ -795,11 +798,11 @@ class GrapficalNode(Node):
             if user_response.selected_option == ShowDialog.Response.CONFIRMED:
                 return False
             elif user_response.selected_option == ShowDialog.Response.RETRY:
-                return self.register_namespace(namespace)
+                return self._register_namespace(namespace)
             else:
                 return False
 
-    def unregister_namespace(self, namespace: str):
+    def _unregister_namespace(self, namespace: str):
         """
         Runs a service client to unregister the namespace in Sopias4 Map-Server.
         On Failure, the user is informed and has a choice to retry
@@ -859,11 +862,11 @@ class GrapficalNode(Node):
             if user_response.selected_option == ShowDialog.Response.CONFIRMED:
                 return False
             elif user_response.selected_option == ShowDialog.Response.RETRY:
-                return self.register_namespace(namespace)
+                return self._register_namespace(namespace)
             else:
                 return False
 
-    def connect_turtlebot(self, use_simulation: bool = False) -> bool:
+    def _launch_nav_stack(self, use_simulation: bool = False) -> bool:
         """
         Runs a service client to start the nodes in Sopias4 Application so the system is connected
         to the robot and ready for operation.
@@ -897,7 +900,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def disconnect_turtlebot(self) -> bool:
+    def _disconnect_turtlebot(self) -> bool:
         """
         Runs a service client to stop the nodes in Sopias4 Application so the system is disconnected
         from the robot and ready for operation.
@@ -934,7 +937,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def start_mapping(self) -> bool:
+    def _start_mapping(self) -> bool:
         """
         Runs a service client to start the mapping process. The Sopias4 Application should
         be fully launched before running this service
@@ -965,7 +968,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def stop_mapping(
+    def _stop_mapping(
         self,
         map_path: str = "maps/map_default",
         map_topic: str = "/map",
@@ -1016,7 +1019,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def drive(
+    def _drive(
         self,
         twist_msg: Twist | None = None,
         direction: str = "stop",
@@ -1062,7 +1065,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def dock(self) -> bool:
+    def _dock(self) -> bool:
         """
         Runs a service client to start the docking process. The namespace should be registered before running this service
 
@@ -1090,7 +1093,7 @@ class GrapficalNode(Node):
         else:
             return False
 
-    def undock(self) -> bool:
+    def _undock(self) -> bool:
         """
         Runs a service client to start the undocking process. The namespace should be registered before running this service
 

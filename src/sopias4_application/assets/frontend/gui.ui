@@ -590,35 +590,21 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <layout class="QGridLayout" name="gridLayout_5">
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pushButton_rotate_left">
-                <property name="text">
-                 <string>Rotate Left</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="3">
+              <item row="1" column="3">
                <widget class="QPushButton" name="pushButton_right">
                 <property name="text">
                  <string>Right</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="1" column="1">
                <widget class="QPushButton" name="pushButton_left">
                 <property name="text">
                  <string>Left</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="2">
-               <widget class="QPushButton" name="pushButton_back">
-                <property name="text">
-                 <string>Backwards</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
+              <item row="0" column="0">
                <spacer name="horizontalSpacer">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -631,47 +617,7 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="2">
-               <widget class="QPushButton" name="pushButton_forward">
-                <property name="text">
-                 <string>Forward</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QPushButton" name="pushButton_rotate_right">
-                <property name="text">
-                 <string>Rotate Right</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <spacer name="verticalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="2">
-               <spacer name="verticalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="4">
+              <item row="0" column="4">
                <spacer name="horizontalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -684,23 +630,24 @@
                 </property>
                </spacer>
               </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="pushButton_forward">
+                <property name="text">
+                 <string>Forward</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pushButton_back">
+                <property name="text">
+                 <string>Backwards</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11">
-              <item>
-               <spacer name="verticalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
               <item>
                <widget class="QSlider" name="horizontalSlider_velocity">
                 <property name="maximum">
@@ -723,19 +670,6 @@
                  <set>Qt::AlignCenter</set>
                 </property>
                </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_7">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
              </layout>
             </item>

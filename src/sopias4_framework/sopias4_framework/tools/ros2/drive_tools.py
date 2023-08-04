@@ -15,12 +15,8 @@ def generate_twist_msg(direction: str, vel_rel: float = 1.0) -> Twist:
         case "backward":
             drive_msg.linear.x = -0.34 * vel_rel
         case "left":
-            drive_msg.linear.y = 0.34 * vel_rel
-        case "right":
-            drive_msg.linear.y = -0.34 * vel_rel
-        case "rotate_left":
             drive_msg.angular.z = 0.34 * vel_rel
-        case "rotate_right":
+        case "right":
             drive_msg.angular.z = -0.34 * vel_rel
         case "stop":
             # drive_msgs is already at 0 speed

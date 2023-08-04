@@ -81,7 +81,7 @@ class GUI(GUINode):
         self.ui.comboBox_map_mode.setCurrentIndex(0)
         self.ui.comboBox_image_format.addItems(["png", "pgm", "bmp"])
         self.ui.comboBox_image_format.setCurrentIndex(0)
-        self.ui.lineEdit_map_name.setText("default_map.yaml")
+        self.ui.lineEdit_map_name.setText("default_map")
         self.ui.lineEdit_map_topic.setText("/map")
         self.ui.doubleSpinBox_free_thres.setValue(0.196)
         self.ui.doubleSpinBox_occupied_thres.setValue(0.65)
