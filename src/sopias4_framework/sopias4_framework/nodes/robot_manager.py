@@ -66,10 +66,10 @@ class RobotManager(Node):
             Drive, "drive", self.__drive_callback
         )
         self.launch_service: Service = self.create_service(
-            LaunchTurtlebot, "connect", self.__connect_robot
+            LaunchTurtlebot, "connect", self.__launch_nav_stack
         )
         self.stop_service: Service = self.create_service(
-            EmptyWithStatuscode, "disconnect", self.__disconnect_robot
+            EmptyWithStatuscode, "disconnect", self.__stop_nav_stack
         )
         self.start_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "start_mapping", self.__start_mapping
@@ -81,7 +81,7 @@ class RobotManager(Node):
             EmptyWithStatuscode, "dock", self.__dock
         )
         self.undock_service: Service = self.create_service(
-            EmptyWithStatuscode, "undock", self.__dock
+            EmptyWithStatuscode, "undock", self.__undock
         )
 
         # ------------------- Service clients--------------------
@@ -230,7 +230,7 @@ class RobotManager(Node):
             )
         return response_data
 
-    def __connect_robot(
+    def __launch_nav_stack(
         self,
         request_data: LaunchTurtlebot.Request,
         response_data: LaunchTurtlebot.Response,
@@ -292,7 +292,7 @@ class RobotManager(Node):
         self.get_logger().info("Successfully started turtlebot nodes")
         return response_data
 
-    def __disconnect_robot(
+    def __stop_nav_stack(
         self,
         _: EmptyWithStatuscode.Request,
         response_data: EmptyWithStatuscode.Response,
