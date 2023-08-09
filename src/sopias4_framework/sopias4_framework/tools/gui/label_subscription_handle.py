@@ -120,7 +120,8 @@ class LabelSubscriptionHandler(QObject):
         """
         :meta private:
         """
-        vel = (msg.velocity_left + msg.velocity_right) / 2
+        # average wheel speed * wheel radius
+        vel = ((msg.velocity_left + msg.velocity_right) / 2) * 0.035
         self.value_signal.emit(str(round(vel, 2)))
 
 

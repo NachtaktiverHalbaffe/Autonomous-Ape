@@ -28,9 +28,10 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	python3-mock \ 
 	libgl1-mesa-glx libgl1-mesa-dri mesa-utils 
 
-# Setup right middleware for communicating
+# Setup right environment variables for ros
 ENV FASTRTPS_DEFAULT_PROFILES_FILE /home/ws/.devcontainer/fastrtps-profile.xml
 ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
+ENV ROS_LOG_DIR /home/ws/log
 
 # Install turtlebot4 dependencies
 RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
@@ -43,7 +44,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 	ros-humble-teleop-twist-keyboard \
 	ros-humble-turtlebot4-simulator ignition-fortress \
 	ros-dev-tools gazebo 
-	
+
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 
 
@@ -56,7 +57,6 @@ RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 # ENV NVIDIA_DRIVER_CAPABILITIES \
 # 	${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}
 # ENV QT_X11_NO_MITSHM 1
-
 ENV SHELL /bin/bash
 
 # ********************************************************

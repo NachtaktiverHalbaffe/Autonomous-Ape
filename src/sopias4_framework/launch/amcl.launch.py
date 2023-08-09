@@ -88,7 +88,7 @@ def generate_launch_description():
     lifecycle_manager = Node(
         package="nav2_lifecycle_manager",
         executable="lifecycle_manager",
-        name="lifecycle_manager_amcl",
+        name="lifecycle_manager_localization",
         output="screen",
         namespace=namespace,
         arguments=["--ros-args", "--log-level", log_level],

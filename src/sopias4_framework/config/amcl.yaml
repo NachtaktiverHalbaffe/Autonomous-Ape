@@ -2,7 +2,7 @@
 # Specific configuration for Turtlebot 4, so it doesn't need any modification
 amcl:
   ros__parameters:
-    use_sim_time: false
+    use_sim_time: False
     alpha1: 0.2
     alpha2: 0.2
     alpha3: 0.2
@@ -15,7 +15,7 @@ amcl:
     do_beamskip: false
     global_frame_id: "map"
     lambda_short: 0.1
-    laser_likelihood_max_dist: 2.0
+    laser_likelihood_max_dist: 1.0
     laser_max_range: 100.0
     laser_min_range: -1.0
     laser_model_type: "likelihood_field"
@@ -32,7 +32,7 @@ amcl:
     save_pose_rate: 0.5
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 1.0
+    transform_tolerance: 1.1
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
