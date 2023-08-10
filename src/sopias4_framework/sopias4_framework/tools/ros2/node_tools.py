@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 import signal
 import subprocess
+from typing import Any
+
+import rclpy
+from rclpy.client import Client
+from rclpy.node import Node
 
 
 def start_launch_file(
@@ -68,6 +73,57 @@ def shutdown_ros_shell_process(shell_process: subprocess.Popen | None) -> bool:
         return True
     else:
         return False
+
+
+def call_service(
+    client: Client, service_req: Any, calling_node: Node, timeout_sec: float = 60.0
+) -> Any | None:
+    """
+    Calls an ROS2 service asynchronously and returns the response
+
+    Args:
+        client (rclpy.Client): The ROS2 service client which calls the service
+        service_req (Any): The service request that should be sent. Must match the service type of the message
+        calling_node (rclpy.Node): The ROS2 node of the service client which calls the service under the hood
+        timeout_sec (float, optional): Second until the request should timeout if no response was received
+
+    Returns:
+        None or response type of service: The response from the service
+    """
+    if client.service_is_ready():
+        # Call the service
+        try:
+            future = client.call_async(service_req)
+        except TypeError:
+            raise TypeError(
+                f"Service type {type(service_req)} doesn't match required service type {client.srv_type}"
+            )
+
+        # Spin calling node until response is available
+        try:
+            if calling_node.executor is not None:
+                calling_node.get_logger().debug(
+                    "Spinning with executor of calling node"
+                )
+                calling_node.executor.spin_once_until_future_complete(
+                    future, timeout_sec=timeout_sec
+                )
+            else:
+                calling_node.get_logger().debug("Spinning with global executor")
+                rclpy.spin_until_future_complete(
+                    calling_node, future, timeout_sec=timeout_sec
+                )
+        except Exception as e:
+            calling_node.get_logger().warning(
+                f"Couldn't spin calling node during calling a service: {e}"
+            )
+
+        return future.result()
+    else:
+        calling_node.get_logger().warning(
+            "Couldnt call service: Theres no service available"
+        )
+        return None
 
 
 if __name__ == "__main__":

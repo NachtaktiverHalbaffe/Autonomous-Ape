@@ -15,7 +15,7 @@ from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
-from sopias4_framework.tools.ros2 import drive_tools
+from sopias4_framework.tools.ros2 import drive_tools, node_tools
 
 from sopias4_msgs.srv import (
     Drive,
@@ -744,22 +744,13 @@ class GrapficalNode(Node):
         )
         request: RegistryService.Request = RegistryService.Request()
         request.name_space = f"/{namespace}"
-        future = self.__mrc_sclient_register.call_async(request)
-        self.get_logger().debug(
-            "Service request for registering namespace sent. Waiting for response"
+        response: RegistryService.Response | None = node_tools.call_service(
+            client=self.__mrc_sclient_register,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
 
-        # Make sure the node itself is spinning
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=10
-            )
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't spin node when registering namespace: {e}"
-            )
-
-        response: RegistryService.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == RegistryService.Response.SUCCESS:
@@ -818,22 +809,13 @@ class GrapficalNode(Node):
         )
         request: RegistryService.Request = RegistryService.Request()
         request.name_space = f"/{namespace}"
-        future = self.__mrc_sclient_manual_unregister.call_async(request)
-        self.get_logger().debug(
-            "Service request for unregistering namespace sent. Waiting for response"
+        response: RegistryService.Response | None = node_tools.call_service(
+            client=self.__mrc_sclient_manual_unregister,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
 
-        # Make sure the node itself is spinnig
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=10
-            )
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't spin node during unregistering namespace: {e}"
-            )
-
-        response: RegistryService.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == RegistryService.Response.SUCCESS:
@@ -877,22 +859,12 @@ class GrapficalNode(Node):
         self.get_logger().debug("Sending service request to launch Turtlebot")
         request = LaunchTurtlebot.Request()
         request.use_simulation = use_simulation
-        future = self.__rm_sclient_launch.call_async(request)
-
-        self.get_logger().debug(
-            "Sent service request to launch Turtlebot. Waiting for response"
+        response: LaunchTurtlebot.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_launch,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=240
-            )
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't spin node when connecting to turtlebot: {e}"
-            )
-
-        # Check response
-        response: LaunchTurtlebot.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == LaunchTurtlebot.Response.SUCCESS:
@@ -913,22 +885,12 @@ class GrapficalNode(Node):
             "Stops Turtlebot. Sending service request to stop nodes"
         )
         stop_request = EmptyWithStatuscode.Request()
-        future = self.__rm_sclient_stop_robot.call_async(stop_request)
-
-        self.get_logger().debug(
-            "Service request to stop nodes sent. Waiting for response"
+        response: EmptyWithStatuscode.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_stop_robot,
+            service_req=stop_request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=120
-            )
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't spin node when disconnecting from turtlebot: {e}"
-            )
-
-        # Check response
-        response: EmptyWithStatuscode.Response | None = future.result()
 
         if response is None:
             return False
@@ -947,20 +909,13 @@ class GrapficalNode(Node):
         """
         self.get_logger().debug("Send service request to start mapping")
         request = EmptyWithStatuscode.Request()
-        future = self.__rm_sclient_start_mapping.call_async(request)
-
-        self.get_logger().debug(
-            "Service request to start mapping sent. Waiting for response"
+        response: EmptyWithStatuscode.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_start_mapping,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=240
-            )
-        except Exception as e:
-            self.get_logger().warning(f"Couldn't spin node when starting mapping: {e}")
 
-        # Check response
-        response: EmptyWithStatuscode.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
@@ -1000,18 +955,13 @@ class GrapficalNode(Node):
         request.map_mode = map_mode
         request.free_thres = free_thres
         request.occupied_thres = occupied_thres
-        future = self.__rm_sclient_stop_mapping.call_async(request)
-
-        self.get_logger().debug(
-            "Service request to start mapping sent. Waiting for response"
+        response: StopMapping.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_stop_mapping,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
         )
-        try:
-            rclpy.spin_until_future_complete(self.service_client_node, future)
-        except Exception as e:
-            self.get_logger().warning(f"Couldn't spin node when stopping mapping: {e}")
 
-        # Check response
-        response: StopMapping.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == StopMapping.Response.SUCCESS:
@@ -1047,16 +997,12 @@ class GrapficalNode(Node):
             )
         else:
             request.twist = twist_msg
-        future = self.__rm_sclient_drive.call_async(request)
-
-        try:
-            rclpy.spin_until_future_complete(self.service_client_node, future)
-        except Exception as e:
-            self.get_logger().warning(
-                f"Couldn't spin node when sending drive command: {e}"
-            )
-
-        response: Drive.Response | None = future.result()
+        response: Drive.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_drive,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
+        )
 
         if response is None:
             return False
@@ -1074,18 +1020,13 @@ class GrapficalNode(Node):
         """
         self.get_logger().debug("Send service request to dock")
         request = EmptyWithStatuscode.Request()
-        future = self.__rm_sclient_dock.call_async(request)
+        response: EmptyWithStatuscode.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_dock,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
+        )
 
-        self.get_logger().debug("Service request to dock sent. Waiting for response")
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=240
-            )
-        except Exception as e:
-            self.get_logger().warning(f"Couldn't spin node when docking: {e}")
-
-        # Check response
-        response: EmptyWithStatuscode.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
@@ -1102,18 +1043,13 @@ class GrapficalNode(Node):
         """
         self.get_logger().debug("Send service request to undock")
         request = EmptyWithStatuscode.Request()
-        future = self.__rm_sclient_undock.call_async(request)
+        response: EmptyWithStatuscode.Response | None = node_tools.call_service(
+            client=self.__rm_sclient_undock,
+            service_req=request,
+            calling_node=self.service_client_node,
+            timeout_sec=5,
+        )
 
-        self.get_logger().debug("Service request to undock sent. Waiting for response")
-        try:
-            rclpy.spin_until_future_complete(
-                self.service_client_node, future, timeout_sec=240
-            )
-        except Exception as e:
-            self.get_logger().warning(f"Couldn't spin node when undocking: {e}")
-
-        # Check response
-        response: EmptyWithStatuscode.Response | None = future.result()
         if response is None:
             return False
         elif response.statuscode == EmptyWithStatuscode.Response.SUCCESS:
