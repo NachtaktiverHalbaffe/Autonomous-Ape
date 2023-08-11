@@ -150,6 +150,7 @@ private:
 		sopias4_msgs::msg::Robot robot_state = sopias4_msgs::msg::Robot();
 		robot_state.name_space = request->name_space;
 		robot_states.push_back(robot_state);
+		RCLCPP_DEBUG(logger, "Added robot state for namespace %s", request->name_space.c_str());
 
 		//  Publish registered namespaces
 		sopias4_msgs::msg::Namespaces msg = sopias4_msgs::msg::Namespaces();
@@ -157,8 +158,6 @@ private:
 		publisher_->publish(msg);
 		//  Publish registered robot_states
 		publish_robot_states();
-
-		RCLCPP_DEBUG(logger, "Added robot state for namespace %s", request->name_space.c_str());
 
 		RCLCPP_INFO(logger, "Successfully registered namespace %s", request->name_space.c_str());
 	}
@@ -203,7 +202,6 @@ private:
 		publish_robot_states();
 
 		RCLCPP_INFO(logger, "Successfully unregistered namespace %s", request->name_space.c_str());
-		return;
 	}
 
 	void set_robot_path_callback(const sopias4_msgs::srv::SetRobotPath::Request::SharedPtr request, sopias4_msgs::srv::SetRobotPath::Response::SharedPtr response)

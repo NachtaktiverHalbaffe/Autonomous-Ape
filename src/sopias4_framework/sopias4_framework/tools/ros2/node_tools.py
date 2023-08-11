@@ -101,23 +101,15 @@ def call_service(
 
         # Spin calling node until response is available
         try:
-            if calling_node.executor is not None:
-                calling_node.get_logger().debug(
-                    "Spinning with executor of calling node"
-                )
-                calling_node.executor.spin_once_until_future_complete(
-                    future, timeout_sec=timeout_sec
-                )
-            else:
-                calling_node.get_logger().debug("Spinning with global executor")
-                rclpy.spin_until_future_complete(
-                    calling_node, future, timeout_sec=timeout_sec
-                )
+            calling_node.get_logger().debug("Spinning with global executor")
+            rclpy.spin_until_future_complete(
+                calling_node, future, timeout_sec=timeout_sec
+            )
         except Exception as e:
             calling_node.get_logger().warning(
                 f"Couldn't spin calling node during calling a service: {e}"
             )
-
+        calling_node.get_logger().debug(f"Got service response {future.result()}")
         return future.result()
     else:
         calling_node.get_logger().warning(

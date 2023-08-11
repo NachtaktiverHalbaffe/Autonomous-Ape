@@ -101,6 +101,7 @@ class GUINode(QMainWindow):
     # Signals for displaying dialogs because they need to be called from main thread and nodes run in a background thread
     display_dialog_signal = pyqtSignal(ShowDialog.Request)
     showed_dialog_signal = pyqtSignal(ShowDialog.Response)
+    registered_signal = pyqtSignal()
 
     def __init__(
         self, ui, node_name: str = "gui_node", namespace: str | None = None
@@ -116,6 +117,7 @@ class GUINode(QMainWindow):
         # Private class attributes
         self.__rm_node: RobotManager | None = None
         self.display_dialog_signal.connect(self.display_dialog)
+        self.registered_signal.connect(self.connect_labels_to_subscriptions)
 
         rclpy.init()
         self.node: GrapficalNode = GrapficalNode(
@@ -240,7 +242,7 @@ class GUINode(QMainWindow):
         self.node_executor.add_node(self.__rm_node)
         self.node_executor.wake()
 
-        self.connect_labels_to_subscriptions()
+        self.registered_signal.emit()
         self.node.get_logger().info(
             f"Successfully registered namespace {self.namespace}"
         )
@@ -262,6 +264,17 @@ class GUINode(QMainWindow):
         """
         try:
             if self.node._unregister_namespace(namespace):
+                # Remove robot manager if running
+                self.namespace = None
+                if self.__rm_node is not None:
+                    self.node_executor.remove_node(self.__rm_node)
+                    self.node_executor.wake()
+                    self.__rm_node.destroy_node()
+                    self.__rm_node = None
+
+                self.node.get_logger().info(
+                    f"Successfully unregistered namespace {namespace}"
+                )
                 return True
             else:
                 return False
@@ -672,6 +685,7 @@ class GrapficalNode(Node):
         showed_dialog_signal.connect(self.__set_response_data)
         self.dialog_return_data: ShowDialog.Response | None = None
         # Log level 10 is debug
+        self.get_logger().set_level(20)
         self.get_logger().info(f"Node started with namespace {self.get_namespace()}")
 
         # ---- Setup services -----
@@ -682,6 +696,7 @@ class GrapficalNode(Node):
         # --- Setup service clients ---
         # Create own sub node for service clients so they can spin independently
         self.service_client_node: Node = rclpy.create_node("_gui_service_clients", namespace=self.get_namespace())  # type: ignore
+        self.service_client_node.get_logger().set_level(20)
         # This service registers the namespace in the multi robot coordinator
         # inside the Sopias4 Map-server
         self.__mrc_sclient_register: Client = self.service_client_node.create_client(

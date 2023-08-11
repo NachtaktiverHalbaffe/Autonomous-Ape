@@ -63,10 +63,7 @@ class GUI(GUINode):
             lambda: Thread(target=self.__register_turtlebot).start()
         )
         self.ui.pushButton_unregister.clicked.connect(
-            lambda: Thread(
-                target=self.unregister_namespace,
-                args=[self.ui.lineEdit_namespace.text()],
-            ).start()
+            lambda: Thread(target=self.__unregister_turtlebot).start()
         )
         self.ui.pushButton_launch_turtlebot.clicked.connect(
             lambda: Thread(target=self.__launch_nav_stack).start()
@@ -191,7 +188,21 @@ class GUI(GUINode):
             self.ui.pushButton_launch_nav2.setEnabled(True)
             self.ui.pushButton_launch_rviz2.setEnabled(True)
             self.ui.pushButton_namespace.setEnabled(False)
+            self.ui.pushButton_unregister.setEnabled(True)
             self.__enable_drive_buttons(True)
+            self.ui.pushButton_dock.setEnabled(True)
+            self.ui.pushButton_undock.setEnabled(True)
+
+    def __unregister_turtlebot(self):
+        if self.unregister_namespace(self.ui.lineEdit_namespace.text()):
+            self.ui.pushButton_unregister.setEnabled(False)
+            self.ui.pushButton_namespace.setEnabled(True)
+            self.ui.pushButton_launch_turtlebot.setEnabled(False)
+            self.ui.pushButton_start_mapping.setEnabled(False)
+            self.ui.pushButton_stop_turtlebot.setEnabled(False)
+            self.ui.pushButton_launch_amcl.setEnabled(False)
+            self.ui.pushButton_launch_nav2.setEnabled(False)
+            self.ui.pushButton_launch_rviz2.setEnabled(False)
             self.ui.pushButton_dock.setEnabled(True)
             self.ui.pushButton_undock.setEnabled(True)
 

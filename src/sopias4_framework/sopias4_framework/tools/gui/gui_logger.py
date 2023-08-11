@@ -70,7 +70,10 @@ class GuiLogger(QObject):
         self.widget.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
         self.widget.setWordWrapMode(QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere)
         self.widget.setTextColor(COLOR_INFO)
-        node.create_subscription(Log, "/rosout", self.__emit_msg, 10)
+        self.sub = node.create_subscription(Log, "/rosout", self.__emit_msg, 10)
+
+    def __del__(self):
+        self.sub.destroy()
 
     def __emit_msg(self, msg: Log):
         self.value_signal.emit(msg)
