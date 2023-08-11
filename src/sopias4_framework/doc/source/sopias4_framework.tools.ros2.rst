@@ -20,6 +20,14 @@ sopias4\_framework.tools.ros2.drive\_tools module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.tools.ros2.node\_tools module
+------------------------------------------------
+
+.. automodule:: sopias4_framework.tools.ros2.node_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.tools.ros2.yaml\_tools module
 ------------------------------------------------
 

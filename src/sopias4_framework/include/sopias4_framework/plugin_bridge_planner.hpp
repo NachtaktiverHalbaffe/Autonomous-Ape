@@ -17,27 +17,50 @@
 
 namespace plugin_bridges
 {
-
     /**
      * @class PlannerBridge
      * @brief A plugin bridge that allows to write Nav2 planner plugins in another programming language than C++
+     *
+     * This class shouldn't need any modification if you plan to use the plugin bridge. However, if you plan to write your own
+     * C++ plugin without this bridge, then this documentation and code can be taken as a refernce (additionally the official documentation
+     * at https://navigation.ros.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html is good).
+     *
+     * If you plan to use this Plugin bridge, then you have to do the following steps:
+     *      1. Configure your Navigation 2 configuration to use this bridge as an planner:
+     *            \code{.yaml}
+     *             planner_server:
+                        ros__parameters:
+                            plugins: ["GridBased"]
+                            GridBased:
+                            plugin: "plugin_bridges/PlannerBridge"
+                            plugin_name: "Astar"
+     *             \endcode
+     *      2. Implement a ROS2 service which has to fulfill following things:
+     *          - The service name must be /<namespace>/<plugin_name>/create_plan (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)
+     *          - The service must return a nav_msgs/Path instance where the planned path is given back as an response. Look at service definition sopias4_msgs/drv/CreatePlan.srv
+     *          - If using Python: The PlannerPyPlugin class from this framework does this already under the hood, so you can inherit from this class
+     *          - A service can be implemented in any programming language, as long as following conditions are met:
+     *              - There must be a ROS2 client library available, installed and running
+     *              - The ROS2 client library must be able to do: Running a node, running a service, generate service classes from service definitons
+     *              - https://docs.ros.org/en/rolling/Concepts/Basic/About-Client-Libraries.html lists a set of known client libraries and languages
+     *          - Make sure that the node which serves your service is running
      */
     class PlannerBridge : public nav2_core::GlobalPlanner
     {
     public:
         /**
          * @brief Constructor
-        */
+         */
         PlannerBridge() = default;
         /**
          * @brief Destructor
-        */
+         */
         ~PlannerBridge() = default;
 
         /**
-         * Method is called at when planner server enters on_configure state. Ideally this methods should perform 
+         * Method is called at when planner server enters on_configure state. Ideally this methods should perform
          * declarations of ROS parameters and initialization of planner’s member variables.
-         * 
+         *
          * @param  parent pointer to user's node
          * @param  name The name of this planner
          * @param  tf A pointer to a TF buffer
@@ -64,12 +87,12 @@ namespace plugin_bridges
         void deactivate() override;
 
         /**
-         * @brief Method create the plan from a starting and ending goal.
-         * 
+         * @brief Method to create the plan from a starting and ending goal.
+         *
          * Here the service client is implemented which has must have the name /<namespace>/<plugin_name>/create_plan.
          * This service client calls the implementation, written in the desired programming language, which must be run as an service server in his own node.
          * It is presumed that the global plan is already set.
-         * 
+         *
          * @param start The starting pose of the robot
          * @param goal  The goal pose of the robot
          * @return The sequence of poses to get from start to goal, if any
@@ -81,32 +104,32 @@ namespace plugin_bridges
     private:
         /**
          * A pointer to the transformation tree buffer
-        */
+         */
         std::shared_ptr<tf2_ros::Buffer> tf_;
 
         /**
          * A pointer to the underlying ROS2 node
-        */
+         */
         nav2_util::LifecycleNode::SharedPtr node_;
 
         /**
          * Global Costmap
-        */
+         */
         nav2_costmap_2d::Costmap2D *costmap_;
 
         /**
          * The global frame of the costmap
-        */
+         */
         std::string global_frame_;
         /**
          * The internal name of the plugin
-        */
-        std::string  name_;
+         */
+        std::string name_;
         /**
          * Name of the plugin bridge. Needed to configure the service name of the bridge correctly.
          * Should match with the bridge implementation
          */
-        std::string plugin_name_; 
+        std::string plugin_name_;
         /**
          * Service client which bridges the create_plan() method to a bridge implementation
          */

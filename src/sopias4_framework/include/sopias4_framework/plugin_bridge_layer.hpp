@@ -9,9 +9,34 @@
 
 namespace plugin_bridges
 {
+    // TODO Update configuration documentation
     /**
      * @class LayerBridge
      * @brief  A plugin bridge that allows to write Nav2 layer plugins in another programming language than C++
+     * 
+     * This class shouldn't need any modification if you plan to use the plugin bridge. However, if you plan to write your own
+     * C++ plugin without this bridge, then this documentation and code can be taken as a refernce (additionally the official documentation
+     * at https://navigation.ros.org/plugin_tutorials/docs/writing_new_costmap2d_plugin.html is good).
+     *
+     * If you plan to use this Plugin bridge, then you have to do the following steps:
+     *      1. Configure your Navigation 2 configuration to use this bridge as an costmap layer:           
+     *            \code{.yaml}
+     *             planner_server:
+                        ros__parameters:
+                            plugins: ["GridBased"]
+                            GridBased:
+                            plugin: "plugin_bridges/PlannerBridge"
+                            plugin_name: "Astar"
+     *             \endcode
+     *      2. Implement a ROS2 service which has to fulfill following things:
+     *          - The service name must be /<namespace>/<plugin_name>/update_costs (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)
+     *          - The service must return a nav_msgs/OccupancyGrid instance where the planned path is given back as an response. Look at service definition sopias4_msgs/drv/UpdateCosts.srv
+     *          - If using Python: The LayerPyPlugin class from this framework does this already under the hood, so you can inherit from this class
+     *          - A service can be implemented in any programming language, as long as following conditions are met:
+     *              - There must be a ROS2 client library available, installed and running
+     *              - The ROS2 client library must be able to do: Running a node, running a service, generate service classes from service definitons
+     *              - https://docs.ros.org/en/rolling/Concepts/Basic/About-Client-Libraries.html lists a set of known client libraries and languages
+     *          - Make sure that the node which serves your service is running
      */
     class LayerBridge : public nav2_costmap_2d::CostmapLayer
     {

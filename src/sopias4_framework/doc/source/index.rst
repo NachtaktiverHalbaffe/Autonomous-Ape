@@ -5,11 +5,28 @@
 
 Welcome to Sopias4 Framework's documentation!
 =============================================
+This ROS2 package 
+
+Python documentation
+-------------------------
+.. toctree::
+   :maxdepth: 3
+
+   sopias4_framework.nodes
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
 
-   modules
+   sopias4_framework.tools
+
+C++ documentation
+---------------------
+.. toctree::
+   :maxdepth: 3
+   
+   ../generated/class_view_hierarchy
+   ../generated/file_view_hierarchy
+   ../generated/unabridged_api
 
 Indices and tables
 ==================
