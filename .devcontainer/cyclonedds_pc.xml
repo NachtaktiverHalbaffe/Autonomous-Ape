@@ -1,0 +1,26 @@
+<!-- This is a merge from the example cofiguration from Create 3 and Turtlebot 4 docs -->
+<CycloneDDS>
+    <Domain>
+        <Id>any</Id>
+        <General>
+            <NetworkInterfaceAddress>auto</NetworkInterfaceAddress>
+            <AllowMulticast>false</AllowMulticast>
+            <EnableMulticastLoopback>true</EnableMulticastLoopback>
+            <DontRoute>true</DontRoute>            <!-- Only necessary part from Turtlebot 4 docs-->
+        </General>
+        <Internal>
+            <MinimumSocketReceiveBufferSize>10MB</MinimumSocketReceiveBufferSize>            <!-- From ros2 docs-->
+        </Internal>
+        <Discovery>
+            <ParticipantIndex>0</ParticipantIndex>
+            <Peers>
+                <Peer Address="$192.168.178.40:7410"/>
+                <Peer Address="$192.168.178.30:7410"/>
+                <!-- <Peer Address="$192.168.178.41:7410"/>
+                <Peer Address="$192.168.178.31:7410"/>                
+                <Peer Address="$192.168.178.42:7410"/>
+                <Peer Address="$192.168.178.32:7410"/ -->
+            </Peers>
+        </Discovery>
+    </Domain>
+</CycloneDDS>
