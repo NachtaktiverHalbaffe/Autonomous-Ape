@@ -1,0 +1,77 @@
+# Installation
+This splits up into setting up a ROS2 workspace for the Sopias4 project and installing ROS2. It's recommended to first setup the workspace and then setting up ROS2, because the workspace contains necessary configuration files if you want to use the Dev Containers and Docker for easy setup. 
+
+## Setting up ROS2 workspace
+Clone this repository. When using Linux, it is recommended to clone it into the home directory of your linux user so it matches with the commands in this guide.
+```Bash
+# If git isn't installed
+sudo apt update && apt install git
+
+cd /home/<your linux user>
+git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right, can vary 
+```
+After you have installed ROS2, you can run an initial build of this workspace:
+```Bash
+cd <path to your workspace>
+colcon build
+```
+
+## Installing ROS2 and necesary applications 
+### Recommended: Running in Docker using Dev Containers (Visual Studio Code)
+Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
+
+If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
+1. Install `docker`  **and** `docker-buildx` for build proper build caching  
+    - For Ubuntu:
+        ```Bash
+        sudo apt-get update
+        sudo apt-get install ca-certificates curl gnupg
+
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+        echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+        sudo apt-get update
+        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        ```
+        You can verify your install by running
+        ```bash
+        sudo docker run hello-world
+        ```
+    - For other Linux distros or OS search for the corresponding guides
+2. Add your current linux user which is used inside the container to the docker group:
+    ```bash
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+3. Modify `.devcontainer/devcontainer.json`: Replace `nachtaktiverhalbaffe` with your Linux username. If you do not know your username, you can find it by running `echo $USERNAME` in the terminal
+4. Repeat last step in `.devcontainer/Dockerfile`
+5. Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`
+
+### Run directly on host
+Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands.
+
+You also need to install these packages to run the prototype:
+- [Turtlebot4 Packages](https://turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_common.html)
+- python3-pip
+- If you want to use the Gazebo simulation: [Turtlebot4 Simulator](https://turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_simulator.html)
+- If documentation generation is wanted: Install [rosdoc2](https://github.com/ros-infrastructure/rosdoc2):
+    1. Clone repository and cd into it
+    2. Run `pip3 install -e .`
+
+ You have to source ROS2 and the workspace everytime you open a terminal and your IDE needs to be started from a sourced terminal so you get all linter and syntax highlighting capabilities. For this you have to run these commands in the opened terminal:
+```bash
+source /opt/ros/humble/setup.bash
+source source <path to ros workspace>/install/setup.bash
+```
+If you want this done automatically each time, when run this commands once:
+```bash
+echo "source /opt/ros/humble/setup.bash" >>/home/<your linux user>/.bashrc
+echo "if [ -f <path to ros workspace>/install/setup.bash ]; then source <path to ros workspace>/install/setup.bash; fi" >> /home/<your linux user>/.bashrc
+```

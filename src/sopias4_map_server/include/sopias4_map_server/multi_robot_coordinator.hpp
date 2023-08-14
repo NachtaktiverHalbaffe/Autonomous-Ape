@@ -4,8 +4,7 @@
 #include "sopias4_msgs/srv/get_namespaces.hpp"
 #include "sopias4_msgs/srv/get_robots.hpp"
 #include "sopias4_msgs/srv/get_robot_identity.hpp"
-#include "sopias4_msgs/srv/register.hpp"
-#include "sopias4_msgs/srv/unregister.hpp"
+#include "sopias4_msgs/srv/registry_service.hpp"
 #include "sopias4_msgs/srv/set_robot_path.hpp"
 #include "sopias4_msgs/msg/robot.hpp"
 

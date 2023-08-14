@@ -1,5 +1,5 @@
 FROM ros:humble
-ARG USERNAME=nachtaktiverhalbaffe
+ARG USERNAME= ros
 ARG WORKSPACE
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -63,10 +63,10 @@ RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 ######################################################################
 
 # Setup right RMW implementation 
-# ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
-# ENV FASTRTPS_DEFAULT_PROFILES_FILE file:///home/ws/.devcontainer/fastrtps-profile.xml
-ENV RMW_IMPLEMENTATION rmw_cyclonedds_cpp
-ENV RCYCLONEDDS_URI file:///home/ws/.devcontainer/cyclonedds_pc.xml
+ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
+# ENV FASTRTPS_DEFAULT_PROFILES_FILE home/ws/.devcontainer/fastrtps-profile.xml
+# ENV RMW_IMPLEMENTATION rmw_cyclonedds_cpp
+ENV RCYCLONEDDS_URI home/ws/.devcontainer/cyclonedds_pc.xml
 RUN echo 'net.core.rmem_max=2147483647' >> /etc/sysctl.d/10-cyclone-max.conf
 
 # Setup directory where log files are stored

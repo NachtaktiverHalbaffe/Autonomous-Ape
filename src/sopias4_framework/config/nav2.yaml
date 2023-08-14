@@ -269,6 +269,7 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       use_sim_time: False
+      use_maximum: True
       rolling_window: True
       width: 3
       height: 3
@@ -303,7 +304,7 @@ local_costmap:
         plugin: nav2_costmap_2d::StaticLayer
         map_subscribe_transient_local: True
         map_topic: /map
-      always_send_full_costmap: True
+      always_send_full_costmap: False
 
 global_costmap:
   global_costmap:

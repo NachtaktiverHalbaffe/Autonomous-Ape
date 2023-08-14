@@ -37,12 +37,14 @@ release = "0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
 ]
 autodoc_member_order = "bysource"
+# pygments_style = "sphinx"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -64,6 +66,7 @@ source_suffix = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
+
 html_theme_options = {
     # Toc options
     "collapse_navigation": False,
@@ -73,6 +76,9 @@ html_theme_options = {
     "titles_only": False,
 }
 html_static_path = ["_static"]
+hmtl_css_files = ["hide_toctree_caption.css"]
+html_logo = "assets/ias_logo.jpeg"
+# html_favicon = 'images/nav2_48x48.png'
 
 # -- Options for rosdoc2 -----------------------------------------------------
 
@@ -85,7 +91,7 @@ rosdoc2_settings = {
     ## This setting, if True, will ensure breathe is part of the 'extensions',
     ## and will set all of the breathe configurations, if not set, and override
     ## settings as needed if they are set by this configuration.
-    # "enable_breathe": True,
+    "enable_breathe": True,
     ## This setting, if True, will ensure exhale is part of the 'extensions',
     ## and will set all of the exhale configurations, if not set, and override
     ## settings as needed if they are set by this configuration.
@@ -95,18 +101,18 @@ rosdoc2_settings = {
     ## If an empty dictionary is provided, breathe defaults will be used.
     # "exhale_specs_mapping": {},
     ## This setting, if True, will ensure autodoc is part of the 'extensions'.
-    # "enable_autodoc": True,
+    "enable_autodoc": True,
     ## This setting, if True, will ensure intersphinx is part of the 'extensions'.
-    # "enable_intersphinx": True,
+    "enable_intersphinx": True,
     ## This setting, if True, will have the 'html_theme' overridden to provide
     ## a consistent style across all of the ROS documentation.
-    # "override_theme": True,
+    "override_theme": False,
     ## This setting, if True, will automatically extend the intersphinx mapping
     ## using inventory files found in the cross-reference directory.
     ## If false, the `found_intersphinx_mappings` variable will be in the global
     ## scope when run with rosdoc2, and could be conditionally used in your own
     ## Sphinx conf.py file.
-    # "automatically_extend_intersphinx_mapping": True,
+    "automatically_extend_intersphinx_mapping": True,
     ## Support markdown
-    # "support_markdown": True,
+    "support_markdown": True,
 }

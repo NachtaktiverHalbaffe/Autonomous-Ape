@@ -1,0 +1,9 @@
+.rst-content .toctree-wrapper>p.caption,
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4,
+.rst-content h5,
+.rst-content h6 {
+    display: none;
+}
