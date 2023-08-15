@@ -235,6 +235,22 @@ class GUI(GUINode):
         self.ui.pushButton_launch_rviz2.setEnabled(False)
 
     def __launch_nav2(self):
+        # --- Add namespace to yaml config of nav2 and amcl launch file ---
+        base_path = os.path.join(
+            ament_index_python.get_package_share_directory("sopias4_framework"),
+            "config",
+        )
+        yaml_tools.insert_namespace_into_yaml_config(
+            namespace=self.node.get_namespace(),
+            path=os.path.join(
+                base_path,
+                "nav2_base.yaml",
+            ),
+            output_path=os.path.join(
+                base_path,
+                "nav2.yaml",
+            ),
+        )
         self.__launch_process_nav2 = node_tools.start_launch_file(
             ros2_package="sopias4_framework",
             launch_file="nav2.launch.py",

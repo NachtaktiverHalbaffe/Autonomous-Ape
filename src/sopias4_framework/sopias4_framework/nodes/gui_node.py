@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import abc
 import multiprocessing
+import os
 import random
 import string
 import time
 from threading import Event, Thread
 
 import rclpy
+from ament_index_python import get_package_share_directory
 from geometry_msgs.msg import Twist
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox
@@ -15,7 +17,7 @@ from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
-from sopias4_framework.tools.ros2 import drive_tools, node_tools
+from sopias4_framework.tools.ros2 import drive_tools, node_tools, yaml_tools
 
 from sopias4_msgs.srv import (
     Drive,
@@ -127,8 +129,8 @@ class GUINode(QMainWindow):
 
         rclpy.init()
         self.node: GrapficalNode = GrapficalNode(
-            showed_dialog_signal=self.showed_dialog_signal,
-            display_dialog_signal=self.display_dialog_signal,
+            showed_dialog_signal=self.__showed_dialog_signal,
+            display_dialog_signal=self.__display_dialog_signal,
             node_name=node_name,
             namespace=namespace,
         )
@@ -238,8 +240,8 @@ class GUINode(QMainWindow):
         self.node_executor.wake()
 
         self.node = GrapficalNode(
-            showed_dialog_signal=self.showed_dialog_signal,
-            display_dialog_signal=self.display_dialog_signal,
+            showed_dialog_signal=self.__showed_dialog_signal,
+            display_dialog_signal=self.__display_dialog_signal,
             node_name=self.node_name,
             namespace=self.namespace,
         )
@@ -249,7 +251,7 @@ class GUINode(QMainWindow):
         self.node_executor.add_node(self.__rm_node)
         self.node_executor.wake()
 
-        self.registered_signal.emit()
+        self.__registered_signal.emit()
         self.node.get_logger().info(
             f"Successfully registered namespace {self.namespace}"
         )

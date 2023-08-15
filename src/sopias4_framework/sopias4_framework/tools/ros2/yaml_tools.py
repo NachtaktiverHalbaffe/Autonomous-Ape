@@ -7,13 +7,11 @@ import ruamel.yaml.parser
 
 REMAPPING_KEYS_YAML_CONFIGS = [
     # Nav2
-    "global_frame",
-    "robot_base_frame",
+    "topic",
 ]
 REMAPPING_VALUES_YAML_CONFIGS = [
     # Nav2
-    "odom",
-    "base_link",
+    "scan",
 ]
 
 REMAPPING_VALUES_RVIZ = [
@@ -328,8 +326,8 @@ def __add_namespace_to_item(
     ):
         value = f"{namespace}/{yaml_instance.mlget(__get_yaml_key(item_key))}"
         # Add leading / to namespace if it wasnt given in the argument
-        if namespace[0] == "/":
-            value = value[1::]
+        if namespace[0] != "/":
+            value = f"/{value}"
         yaml_instance.mlput(path=item_key, value=value)
         return yaml_instance
 
