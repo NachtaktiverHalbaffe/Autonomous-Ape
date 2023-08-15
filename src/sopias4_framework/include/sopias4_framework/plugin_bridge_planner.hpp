@@ -134,6 +134,11 @@ namespace plugin_bridges
          * Service client which bridges the create_plan() method to a bridge implementation
          */
         rclcpp::Client<sopias4_msgs::srv::CreatePlan>::SharedPtr client_;
+        /**
+         * A pointer to the underlying ROS2 node
+         */
+        rclcpp::Node::SharedPtr service_node_;
+
     };
 
 } // namespace plugin_bridge

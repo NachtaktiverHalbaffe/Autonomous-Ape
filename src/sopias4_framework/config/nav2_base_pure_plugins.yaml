@@ -347,8 +347,10 @@ planner_server:
     use_sim_time: False
     planner_plugins: [GridBased]
     GridBased:
-      plugin: plugin_bridges/PlannerBridge
-      plugin_name: "astar"
+      plugin: nav2_navfn_planner/NavfnPlanner
+      tolerance: 0.5
+      use_astar: True
+      allow_unknown: True
 
 smoother_server:
   ros__parameters:

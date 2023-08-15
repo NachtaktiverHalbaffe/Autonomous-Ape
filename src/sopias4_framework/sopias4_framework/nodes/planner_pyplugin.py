@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import abc
-from threading import Thread
 from typing import Tuple
 
-from geometry_msgs.msg import Pose
+import rclpy
+from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import Path
-from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.service import Service
 from sopias4_framework.tools.ros2 import costmap_tools
@@ -33,7 +32,12 @@ class PlannerPyPlugin(Node):
                                                                                                                     the robot should avoid this region
     """
 
-    def __init__(self, node_name, plugin_name, namespace: str | None = None) -> None:
+    def __init__(
+        self,
+        node_name: str,
+        plugin_name: str,
+        namespace: str | None = None,
+    ) -> None:
         if namespace is None:
             super().__init__(node_name)  # type: ignore
         else:
@@ -45,11 +49,6 @@ class PlannerPyPlugin(Node):
         )
 
         self.costmap: PyCostmap2D
-        # Let node spin itself
-        # self.__executor = MultiThreadedExecutor()
-        # self.__executor.add_node(self)
-        # self.__spin_node_thread = Thread(target=self.__executor.spin)
-        # self.__spin_node_thread.start()
 
     def __create_plan_callback(
         self, request: CreatePlan.Request, response: CreatePlan.Response
@@ -63,18 +62,24 @@ class PlannerPyPlugin(Node):
         start = costmap_tools.pose_2_costmap(
             request.start, PyCostmap2D(request.costmap)
         )
-        goal = costmap_tools.pose_2_costmap(request.start, PyCostmap2D(request.costmap))
+        goal = costmap_tools.pose_2_costmap(request.goal, PyCostmap2D(request.costmap))
         self.costmap = PyCostmap2D(request.costmap)
+
+        self.get_logger().debug(
+            f"Generating path in costmap domain from {start} to {goal}"
+        )
 
         pixel_path: list[Tuple[int, int]] = self.generate_path(start=start, goal=goal)
 
         self.get_logger().debug(
             "Found shortest path in costmap domain. Transforming it into map domain"
         )
+        self.get_logger().debug(f"Shortest path in costmap domain: {pixel_path}")
+
         path: Path = Path()
         for node in pixel_path:
-            path_node = Pose()
-            path_node = costmap_tools.costmap_2_pose(
+            path_node = PoseStamped()
+            path_node.pose = costmap_tools.costmap_2_pose(
                 node[0], node[1], PyCostmap2D(request.costmap)
             )
             path.poses.append(path_node)  # type: ignore

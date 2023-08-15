@@ -22,6 +22,7 @@ class Astar(PlannerPyPlugin):
             super().__init__(
                 node_name="planner_astar", plugin_name="astar", namespace=namespace
             )
+        self.get_logger().set_level(10)
         self.get_logger().info("Started node")
 
     def generate_path(
@@ -68,10 +69,15 @@ class Astar(PlannerPyPlugin):
         #######################
         while len(list_open_canditates) != 0:
             # --- Search node which gets processed this iteration ---
+            self.get_logger().debug("Running new iteration")
             # Sort open list according to the lowest cost (second element of each sublist)
             list_open_canditates.sort(key=lambda x: x[1])
             # Take first element of the open candidates because it has the lowest costs
             current_node = list_open_canditates.pop(0)[0]
+            self.get_logger().debug(f"Current node: {current_node}")
+            self.get_logger().debug(
+                f"Current distance to goal: {costmap_tools.euclidian_distance_pixel_domain(current_node, goal)}"
+            )
 
             # If current_node is the goal, finish the algorithm execution
             if current_node == goal:
@@ -90,8 +96,8 @@ class Astar(PlannerPyPlugin):
                     continue
 
                 # Add heuristic (euclidian distance) to costs
-                final_cost = cost + costmap_tools.euclidian_distance_map_domain(
-                    neighbor_node, goal, self.costmap
+                final_cost = cost + costmap_tools.euclidian_distance_pixel_domain(
+                    neighbor_node, goal
                 )
 
                 # Check if neighbor is in canditates list

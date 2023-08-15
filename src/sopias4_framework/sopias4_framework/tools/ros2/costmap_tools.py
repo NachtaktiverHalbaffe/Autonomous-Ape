@@ -12,7 +12,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import OccupancyGrid
 
-LETHAL_COST = 150
+LETHAL_COST = 254
 
 
 def costmap_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:

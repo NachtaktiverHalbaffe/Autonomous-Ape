@@ -22,6 +22,7 @@ namespace plugin_bridges
     costmap_ = costmap_ros->getCostmap();
     global_frame_ = costmap_ros->getGlobalFrameID();
     // Service client
+    service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node");
 
     // Parameter initialization
     nav2_util::declare_parameter_if_not_declared(node_, name_ + ".plugin_name", rclcpp::ParameterValue("global_planner"));
@@ -40,7 +41,7 @@ namespace plugin_bridges
     RCLCPP_INFO(
         node_->get_logger(), "Activating plugin %s of type PlannerPluginBridge",
         name_.c_str());
-    client_ = node_->create_client<sopias4_msgs::srv::CreatePlan>(plugin_name_ + "/create_plan");
+    client_ = service_node_->create_client<sopias4_msgs::srv::CreatePlan>(plugin_name_ + "/create_plan");
   }
 
   void PlannerBridge::deactivate()
@@ -80,7 +81,7 @@ namespace plugin_bridges
     request->costmap = sopias4_framework::tools::costmap_2_costmap_msg(costmap_);
 
     auto future = client_->async_send_request(request);
-    auto return_code = rclcpp::spin_until_future_complete(node_, future);
+    auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
 
     if (return_code == rclcpp::FutureReturnCode::SUCCESS)
     {

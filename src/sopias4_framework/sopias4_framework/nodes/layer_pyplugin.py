@@ -2,11 +2,9 @@
 import abc
 from threading import Thread
 
+import rclpy
 import sopias4_framework.tools.ros2
-from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
-from nav_msgs.msg import Path
-from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.service import Service
 from sopias4_framework.tools.ros2.costmap_tools import pycostmap2d_2_occupancygrid
@@ -28,7 +26,10 @@ class LayerPyPlugin(Node):
     """
 
     def __init__(
-        self, node_name: str, plugin_name: str, namespace: str | None = None
+        self,
+        node_name: str = "layer_pyplugin",
+        plugin_name: str = "abstract plugin",
+        namespace: str | None = None,
     ) -> None:
         if namespace is None:
             super().__init__(node_name)  # type: ignore
@@ -39,12 +40,6 @@ class LayerPyPlugin(Node):
         self.__plugin_bridge_server: Service = self.create_service(
             UpdateCosts, f"{plugin_name}/update_costs", self.__update_costs_callback
         )
-
-        # Let node spin itself
-        self.__executor = MultiThreadedExecutor()
-        self.__executor.add_node(self)
-        self.__spin_node_thread = Thread(target=self.__executor.spin)
-        self.__spin_node_thread.start()
 
     def __update_costs_callback(
         self, request: UpdateCosts.Request, response: UpdateCosts.Response
@@ -85,3 +80,23 @@ class LayerPyPlugin(Node):
         self.get_logger().info("Shutting down node")
         self.__plugin_bridge_server.destroy()
         super().destroy_node()
+
+
+def main(args=None):
+    """
+    Start the node. It basically initializes the ROS2 context and creates a instance of PlannerPyPlugin
+    :meta private:
+    """
+    # Initialize node context
+    rclpy.init(args=args)
+    # Create ROS2 Node
+    node = LayerPyPlugin()
+    # Run node
+    rclpy.spin(node)
+    # Cleanup
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
