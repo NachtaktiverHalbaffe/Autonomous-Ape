@@ -77,14 +77,17 @@ class PlannerPyPlugin(Node):
         self.get_logger().debug(f"Shortest path in costmap domain: {pixel_path}")
 
         path: Path = Path()
+        path.header.frame_id = self.costmap.global_frame_id              
         for node in pixel_path:
             path_node = PoseStamped()
+            path_node.header.frame_id = self.costmap.global_frame_id
             path_node.pose = costmap_tools.costmap_2_pose(
                 node[0], node[1], PyCostmap2D(request.costmap)
             )
             path.poses.append(path_node)  # type: ignore
 
         response.global_path = path
+        self.get_logger().debug(f"Shortest path in map domain: {path.poses}")
         self.get_logger().info("Shortest global path to goal successfully found")
         return response
 

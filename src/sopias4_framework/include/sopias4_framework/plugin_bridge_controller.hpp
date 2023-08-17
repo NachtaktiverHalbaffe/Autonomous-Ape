@@ -164,6 +164,10 @@ namespace plugin_bridges
          * Service client which bridges the compute_velocity_commands() method to a bridge implementation
          */
         rclcpp::Client<sopias4_msgs::srv::ComputeVelocityCommands>::SharedPtr client_compute_vel_;
+        /**
+         * A pointer to the underlying ROS2 node which runs the service client
+         */
+        rclcpp::Node::SharedPtr service_node_;
     };
 
 } // namespace plugin_bridges

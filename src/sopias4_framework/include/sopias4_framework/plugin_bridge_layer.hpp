@@ -115,6 +115,10 @@ namespace plugin_bridges
          * Service client which bridges the pdate_costs() method to a bridge implementation
          */
         rclcpp::Client<sopias4_msgs::srv::UpdateCosts>::SharedPtr client_;
+        /**
+         * A pointer to the underlying ROS2 node which runs the service client
+         */
+        rclcpp::Node::SharedPtr service_node_;
     };
 
 } // namespace plugin_bridge

@@ -135,7 +135,7 @@ namespace plugin_bridges
          */
         rclcpp::Client<sopias4_msgs::srv::CreatePlan>::SharedPtr client_;
         /**
-         * A pointer to the underlying ROS2 node
+         * A pointer to the underlying ROS2 node which runs the service client
          */
         rclcpp::Node::SharedPtr service_node_;
 

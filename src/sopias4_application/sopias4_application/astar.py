@@ -46,6 +46,14 @@ class Astar(PlannerPyPlugin):
         # The global path
         path = []
         self.get_logger().info("Using A* algorithm")
+        start_index: int = self.costmap.getIndex(start[0], start[1])
+        goal_index: int = self.costmap.getIndex(goal[0], goal[1])
+
+        if start_index >= len(self.costmap.costmap) or goal_index > len(
+            self.costmap.costmap
+        ):
+            raise IndexError("Specified start or goal arent in the given costmap")
+
         # A list of all nodes, which are open to being processed. Each node must be a tuple with first element being a
         # tuple with the x,y-coordinate of the node and the second element it's cost
         list_open_canditates: list = []
@@ -55,12 +63,22 @@ class Astar(PlannerPyPlugin):
         # Append start node to
         list_open_canditates.append(
             (
-                start,
-                costmap_tools.euclidian_distance_map_domain(start, goal, self.costmap),
+                start_index,
+                costmap_tools.euclidian_distance_pixel_domain(
+                    start_index, goal, self.costmap
+                ),
             )
         )
         # Dict for mapping children to parent
         parents = dict()
+        # Dict containing the costs of the processed nodes. These are the normal costs like in dijkstra without the heuristic applied
+        natural_costs: dict = dict()
+        natural_costs[start_index] = 0
+        # Final costs which are natural_costs + heuristic costs
+        final_costs: dict = dict()
+        final_costs[start_index] = costmap_tools.euclidian_distance_pixel_domain(
+            start_index, goal_index, self.costmap
+        )
 
         path_found: bool = False
         self.get_logger().debug("Initialized A* algorithm")
@@ -69,56 +87,62 @@ class Astar(PlannerPyPlugin):
         #######################
         while len(list_open_canditates) != 0:
             # --- Search node which gets processed this iteration ---
-            self.get_logger().debug("Running new iteration")
+            self.get_logger().debug("Running new iteration", throttle_duration_sec=1)
             # Sort open list according to the lowest cost (second element of each sublist)
             list_open_canditates.sort(key=lambda x: x[1])
             # Take first element of the open candidates because it has the lowest costs
-            current_node = list_open_canditates.pop(0)[0]
-            self.get_logger().debug(f"Current node: {current_node}")
+            current_index: int = list_open_canditates.pop(0)[0]
             self.get_logger().debug(
-                f"Current distance to goal: {costmap_tools.euclidian_distance_pixel_domain(current_node, goal)}"
+                f"Current distance to goal: {costmap_tools.euclidian_distance_pixel_domain(current_index, goal_index, self.costmap)}",
+                throttle_duration_sec=1,
             )
 
             # If current_node is the goal, finish the algorithm execution
-            if current_node == goal:
+            if current_index == goal_index:
                 self.get_logger().debug("A* found goal node")
                 path_found = True
                 break
 
             # --- Process neighbors of nodes ---
             # Get neighbors
-            neighbors: list[
-                Tuple[Tuple[int, int], float]
-            ] = costmap_tools.find_neighbors(current_node, self.costmap)
-            for neighbor_node, cost in neighbors:
+            neighbors: list[Tuple[int, float]] = costmap_tools.find_neighbors_index(
+                current_index, self.costmap
+            )
+            for neighbor_index, cost in neighbors:
                 # Skip node if already processed
-                if neighbor_node in list_processed:
+                if neighbor_index in list_processed:
                     continue
 
+                # Calculate natural costs of current neighbor node like in dijkstra
+                n_cost = natural_costs[current_index] + cost
                 # Add heuristic (euclidian distance) to costs
-                final_cost = cost + costmap_tools.euclidian_distance_pixel_domain(
-                    neighbor_node, goal
+                f_cost = n_cost + costmap_tools.euclidian_distance_pixel_domain(
+                    neighbor_index, goal, self.costmap
                 )
 
                 # Check if neighbor is in canditates list
                 is_already_canditate: bool = False
                 for idx, element in enumerate(list_open_canditates):
                     # Neighbors is already an candidate
-                    if element[0] == neighbor_node:
-                        is_already_canditate = True
+                    if element[0] == neighbor_index:
                         # Update cost of canditate if current costs are lower
-                        if final_cost < element[1]:
-                            list_open_canditates[idx] = (element[0], final_cost)
-                            parents[neighbor_node] = current_node
+                        if f_cost < final_costs[neighbor_index]:
+                            natural_costs[neighbor_index] = n_cost
+                            final_costs[neighbor_index] = f_cost
+                            parents[neighbor_index] = current_index
+                            list_open_canditates[idx] = (neighbor_index, f_cost)
+                        is_already_canditate = True
                         break
 
-                # Append node to list of canditates if not already on there
                 if not is_already_canditate:
-                    list_open_canditates.append((neighbor_node, final_cost))
-                    parents[neighbor_node] = current_node
+                    # Append node to list of canditates if not already on there
+                    natural_costs[neighbor_index] = n_cost
+                    final_costs[neighbor_index] = f_cost
+                    parents[neighbor_index] = current_index
+                    list_open_canditates.append((neighbor_index, f_cost))
 
             # --- Add node to list of processed nodes so it doesn't get visited --
-            list_processed.add(current_node)
+            list_processed.add(current_index)
 
         ######################
         # --- Post-processing ---
@@ -133,11 +157,14 @@ class Astar(PlannerPyPlugin):
 
         # Reconstruct path by working backwards from target
         if path_found:
-            node = goal
-            path.append(node)
-            while node != start:
-                path.append(node)
-                node = parents[node]
+            node_index = goal_index
+            path.append(goal)
+            while node_index != start_index:
+                node_cor = costmap_tools.index_2_costmap(
+                    index=node_index, costmap=self.costmap
+                )
+                path.append(node_cor)
+                node_index = parents[node_index]
 
         path = path[::-1]
 

@@ -76,6 +76,9 @@ namespace plugin_bridges
     node->get_parameter(name_ + ".transform_tolerance", transform_tolerance);
     transform_tolerance_ = rclcpp::Duration::from_seconds(transform_tolerance);
 
+    // Service client node
+    service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
+
     global_pub_ = node->create_publisher<nav_msgs::msg::Path>("received_global_plan", 1);
   }
 
@@ -98,7 +101,6 @@ namespace plugin_bridges
 
     auto node = node_.lock();
     client_compute_vel_ = node->create_client<sopias4_msgs::srv::ComputeVelocityCommands>(plugin_name_ + "/compute_velocity_commands");
-    client_set_speed_limit_ = node->create_client<sopias4_msgs::srv::SetSpeedLimit>(plugin_name_ + "/set_speed_limit");
   }
 
   void ControllerBridge::deactivate()
@@ -293,7 +295,6 @@ namespace plugin_bridges
     }
     return false;
   }
-
-
+}
 // Register this controller as a nav2_core plugin
 PLUGINLIB_EXPORT_CLASS(plugin_bridges::ControllerBridge, nav2_core::Controller)
