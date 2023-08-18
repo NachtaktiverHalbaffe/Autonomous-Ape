@@ -71,7 +71,7 @@ namespace plugin_bridges
 
     if (goal.header.frame_id != global_frame_)
     {
-      RCLCPP_INFO(
+      RCLCPP_ERROR(
           node_->get_logger(), "Planner will only except goal position from %s frame",
           global_frame_.c_str());
       return global_path;
@@ -88,7 +88,7 @@ namespace plugin_bridges
 
     if (return_code == rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
           node_->get_logger(), "Received plan from implemented plugin");
       global_path.poses = future.get()->global_path.poses;
       return global_path;

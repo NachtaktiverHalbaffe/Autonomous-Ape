@@ -22,14 +22,19 @@ class Astar(PlannerPyPlugin):
             super().__init__(
                 node_name="planner_astar", plugin_name="astar", namespace=namespace
             )
-        self.get_logger().set_level(10)
         self.get_logger().info("Started node")
+        self.get_logger().set_level(30)
 
     def generate_path(
-        self, start: Tuple[int, int], goal: Tuple[int, int]
+        self, start: Tuple[int, int], goal: Tuple[int, int], goal_tolerance: float = 0.2
     ) -> list[Tuple[int, int]]:
         """
-        Here the path finding algorithm should be implemented
+        Here the path finding algorithm should be implemented. Some tips for implementing the algorithm:
+        1. Use python sets and dicts instead of lists. They are way faster when a specific value is searched, inserted or updated
+        2. Be careful with loops when iterating through datasets. When applying first tip, there are often ways to directly update, \
+            searching or updating values in datasets instead of iterating through them
+        3. The module costmap_tools from sopias4_framework.tools.ros2 package has useful tools for interacting with the given costmap. \
+            Remember that the costmap is stored in self.costmap of this class
 
         Args:
             start (tuple(int, int)): The position from which the path should start as an x,y-coordinate in the costmap
@@ -56,12 +61,12 @@ class Astar(PlannerPyPlugin):
 
         # A list of all nodes, which are open to being processed. Each node must be a tuple with first element being a
         # tuple with the x,y-coordinate of the node and the second element it's cost
-        list_open_canditates: list = []
+        open_canditates: set = set()
         # A list of all nodes which are already processed
         list_processed: set = set()
 
         # Append start node to
-        list_open_canditates.append(
+        open_canditates.add(
             (
                 start_index,
                 costmap_tools.euclidian_distance_pixel_domain(
@@ -85,28 +90,30 @@ class Astar(PlannerPyPlugin):
         #######################
         # ------ A* execution ------
         #######################
-        while len(list_open_canditates) != 0:
+        while len(open_canditates) != 0:
             # --- Search node which gets processed this iteration ---
-            self.get_logger().debug("Running new iteration", throttle_duration_sec=1)
-            # Sort open list according to the lowest cost (second element of each sublist)
-            list_open_canditates.sort(key=lambda x: x[1])
-            # Take first element of the open candidates because it has the lowest costs
-            current_index: int = list_open_canditates.pop(0)[0]
-            self.get_logger().debug(
-                f"Current distance to goal: {costmap_tools.euclidian_distance_pixel_domain(current_index, goal_index, self.costmap)}",
-                throttle_duration_sec=1,
-            )
+            # Get current node which is the one which has the minimal costs in the set of open canditates
+            current = min(open_canditates, key=lambda x: x[1])
+            current_index: int = current[0]
+            open_canditates.remove(current)
 
             # If current_node is the goal, finish the algorithm execution
-            if current_index == goal_index:
+            if (
+                costmap_tools.euclidian_distance_map_domain(
+                    current_index, goal_index, self.costmap
+                )
+                <= goal_tolerance
+            ):
                 self.get_logger().debug("A* found goal node")
+                if goal_index not in parents.keys():
+                    parents[goal_index] = current_index
                 path_found = True
                 break
 
             # --- Process neighbors of nodes ---
             # Get neighbors
             neighbors: list[Tuple[int, float]] = costmap_tools.find_neighbors_index(
-                current_index, self.costmap
+                current_index, self.costmap, step_size=1
             )
             for neighbor_index, cost in neighbors:
                 # Skip node if already processed
@@ -120,26 +127,25 @@ class Astar(PlannerPyPlugin):
                     neighbor_index, goal, self.costmap
                 )
 
-                # Check if neighbor is in canditates list
-                is_already_canditate: bool = False
-                for idx, element in enumerate(list_open_canditates):
-                    # Neighbors is already an candidate
-                    if element[0] == neighbor_index:
-                        # Update cost of canditate if current costs are lower
-                        if f_cost < final_costs[neighbor_index]:
-                            natural_costs[neighbor_index] = n_cost
-                            final_costs[neighbor_index] = f_cost
-                            parents[neighbor_index] = current_index
-                            list_open_canditates[idx] = (neighbor_index, f_cost)
-                        is_already_canditate = True
-                        break
-
-                if not is_already_canditate:
-                    # Append node to list of canditates if not already on there
+                # We can simply check if the neighbor has already costs
+                # associated with it to see if neighbor was visited already or not
+                if final_costs.get(neighbor_index) is None:
+                    # neighbor node is first visited
                     natural_costs[neighbor_index] = n_cost
                     final_costs[neighbor_index] = f_cost
                     parents[neighbor_index] = current_index
-                    list_open_canditates.append((neighbor_index, f_cost))
+                    open_canditates.add((neighbor_index, f_cost))
+                else:
+                    # neighbor node was already visited# => update cost if cheaper
+                    if f_cost < final_costs[neighbor_index]:
+                        open_canditates.remove(
+                            (neighbor_index, final_costs[neighbor_index])
+                        )
+                        open_canditates.add((neighbor_index, f_cost))
+                        # Update costs
+                        natural_costs[neighbor_index] = n_cost
+                        final_costs[neighbor_index] = f_cost
+                        parents[neighbor_index] = current_index
 
             # --- Add node to list of processed nodes so it doesn't get visited --
             list_processed.add(current_index)

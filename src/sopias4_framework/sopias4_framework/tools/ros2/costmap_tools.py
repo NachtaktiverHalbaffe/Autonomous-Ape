@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import OccupancyGrid
 
-LETHAL_COST = 254
+LETHAL_COST = 150
 
 
 def costmap_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
@@ -136,7 +136,7 @@ def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
 
 
 def find_neighbors_coordinates(
-    node: Tuple[int, int], costmap: PyCostmap2D
+    node: Tuple[int, int], costmap: PyCostmap2D, step_size: int = 1
 ) -> list[Tuple[Tuple[int, int], float]]:
     """
     Identifies neighbor nodes inspecting the 8 adjacent neighbors and is working woth coordinates. Checks if neighbor is inside the map boundaries\
@@ -146,12 +146,13 @@ def find_neighbors_coordinates(
     Args:
         node (tuple(int,int)): The node as an x,y-coordinate in the costmap for which the neighbors should be found
         costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched.
+        step_size (int, optional): The step size to the next neighbor in pixel. Defaults to 1
     Returns:
          list(tuple(tuple(int,int), float)): A list with valid neighbour nodes as a tuple with [x,y-coordinates, step_cost] pairs
     """
     neighbors = []
 
-    upper_neighbor = (node[0], node[1] + 1)
+    upper_neighbor = (node[0], node[1] + step_size)
     if __check_constrains(node_to_check=upper_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -160,7 +161,7 @@ def find_neighbors_coordinates(
             )
         )
 
-    left_neighbor = (node[0] - 1, node[1])
+    left_neighbor = (node[0] - step_size, node[1])
     if __check_constrains(node_to_check=left_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -169,11 +170,11 @@ def find_neighbors_coordinates(
             )
         )
 
-    upper_left_neighbor = (node[0] - 1, node[1] + 1)
+    upper_left_neighbor = (node[0] - step_size, node[1] + step_size)
     if __check_constrains(node_to_check=upper_left_neighbor, costmap=costmap):
         neighbors.append((upper_left_neighbor, upper_left_neighbor))
 
-    upper_right_neighbor = (node[0] + 1, node[1] + 1)
+    upper_right_neighbor = (node[0] + step_size, node[1] + step_size)
     if __check_constrains(node_to_check=upper_right_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -184,7 +185,7 @@ def find_neighbors_coordinates(
             )
         )
 
-    right_neighbor = (node[0] + 1, node[1])
+    right_neighbor = (node[0] + step_size, node[1])
     if __check_constrains(node_to_check=right_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -193,7 +194,7 @@ def find_neighbors_coordinates(
             )
         )
 
-    lower_left_neighbor = (node[0] - 1, node[1] - 1)
+    lower_left_neighbor = (node[0] - step_size, node[1] - step_size)
     if __check_constrains(node_to_check=lower_left_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -204,7 +205,7 @@ def find_neighbors_coordinates(
             )
         )
 
-    lower_neighbor = (node[0], node[1] - 1)
+    lower_neighbor = (node[0], node[1] - step_size)
     if __check_constrains(node_to_check=lower_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -213,7 +214,7 @@ def find_neighbors_coordinates(
             )
         )
 
-    lower_right_neighbor = (node[0] + 1, node[1] - 1)
+    lower_right_neighbor = (node[0] + step_size, node[1] - step_size)
     if __check_constrains(node_to_check=lower_right_neighbor, costmap=costmap):
         neighbors.append(
             (
@@ -228,7 +229,7 @@ def find_neighbors_coordinates(
 
 
 def find_neighbors_index(
-    node_index: int, costmap: PyCostmap2D
+    node_index: int, costmap: PyCostmap2D, step_size: int = 1
 ) -> list[Tuple[int, float]]:
     """
     Identifies neighbor nodes inspecting the 8 adjacent neighbors and is working with index in 1d costmap array directly. Checks if neighbor is inside the map boundaries\
@@ -237,7 +238,8 @@ def find_neighbors_index(
 
     Args:
         node (int): The node as an index in the 1d costmap array for which the neighbors should be found
-        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched.
+        costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched
+        step_size (int, optional): The step size to the next neighbor in pixel. Defaults to 1
     Returns:
          list(tuple(int, float)): A list with valid neighbour nodes as a tuple with [index, step_cost] pairs
     """
@@ -245,8 +247,12 @@ def find_neighbors_index(
     width: int = costmap.getSizeInCellsX()
     height: int = costmap.getSizeInCellsY()
 
-    upper_neighbor = node_index - width
-    if upper_neighbor > 0 and costmap.getCostIdx(upper_neighbor) < LETHAL_COST:
+    upper_neighbor: int = node_index - width * step_size
+    if __check_constrains(
+        node_to_check=upper_neighbor,
+        costmap=costmap,
+        additional_constraints=[upper_neighbor > 0],
+    ):
         neighbors.append(
             (
                 upper_neighbor,
@@ -254,8 +260,12 @@ def find_neighbors_index(
             )
         )
 
-    left_neighbor = node_index - 1
-    if left_neighbor % width > 0 and costmap.getCostIdx(left_neighbor) < LETHAL_COST:
+    left_neighbor: int = node_index - step_size
+    if __check_constrains(
+        node_to_check=left_neighbor,
+        costmap=costmap,
+        additional_constraints=[left_neighbor % width > 0],
+    ):
         neighbors.append(
             (
                 left_neighbor,
@@ -263,11 +273,14 @@ def find_neighbors_index(
             )
         )
 
-    upper_left_neighbor = node_index - width + 1
-    if (
-        upper_left_neighbor > 0
-        and upper_left_neighbor % width > 0
-        and costmap.getCostIdx(upper_left_neighbor) < LETHAL_COST
+    upper_left_neighbor: int = node_index - width * step_size + step_size
+    if __check_constrains(
+        node_to_check=upper_left_neighbor,
+        costmap=costmap,
+        additional_constraints=[
+            upper_left_neighbor > 0,
+            upper_left_neighbor % width > 0,
+        ],
     ):
         neighbors.append(
             (
@@ -280,11 +293,14 @@ def find_neighbors_index(
             )
         )
 
-    upper_right_neighbor = node_index - width - 1
-    if (
-        upper_right_neighbor > 0
-        and (upper_right_neighbor) % width != width - 1
-        and costmap.getCostIdx(upper_right_neighbor) < LETHAL_COST
+    upper_right_neighbor: int = node_index - width * step_size - step_size
+    if __check_constrains(
+        node_to_check=upper_right_neighbor,
+        costmap=costmap,
+        additional_constraints=[
+            upper_right_neighbor > 0,
+            (upper_right_neighbor) % width != width - 1,
+        ],
     ):
         neighbors.append(
             (
@@ -297,8 +313,12 @@ def find_neighbors_index(
             )
         )
 
-    right_neighbor = node_index + 1
-    if right_neighbor % width != (width + 1) and right_neighbor < LETHAL_COST:
+    right_neighbor: int = node_index + step_size
+    if __check_constrains(
+        node_to_check=right_neighbor,
+        costmap=costmap,
+        additional_constraints=[right_neighbor % width != (width + 1)],
+    ):
         neighbors.append(
             (
                 right_neighbor,
@@ -306,11 +326,14 @@ def find_neighbors_index(
             )
         )
 
-    lower_left_neighbor = node_index + width - 1
-    if (
-        lower_left_neighbor < height * width
-        and lower_left_neighbor % width != 0
-        and costmap.getCostIdx(lower_left_neighbor) < LETHAL_COST
+    lower_left_neighbor: int = node_index + width - step_size
+    if __check_constrains(
+        node_to_check=lower_left_neighbor,
+        costmap=costmap,
+        additional_constraints=[
+            lower_left_neighbor < height * width,
+            lower_left_neighbor % width != 0,
+        ],
     ):
         neighbors.append(
             (
@@ -323,8 +346,12 @@ def find_neighbors_index(
             )
         )
 
-    lower_neighbor = node_index + width
-    if lower_neighbor < width * height and costmap.getCostIdx(lower_neighbor):
+    lower_neighbor: int = node_index + width * step_size
+    if __check_constrains(
+        node_to_check=lower_neighbor,
+        costmap=costmap,
+        additional_constraints=[lower_neighbor < width * height],
+    ):
         neighbors.append(
             (
                 lower_neighbor,
@@ -332,11 +359,14 @@ def find_neighbors_index(
             )
         )
 
-    lower_right_neighbor = node_index + width + 1
-    if (
-        (lower_right_neighbor) <= height * width
-        and lower_right_neighbor % width != (width - 1)
-        and costmap.getCostIdx(lower_right_neighbor) < LETHAL_COST
+    lower_right_neighbor: int = node_index + width * step_size + step_size
+    if __check_constrains(
+        node_to_check=lower_right_neighbor,
+        costmap=costmap,
+        additional_constraints=[
+            lower_right_neighbor <= height * width,
+            lower_right_neighbor % width != (width - 1),
+        ],
     ):
         neighbors.append(
             (
@@ -352,36 +382,72 @@ def find_neighbors_index(
     return neighbors
 
 
-def __check_constrains(node_to_check: Tuple[int, int], costmap: PyCostmap2D) -> bool:
+def __check_constrains(
+    node_to_check: Tuple[int, int] | int,
+    costmap: PyCostmap2D,
+    additional_constraints: list[bool] = [True],
+) -> bool:
     """
     Checks if constraints of nodes are meeting the constraints for being added as an neighbor
 
     General approach:
     1. Check if new coordinate is out of costmap
     2. Check if new coordinate is lethal obstacle
+    3. Check if all additional constraints are met if given. They are chained together in AND-logic
 
     Args:
-        node_to_check(tuple(int, int)): The node for which the constraints should be checked
+        node_to_check(tuple(int, int) or int): The node for which the constraints should be checked in either coordinates or index of costmap array (technically the same)
         costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched.
+        additional_constraints (list(bool), optional): List of additional constraints that can be checked. All of them need to be true \
+                                                                                    in order to fulfill constraints (AND-logic). Remember that you can pass expressions inside\
+                                                                                    of them as long as they return bool e.g. `number < threshold` could be passed
     Returns:
          bool: If constraints are fulfilled
     """
-    is_index_above_lower_bound: bool = node_to_check[0] > 0 and node_to_check[0] > 0
-    is_index_under_upper_bound: bool = (
-        node_to_check[0] < costmap.getSizeInCellsX()
-        and node_to_check[1] < costmap.getSizeInCellsY()
-    )
-    is_index_in_arraybounds: bool = (
-        costmap.getIndex(node_to_check[0], node_to_check[1]) <= len(costmap.costmap) - 1
-    )
-
+    if type(node_to_check) == Tuple[int, int]:
+        is_index_above_lower_bound: bool = (
+            node_to_check[0] >= 0 and node_to_check[0] >= 0
+        )
+        is_index_under_upper_bound: bool = (
+            node_to_check[0] < costmap.getSizeInCellsX()
+            and node_to_check[1] < costmap.getSizeInCellsY()
+        )
+        is_index_in_arraybounds: bool = (
+            costmap.getIndex(node_to_check[0], node_to_check[1])
+            <= len(costmap.costmap) - 1
+        )
+        # Conversion needed because it returns bool_ as data type and not bool
+        # Also is_index_in_arraybounds must be true before performing check, otherwise a IndexError could be thrown
+        if is_index_in_arraybounds:
+            is_node_lethal: bool = bool(
+                costmap.getCostXY(node_to_check[0], node_to_check[1]) >= LETHAL_COST
+            )
+        else:
+            return False
+    elif type(node_to_check) == int:
+        is_index_above_lower_bound: bool = node_to_check >= 0
+        is_index_under_upper_bound: bool = node_to_check < len(costmap.costmap)
+        is_index_in_arraybounds: bool = is_index_under_upper_bound
+        # Conversion needed because it returns bool_ as data type and not bool.
+        # Also is_index_in_arraybounds must be true before performing check, otherwise a IndexError could be thrown
+        if is_index_in_arraybounds:
+            is_node_lethal: bool = bool(
+                costmap.getCostIdx(node_to_check) >= LETHAL_COST
+            )
+        else:
+            return False
+    else:
+        return False
+    # print(additional_constraints)
+    # print(not False in additional_constraints)
     if (
         is_index_above_lower_bound
         and is_index_under_upper_bound
         and is_index_in_arraybounds
+        and not is_node_lethal
+        and not False in additional_constraints
     ):
-        if costmap.getCostXY(node_to_check[0], node_to_check[1]) < LETHAL_COST:
-            return True
+        return True
 
     return False
 
@@ -406,20 +472,20 @@ def __calculate_cost(
     if type(node_to_calculate) == int:
         if is_diagonal:
             step_cost: float = diagonal_step_cost + float(
-                costmap.getCostIdx(node_to_calculate) / 255
+                costmap.getCostIdx(node_to_calculate)
             )
         else:
             step_cost: float = costmap.getResolution() + float(
-                costmap.getCostIdx(node_to_calculate) / 255
+                costmap.getCostIdx(node_to_calculate)
             )
     elif type(node_to_calculate) == Tuple[int, int]:
         if is_diagonal:
             step_cost: float = diagonal_step_cost + float(
-                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1]) / 255
+                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1])
             )
         else:
             step_cost: float = costmap.getResolution() + float(
-                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1]) / 255
+                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1])
             )
     else:
         step_cost = 0.0

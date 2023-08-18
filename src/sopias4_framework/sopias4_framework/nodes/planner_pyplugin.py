@@ -37,6 +37,7 @@ class PlannerPyPlugin(Node):
         node_name: str,
         plugin_name: str,
         namespace: str | None = None,
+        goal_tolerance: float = 0.2,
     ) -> None:
         if namespace is None:
             super().__init__(node_name)  # type: ignore
@@ -49,6 +50,7 @@ class PlannerPyPlugin(Node):
         )
 
         self.costmap: PyCostmap2D
+        self.goal_tolerance = 0.2
 
     def __create_plan_callback(
         self, request: CreatePlan.Request, response: CreatePlan.Response
@@ -69,15 +71,16 @@ class PlannerPyPlugin(Node):
             f"Generating path in costmap domain from {start} to {goal}"
         )
 
-        pixel_path: list[Tuple[int, int]] = self.generate_path(start=start, goal=goal)
+        pixel_path: list[Tuple[int, int]] = self.generate_path(
+            start=start, goal=goal, goal_tolerance=0.2
+        )
 
         self.get_logger().debug(
             "Found shortest path in costmap domain. Transforming it into map domain"
         )
-        self.get_logger().debug(f"Shortest path in costmap domain: {pixel_path}")
 
         path: Path = Path()
-        path.header.frame_id = self.costmap.global_frame_id              
+        path.header.frame_id = self.costmap.global_frame_id
         for node in pixel_path:
             path_node = PoseStamped()
             path_node.header.frame_id = self.costmap.global_frame_id
@@ -87,20 +90,25 @@ class PlannerPyPlugin(Node):
             path.poses.append(path_node)  # type: ignore
 
         response.global_path = path
-        self.get_logger().debug(f"Shortest path in map domain: {path.poses}")
         self.get_logger().info("Shortest global path to goal successfully found")
         return response
 
     @abc.abstractmethod
     def generate_path(
-        self, start: Tuple[int, int], goal: Tuple[int, int]
+        self, start: Tuple[int, int], goal: Tuple[int, int], goal_tolerance: float = 0.2
     ) -> list[Tuple[int, int]]:
         """
-        Here the path finding algorithm should be implemented
+        Here the path finding algorithm should be implemented. Some tips for implementing the algorithm:
+        1. Use python sets and dicts instead of lists. They are way faster when a specific value is searched, inserted or updated
+        2. Be careful with loops when iterating through datasets. When applying first tip, there are often ways to directly update, \
+            searching or updating values in datasets instead of iterating through them
+        3. The module costmap_tools from sopias4_framework.tools.ros2 package has useful tools for interacting with the given costmap. \
+            Remember that the costmap is stored in self.costmap of this class
 
         Args:
             start (tuple(int, int)): The position from which the path should start as an x,y-coordinate in the costmap
             goal (tuple(int, int)): The position in which the path should end as an x,y-coordinate in the costmap
+            goal_tolerance (float): The tolerance distance in meters to the goal under which the algorithm considers its goal reached
 
         Returns:
             list(tuple(int,int)): The generated path as a list of x,y-coordinates in the costmap
