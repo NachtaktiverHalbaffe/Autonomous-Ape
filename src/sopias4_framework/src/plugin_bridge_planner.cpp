@@ -21,11 +21,13 @@ namespace plugin_bridges
     tf_ = tf;
     costmap_ = costmap_ros->getCostmap();
     global_frame_ = costmap_ros->getGlobalFrameID();
-    // Service client
 
     // Parameter initialization
     nav2_util::declare_parameter_if_not_declared(node_, name_ + ".plugin_name", rclcpp::ParameterValue("global_planner"));
     node_->get_parameter(name + ".plugin_name", plugin_name_);
+
+    // Service client node
+    service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
   }
 
   void PlannerBridge::cleanup()
@@ -40,7 +42,7 @@ namespace plugin_bridges
     RCLCPP_INFO(
         node_->get_logger(), "Activating plugin %s of type PlannerPluginBridge",
         name_.c_str());
-    client_ = node_->create_client<sopias4_msgs::srv::CreatePlan>(plugin_name_ + "/create_plan");
+    client_ = service_node_->create_client<sopias4_msgs::srv::CreatePlan>(plugin_name_ + "/create_plan");
   }
 
   void PlannerBridge::deactivate()
@@ -55,6 +57,8 @@ namespace plugin_bridges
       const geometry_msgs::msg::PoseStamped &goal)
   {
     nav_msgs::msg::Path global_path;
+    global_path.header.frame_id= global_frame_;
+    global_path.header.stamp =node_-> now();
 
     // Checking if the goal and start state is in the global frame
     if (start.header.frame_id != global_frame_)
@@ -67,7 +71,7 @@ namespace plugin_bridges
 
     if (goal.header.frame_id != global_frame_)
     {
-      RCLCPP_INFO(
+      RCLCPP_ERROR(
           node_->get_logger(), "Planner will only except goal position from %s frame",
           global_frame_.c_str());
       return global_path;
@@ -77,14 +81,17 @@ namespace plugin_bridges
     // Generate service request
     request->start = start;
     request->goal = goal;
-    request->costmap = sopias4_framework::tools::costmap_2_costmap_msg(costmap_);
+    request->costmap = sopias4_framework::tools::costmap_2_costmap_msg(costmap_, global_frame_);
 
     auto future = client_->async_send_request(request);
-    auto return_code = rclcpp::spin_until_future_complete(node_, future);
+    auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
 
     if (return_code == rclcpp::FutureReturnCode::SUCCESS)
     {
-      return future.get()->global_path;
+      RCLCPP_DEBUG(
+          node_->get_logger(), "Received plan from implemented plugin");
+      global_path.poses = future.get()->global_path.poses;
+      return global_path;
     }
     else
     {

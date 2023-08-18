@@ -313,7 +313,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
-      robot_radius: 0.2
+      robot_radius: 0.175
       resolution: 0.06
       track_unknown_space: True
       plugins: [static_layer, obstacle_layer, inflation_layer]
@@ -343,12 +343,14 @@ global_costmap:
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 5.0
+    expected_planner_frequency: 20.0
     use_sim_time: False
     planner_plugins: [GridBased]
     GridBased:
-      plugin: plugin_bridges/PlannerBridge
-      plugin_name: "astar"
+      plugin: nav2_navfn_planner/NavfnPlanner
+      tolerance: 0.5
+      use_astar: True
+      allow_unknown: True
 
 smoother_server:
   ros__parameters:

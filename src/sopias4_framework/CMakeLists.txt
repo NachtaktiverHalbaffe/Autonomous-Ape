@@ -70,6 +70,7 @@ set(dependencies
 add_library(${library_name} SHARED
     src/plugin_bridge_planner.cpp
     src/plugin_bridge_layer.cpp
+    src/msgs_utils.cpp
 )
 # Include dependecies in compiled plugins
 ament_target_dependencies(${library_name}
@@ -98,7 +99,6 @@ install(FILES plugin_bridge_planner.xml
 ament_python_install_package(${PROJECT_NAME})
 # Install executables
 install(PROGRAMS
-  sopias4_framework/nodes/robot_manager.py
   sopias4_framework/nodes/robot_manager.py
   DESTINATION lib/${PROJECT_NAME}
 )

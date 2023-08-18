@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import abc
-from threading import Thread
 from typing import Tuple
 
-from geometry_msgs.msg import Pose
+import rclpy
+from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import Path
-from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.service import Service
 from sopias4_framework.tools.ros2 import costmap_tools
@@ -33,7 +32,13 @@ class PlannerPyPlugin(Node):
                                                                                                                     the robot should avoid this region
     """
 
-    def __init__(self, node_name, plugin_name, namespace: str | None = None) -> None:
+    def __init__(
+        self,
+        node_name: str,
+        plugin_name: str,
+        namespace: str | None = None,
+        goal_tolerance: float = 0.2,
+    ) -> None:
         if namespace is None:
             super().__init__(node_name)  # type: ignore
         else:
@@ -45,11 +50,7 @@ class PlannerPyPlugin(Node):
         )
 
         self.costmap: PyCostmap2D
-        # Let node spin itself
-        # self.__executor = MultiThreadedExecutor()
-        # self.__executor.add_node(self)
-        # self.__spin_node_thread = Thread(target=self.__executor.spin)
-        # self.__spin_node_thread.start()
+        self.goal_tolerance = 0.2
 
     def __create_plan_callback(
         self, request: CreatePlan.Request, response: CreatePlan.Response
@@ -63,18 +64,27 @@ class PlannerPyPlugin(Node):
         start = costmap_tools.pose_2_costmap(
             request.start, PyCostmap2D(request.costmap)
         )
-        goal = costmap_tools.pose_2_costmap(request.start, PyCostmap2D(request.costmap))
+        goal = costmap_tools.pose_2_costmap(request.goal, PyCostmap2D(request.costmap))
         self.costmap = PyCostmap2D(request.costmap)
 
-        pixel_path: list[Tuple[int, int]] = self.generate_path(start=start, goal=goal)
+        self.get_logger().debug(
+            f"Generating path in costmap domain from {start} to {goal}"
+        )
+
+        pixel_path: list[Tuple[int, int]] = self.generate_path(
+            start=start, goal=goal, goal_tolerance=0.2
+        )
 
         self.get_logger().debug(
             "Found shortest path in costmap domain. Transforming it into map domain"
         )
+
         path: Path = Path()
+        path.header.frame_id = self.costmap.global_frame_id
         for node in pixel_path:
-            path_node = Pose()
-            path_node = costmap_tools.costmap_2_pose(
+            path_node = PoseStamped()
+            path_node.header.frame_id = self.costmap.global_frame_id
+            path_node.pose = costmap_tools.costmap_2_pose(
                 node[0], node[1], PyCostmap2D(request.costmap)
             )
             path.poses.append(path_node)  # type: ignore
@@ -85,14 +95,20 @@ class PlannerPyPlugin(Node):
 
     @abc.abstractmethod
     def generate_path(
-        self, start: Tuple[int, int], goal: Tuple[int, int]
+        self, start: Tuple[int, int], goal: Tuple[int, int], goal_tolerance: float = 0.2
     ) -> list[Tuple[int, int]]:
         """
-        Here the path finding algorithm should be implemented
+        Here the path finding algorithm should be implemented. Some tips for implementing the algorithm:
+        1. Use python sets and dicts instead of lists. They are way faster when a specific value is searched, inserted or updated
+        2. Be careful with loops when iterating through datasets. When applying first tip, there are often ways to directly update, \
+            searching or updating values in datasets instead of iterating through them
+        3. The module costmap_tools from sopias4_framework.tools.ros2 package has useful tools for interacting with the given costmap. \
+            Remember that the costmap is stored in self.costmap of this class
 
         Args:
             start (tuple(int, int)): The position from which the path should start as an x,y-coordinate in the costmap
             goal (tuple(int, int)): The position in which the path should end as an x,y-coordinate in the costmap
+            goal_tolerance (float): The tolerance distance in meters to the goal under which the algorithm considers its goal reached
 
         Returns:
             list(tuple(int,int)): The generated path as a list of x,y-coordinates in the costmap

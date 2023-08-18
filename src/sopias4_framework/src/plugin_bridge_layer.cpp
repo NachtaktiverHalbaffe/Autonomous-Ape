@@ -33,6 +33,9 @@ namespace plugin_bridges
         declareParameter("plugin_name", rclcpp::ParameterValue("local_layer"));
         node->get_parameter(name_ + "plugin_name", plugin_name_);
 
+        // Service client node
+        service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
+
         client_ = node->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
 
         need_recalculation_ = false;

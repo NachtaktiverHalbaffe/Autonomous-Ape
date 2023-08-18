@@ -7,16 +7,15 @@ namespace sopias4_framework::tools
   nav_msgs::msg::OccupancyGrid costmap_2_costmap_msg(nav2_costmap_2d::Costmap2D *costmap)
   {
     nav_msgs::msg::OccupancyGrid costmap_msg = nav_msgs::msg::OccupancyGrid();
-    // info
+    // Map metadata
     costmap_msg.info.resolution = costmap->getResolution();
     costmap_msg.info.width = costmap->getSizeInCellsX();
     costmap_msg.info.height = costmap->getSizeInCellsY();
-    double wx, wy;
-    costmap->mapToWorld(0, 0, wy, wy);
-    costmap_msg.info.origin.position.x = wx - costmap->getResolution() / 2;
-    costmap_msg.info.origin.position.y = wy - costmap->getResolution() / 2;
+    costmap_msg.info.origin.position.x = costmap->getOriginX();
+    costmap_msg.info.origin.position.y = costmap -> getOriginY();
     costmap_msg.info.origin.position.z = 0;
     costmap_msg.info.origin.orientation.w = 1.0;
+
     // Build data
     costmap_msg.data.resize(costmap_msg.info.width * costmap_msg.info.height);
     unsigned char *data = costmap->getCharMap();
@@ -24,6 +23,15 @@ namespace sopias4_framework::tools
     {
       costmap_msg.data[i] = data[i];
     }
+
+    return costmap_msg;
+  }
+
+  nav_msgs::msg::OccupancyGrid costmap_2_costmap_msg(nav2_costmap_2d::Costmap2D *costmap, std::string frame_id)
+  {
+
+    nav_msgs::msg::OccupancyGrid costmap_msg = sopias4_framework::tools::costmap_2_costmap_msg(costmap);
+    costmap_msg.header.frame_id = frame_id;
 
     return costmap_msg;
   }
