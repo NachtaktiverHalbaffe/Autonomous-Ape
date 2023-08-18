@@ -99,8 +99,7 @@ namespace plugin_bridges
         name_.c_str());
     global_pub_->on_activate();
 
-    auto node = node_.lock();
-    client_compute_vel_ = node->create_client<sopias4_msgs::srv::ComputeVelocityCommands>(plugin_name_ + "/compute_velocity_commands");
+    client_compute_vel_ = service_node_->create_client<sopias4_msgs::srv::ComputeVelocityCommands>(plugin_name_ + "/compute_velocity_commands");
   }
 
   void ControllerBridge::deactivate()
@@ -136,8 +135,7 @@ namespace plugin_bridges
     request->current_vel_cmd = velocity;
 
     auto future = client_compute_vel_->async_send_request(request);
-    auto node = node_.lock();
-    auto return_code = rclcpp::spin_until_future_complete(node, future);
+    auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
 
     // Create and publish a TwistStamped message with the desired velocity
     if (return_code == rclcpp::FutureReturnCode::SUCCESS)

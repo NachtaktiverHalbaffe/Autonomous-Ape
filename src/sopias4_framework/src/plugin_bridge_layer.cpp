@@ -36,7 +36,7 @@ namespace plugin_bridges
         // Service client node
         service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
 
-        client_ = node->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
+        client_ = service_node_->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
 
         need_recalculation_ = false;
         current_ = true;
@@ -141,7 +141,7 @@ namespace plugin_bridges
         // Send request and receive response
         auto future = client_->async_send_request(request);
         auto node = node_.lock();
-        auto return_code = rclcpp::spin_until_future_complete(node, future);
+        auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
 
         if (return_code == rclcpp::FutureReturnCode::SUCCESS)
         {
@@ -162,4 +162,4 @@ namespace plugin_bridges
 // to be registered in order to be dynamically loadable of base type nav2_costmap_2d::Layer.
 // Usually places in the end of cpp-file where the loadable class written.
 #include "pluginlib/class_list_macros.hpp"
-PLUGINLIB_EXPORT_CLASS(plugin_bridges::LayerBridge, nav2_costmap_2d::CostmapLayer)
+PLUGINLIB_EXPORT_CLASS(plugin_bridges::LayerBridge, nav2_costmap_2d::Layer)

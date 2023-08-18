@@ -52,6 +52,8 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <costmap_2d plugin="${prefix}/plugin_bridge_layer.xml" />
+    <nav2_core plugin="${prefix}/plugin_bridge_planner.xml" />
   </export>
 
 

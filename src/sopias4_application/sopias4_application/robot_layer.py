@@ -6,7 +6,7 @@ from nav2_simple_commander.costmap_2d import PyCostmap2D
 from sopias4_framework.nodes.layer_pyplugin import LayerPyPlugin
 from sopias4_framework.tools.ros2 import costmap_tools
 
-from sopias4_msgs.msg import RobotStates
+from sopias4_msgs.msg import Robot, RobotStates
 
 
 class RobotLayer(LayerPyPlugin):
@@ -115,6 +115,7 @@ class RobotLayer(LayerPyPlugin):
 
         # Add new position of robots to list
         for robot in msg.robot_states:
+            # if robot.name_space != self.get_namespace():
             self.robot_positions.append(robot.pose)
 
 
