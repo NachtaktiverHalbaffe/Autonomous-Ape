@@ -125,7 +125,16 @@ def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
         nav_msgs.msg.OccupancyGrid: The generated OccupancyGrid message
     """
     occ_grid = OccupancyGrid()
-    occ_grid.data = pycostmap.costmap
+    # Convert np.uint8 array to list with ints in range 0 to 100
+    SCALE_FACTOR = 100 / 255
+    converted_array = np.round(pycostmap.costmap.astype(float) * SCALE_FACTOR).astype(
+        int
+    )
+    occ_grid.data = converted_array.tolist()
+
+    # occ_grid.data = [0] * len(pycostmap.costmap)
+    # for i in range(len(occ_grid.data)):
+    #     occ_grid.data[i]
     occ_grid.info.height = pycostmap.size_y
     occ_grid.info.width = pycostmap.size_x
     occ_grid.info.resolution = pycostmap.resolution

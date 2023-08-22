@@ -12,7 +12,7 @@ namespace sopias4_framework::tools
      * @returns A nav2_msgs/CostMap message
      */
     nav_msgs::msg::OccupancyGrid costmap_2_costmap_msg(nav2_costmap_2d::Costmap2D *costmap);
-    
+
     /**
      * @brief Converts a nav2 costmap to a nav2 costmap message
      * @param costmap A pointer to the costmap which should be converted to an message
@@ -20,11 +20,23 @@ namespace sopias4_framework::tools
      * @returns A nav2_msgs/CostMap message
      */
     nav_msgs::msg::OccupancyGrid costmap_2_costmap_msg(nav2_costmap_2d::Costmap2D *costmap, std::string frame_id);
+
     /**
      * @brief Updates a costmap with the new cost values from a costmap message
      * @param costmap_msg A pointer to the costmap message from which the updated values will be taken
      * @param costmap_array A pointer to the costmap array which costs should be updated
      */
-    void update_costmap_with_msg(nav_msgs::msg::OccupancyGrid *costmap_msg, unsigned char* costmap_array);
+    void update_costmap_with_msg(nav_msgs::msg::OccupancyGrid *costmap_msg, unsigned char *costmap_array);
+
+    /**
+     * @brief Updates a costmap with the new cost values from a costmap message within a given bound
+     * @param costmap_msg A pointer to the costmap message from which the updated values will be taken
+     * @param costmap A pointer to the costmap which costs should be updated
+     * @param min_i Lower bound in first dimension of costmap
+     * @param min_i Lower bound in second dimension of costmap
+     * @param max_i Upper bound in first dimension of costmap
+     * @param max_j Upeer bound in second dimension of costmap
+     */
+    void update_costmap_with_msg_within_bounds(nav_msgs::msg::OccupancyGrid costmap_msg, nav2_costmap_2d::Costmap2D & costmap, int min_i, int min_j, int max_i, int max_j);
 }
 #endif // PLUGIN_BRIDGE_PLANNER__STRAIGHT_LINE_PLANNER_HPP_

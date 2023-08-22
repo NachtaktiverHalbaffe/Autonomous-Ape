@@ -251,6 +251,16 @@ class GUI(GUINode):
                 "nav2.yaml",
             ),
         )
+
+        self.__astar_node = Astar(namespace=self.node.get_namespace())
+        self.__robot_layer_node = RobotLayer(namespace=self.node.get_namespace())
+        self.__path_layer_node = PathLayer(namespace=self.node.get_namespace())
+
+        self.node_executor.add_node(self.__astar_node)
+        self.node_executor.add_node(self.__path_layer_node)
+        self.node_executor.add_node(self.__robot_layer_node)
+        self.node_executor.wake()
+
         self.__launch_process_nav2 = node_tools.start_launch_file(
             ros2_package="sopias4_framework",
             launch_file="nav2.launch.py",

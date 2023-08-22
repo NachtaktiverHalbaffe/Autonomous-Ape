@@ -28,15 +28,12 @@ class LayerPyPlugin(Node):
     def __init__(
         self,
         node_name: str = "layer_pyplugin",
-        plugin_name: str = "abstract plugin",
+        plugin_name: str = "abstract_plugin",
         namespace: str | None = None,
     ) -> None:
-        if namespace is None:
-            super().__init__(node_name)  # type: ignore
-        else:
-            super().__init__(node_name, namespace=namespace)  # type: ignore
+        super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
 
-        # Service server
+        # Service
         self.__plugin_bridge_server: Service = self.create_service(
             UpdateCosts, f"{plugin_name}/update_costs", self.__update_costs_callback
         )
@@ -47,12 +44,20 @@ class LayerPyPlugin(Node):
         """
         Callback function which executes when the update_costs service is called
         """
+        self.get_logger().info(
+            "Got request to update costs in robot layer",
+            throttle_duration_sec=2,
+        )
         updated_costmap: PyCostmap2D = self.update_costs(
             min_i=request.min_i,
             min_j=request.min_j,
             max_i=request.max_i,
             max_j=request.max_j,
             costmap=PyCostmap2D(request.current_costmap),
+        )
+        self.get_logger().debug(
+            "Updated costmap, returning costmap to service requester",
+            throttle_duration_sec=2,
         )
         response.updated_costmap = pycostmap2d_2_occupancygrid(updated_costmap)
         return response
@@ -98,5 +103,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
