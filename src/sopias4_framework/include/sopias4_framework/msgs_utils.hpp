@@ -37,6 +37,6 @@ namespace sopias4_framework::tools
      * @param max_i Upper bound in first dimension of costmap
      * @param max_j Upeer bound in second dimension of costmap
      */
-    void update_costmap_with_msg_within_bounds(nav_msgs::msg::OccupancyGrid costmap_msg, nav2_costmap_2d::Costmap2D & costmap, int min_i, int min_j, int max_i, int max_j);
+    void update_costmap_with_msg_within_bounds(nav_msgs::msg::OccupancyGrid *costmap_msg, nav2_costmap_2d::Costmap2D & costmap, int min_i, int min_j, int max_i, int max_j);
 }
 #endif // PLUGIN_BRIDGE_PLANNER__STRAIGHT_LINE_PLANNER_HPP_

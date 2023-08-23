@@ -92,8 +92,8 @@ def costmap_2_grid(costmap: PyCostmap2D) -> np.ndarray:
     Returns:
         np.ndarray: A 2-dimensional array of the costmap data
     """
-    array2D = np.array(costmap.costmap, dtype=np.int8).reshape(
-        costmap.size_y, costmap.size_x
+    array2D = costmap.costmap.reshape(
+        costmap.getSizeInCellsY(), costmap.getSizeInCellsX()
     )
 
     return array2D
