@@ -18,29 +18,20 @@ RUN groupadd --gid $USER_GID $USERNAME \
 ######################################################################
 
 # Install apps etc. outside ros dependencies
-RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
-	--mount=target=/var/cache/apt,type=cache,sharing=locked \
-	rm -f /etc/apt/apt.conf.d/docker-clean\
-	&& sudo apt-get update && sudo apt-get install wget \
-	&& apt-get update && apt-get upgrade -y \
-	&& apt-get install -y --no-install-recommends python3-pip \
+RUN sudo apt-get update && apt-get upgrade -y --with-new-pkgs \ 
+	&& sudo apt-get install -y\
+	wget python3-pip \
 	doxygen figlet qttools5-dev-tools qttools5-dev python3-mock \ 
 	libgl1-mesa-glx libgl1-mesa-dri mesa-utils 
 
 # Install ros dependencies 
 ARG RTI_NC_LICENSE_ACCEPTED=yes
-RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
-	--mount=target=/var/cache/apt,type=cache,sharing=locked \
-	rm -f /etc/apt/apt.conf.d/docker-clean\
-	&& apt-get update && apt-get install -y --no-install-recommends\
+RUN apt-get update && apt-get install -y --no-install-recommends\
 	ros-humble-rmw-cyclonedds-cpp ros-humble-rmw-fastrtps-cpp \
 	ros-humble-rmw-connextdds 
 
 # Install turtlebot4 dependencies
-RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
-	--mount=target=/var/cache/apt,type=cache,sharing=locked \
-	rm -f /etc/apt/apt.conf.d/docker-clean\
-	&& sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
+RUN sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
 	&& wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add - \
 	&& apt-get update  && apt-get install -y \
 	ros-humble-turtlebot4-description \
