@@ -151,7 +151,7 @@ namespace plugin_bridges
 
         if (return_code == rclcpp::FutureReturnCode::SUCCESS)
         {
-            sopias4_framework::tools::update_costmap_with_msg_within_bounds(future.get()->updated_costmap, master_grid, min_i,min_j,max_i,max_j);
+            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&future.get()->updated_costmap, master_grid, min_i,min_j,max_i,max_j);
             // updateWithMax(master_grid, min_i, min_j, max_i, max_j);
         }
         current_ = true;

@@ -45,7 +45,7 @@ class RobotLayer(LayerPyPlugin):
             ),
         )
         self.get_logger().info("Started node")
-        self.get_logger().set_level(20)
+        self.get_logger().set_level(30)
 
     def update_costs(
         self, min_i: int, min_j: int, max_i: int, max_j: int, costmap: PyCostmap2D
@@ -127,8 +127,8 @@ class RobotLayer(LayerPyPlugin):
         self.robot_positions.clear()
         # Add new position of robots to list
         for robot in msg.robot_states:
-            # if robot.name_space != self.get_namespace():
-            self.robot_positions.append(robot.pose)
+            if robot.name_space != self.get_namespace():
+                self.robot_positions.append(robot.pose)
 
 
 def main(args=None):

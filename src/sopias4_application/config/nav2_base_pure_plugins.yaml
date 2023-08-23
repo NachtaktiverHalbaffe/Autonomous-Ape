@@ -71,7 +71,7 @@ bt_navigator_navigate_to_pose_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: False
-    controller_frequency: 5.0
+    controller_frequency: 10.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -274,7 +274,7 @@ local_costmap:
       height: 3
       resolution: 0.06
       robot_radius: 0.15
-      plugins: [static_layer, voxel_layer, inflation_layer, robot_layer]
+      plugins: [static_layer, voxel_layer, inflation_layer]
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 4.0
@@ -303,9 +303,6 @@ local_costmap:
         plugin: nav2_costmap_2d::StaticLayer
         map_subscribe_transient_local: True
         map_topic: /map
-      robot_layer:
-        plugin: plugin_bridges/LayerPlugin
-        plugin_name: "robot_layer"
       always_send_full_costmap: True
 
 global_costmap:
@@ -316,11 +313,10 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
-      robot_radius: 0.2
+      robot_radius: 0.175
       resolution: 0.06
       track_unknown_space: True
-      plugins:
-        [static_layer, obstacle_layer, inflation_layer, robot_layer, path_layer]
+      plugins: [static_layer, obstacle_layer, inflation_layer]
       obstacle_layer:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: True
@@ -343,22 +339,18 @@ global_costmap:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 4.0
         inflation_radius: 0.45
-      robot_layer:
-        plugin: plugin_bridges/LayerPlugin
-        plugin_name: "robot_layer"
-      path_layer:
-        plugin: plugin_bridges/LayerPlugin
-        plugin_name: "path_layer"
       always_send_full_costmap: True
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 5.0
+    expected_planner_frequency: 20.0
     use_sim_time: False
     planner_plugins: [GridBased]
     GridBased:
-      plugin: plugin_bridges/PlannerBridge
-      plugin_name: "astar"
+      plugin: nav2_navfn_planner/NavfnPlanner
+      tolerance: 0.5
+      use_astar: True
+      allow_unknown: True
 
 smoother_server:
   ros__parameters:
