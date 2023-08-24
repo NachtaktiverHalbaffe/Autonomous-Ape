@@ -85,23 +85,3 @@ class LayerPyPlugin(Node):
         self.get_logger().info("Shutting down node")
         self.__plugin_bridge_server.destroy()
         super().destroy_node()
-
-
-def main(args=None):
-    """
-    Start the node. It basically initializes the ROS2 context and creates a instance of PlannerPyPlugin
-    :meta private:
-    """
-    # Initialize node context
-    rclpy.init(args=args)
-    # Create ROS2 Node
-    node = LayerPyPlugin()
-    # Run node
-    rclpy.spin(node)
-    # Cleanup
-    node.destroy_node()
-    rclpy.shutdown()
-
-
-# if __name__ == "__main__":
-#     main()

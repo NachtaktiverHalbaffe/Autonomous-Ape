@@ -6,6 +6,7 @@ import sys
 from threading import Thread
 
 import ament_index_python
+from geometry_msgs.msg import PoseStamped
 from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtWidgets import QApplication
 from rcl_interfaces.msg import Log
@@ -26,7 +27,6 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow())
-        self.node.get_logger().set_level(10)
         # Nav2 plugins
         self.__astar_node: Astar | None = None
         self.__robot_layer_node: RobotLayer | None = None
@@ -35,26 +35,37 @@ class GUI(GUINode):
         self.__launch_service_amcl: node_tools.LaunchService = node_tools.LaunchService(
             ros2_package="sopias4_framework",
             launch_file="amcl.launch.py",
-            launch_file_arguments=f"namespace:={self.node.get_namespace()}",
         )
         self.__launch_service_nav2: node_tools.LaunchService = node_tools.LaunchService(
             ros2_package="sopias4_framework",
             launch_file="nav2.launch.py",
-            launch_file_arguments=f"namespace:={self.node.get_namespace()}",
         )
         self.__launch_service_rviz2: node_tools.LaunchService = (
             node_tools.LaunchService(
                 ros2_package="sopias4_framework",
                 launch_file="rviz.launch.py",
-                launch_file_arguments=f"namespace:={self.node.get_namespace()}",
             )
         )
+
+        if self.node.get_namespace() != "/":
+            self.__launch_service_amcl.add_launchfile_arguments(
+                f"namespace:={self.node.get_namespace()}"
+            )
+            self.__launch_service_nav2.add_launchfile_arguments(
+                f"namespace:={self.node.get_namespace()}"
+            )
+            self.__launch_service_rviz2.add_launchfile_arguments(
+                f"namespace:={self.node.get_namespace()}"
+            )
 
     def connect_labels_to_subscriptions(self):
         GuiLogger(
             widget=self.ui.textEdit,
             node=self.node,
             namespace_filter=self.node.get_namespace(),
+        ) if self.node.get_namespace() != "/" else GuiLogger(
+            widget=self.ui.textEdit,
+            node=self.node,
         )
         try:
             LabelSubscriptionHandler(
@@ -63,6 +74,9 @@ class GUI(GUINode):
             LabelSubscriptionHandler(self.ui.label_current_speed, self.node, WheelVels)
             LabelSubscriptionHandler(self.ui.label_docked, self.node, DockStatus)
             LabelSubscriptionHandler(self.ui.label_kidnapped, self.node, KidnapStatus)
+            LabelSubscriptionHandler(
+                self.ui.label_is_navigating, self.node, PoseStamped
+            )
 
         except Exception as e:
             self.node.get_logger().error(f"Couldn't add LabelSubscriptionHandler: {e}")

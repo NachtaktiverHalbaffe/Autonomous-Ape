@@ -16,12 +16,12 @@ class Astar(PlannerPyPlugin):
     """
 
     def __init__(self, namespace: str | None = None) -> None:
-        if namespace is None:
-            super().__init__(node_name="planner_astar", plugin_name="astar")
-        else:
-            super().__init__(
-                node_name="planner_astar", plugin_name="astar", namespace=namespace
-            )
+        super().__init__(
+            node_name="planner_astar", plugin_name="astar"
+        ) if namespace is None else super().__init__(
+            node_name="planner_astar", plugin_name="astar", namespace=namespace
+        )
+
         self.get_logger().info("Started node")
         self.get_logger().set_level(30)
 

@@ -51,12 +51,8 @@ class RobotManager(Node):
     """
 
     def __init__(self, node_name="robot_manager", namespace: str | None = None) -> None:
-        if namespace is None:
-            super().__init__(node_name)  # type: ignore
-        else:
-            super().__init__(node_name, namespace=namespace)  # type: ignore
+        super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
         self.__goal_handle = None
-        self.__result_future = None
 
         # ------------------- Service server --------------------
         self.drive_to_pos_action: Service = self.create_service(
@@ -85,28 +81,42 @@ class RobotManager(Node):
         )
 
         # ------------------- Service clients--------------------
-        # Create own sub node for service clients so they can spin independently
-        self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients", namespace=self.get_namespace())  # type: ignore
-
-        # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
-        # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
-        self.__amcl_sclient_lifecycle: Client = (
-            self.__service_client_node.create_client(
-                ChangeState, f"{self.get_namespace()}/amcl/change_state"
+        if self.get_namespace() == "/":
+            # Create own sub node for service clients so they can spin independently
+            self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients")  # type: ignore
+            # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
+            # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
+            self.__amcl_sclient_lifecycle: Client = (
+                self.__service_client_node.create_client(
+                    ChangeState,
+                    "/amcl/change_state",
+                )
             )
-        )
+            #  This service allows the robot manager to show a dialog with which the user can interact
+            self.__gui_sclient_showDialog: Client = (
+                self.__service_client_node.create_client(ShowDialog, "/show_dialog")
+            )
+        else:
+            # Create own sub node for service clients so they can spin independently
+            self.__service_client_node: Node = rclpy.create_node("_robot_manager_service_clients", namespace=self.get_namespace())  # type: ignore
+
+            # This service changes the lifecycle of the amcl node. It is used to set the amcl to an inactive state
+            # (not operating) when slam is active. Make shure either amcl or slam is actively running, but not both at same time
+            self.__amcl_sclient_lifecycle: Client = (
+                self.__service_client_node.create_client(
+                    ChangeState, f"{self.get_namespace()}/amcl/change_state"
+                )
+            )
+            #  This service allows the robot manager to show a dialog with which the user can interact
+            self.__gui_sclient_showDialog: Client = (
+                self.__service_client_node.create_client(
+                    ShowDialog, f"{self.get_namespace()}/show_dialog"
+                )
+            )
+
         # This service saves the current map in the Sopias4 Map-Server. Used when the mapping is finished to save the map
-        # self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
-        #     slam_toolbox_srv.SaveMap, f"{self.get_namespace()}/slam_toolbox/save_map"
-        # )
         self.__ms_sclient_saveMap: Client = self.__service_client_node.create_client(
             nav2_srv.SaveMap, "/map_saver/save_map"
-        )
-        #  This service allows the robot manager to show a dialog with which the user can interact
-        self.__gui_sclient_showDialog: Client = (
-            self.__service_client_node.create_client(
-                ShowDialog, f"{self.get_namespace()}/show_dialog"
-            )
         )
         # This service unregisters the namespace from the Multi roboter coordinator inside Sopias4 Mapserver
         self.__mrc__sclient__unregister = self.__service_client_node.create_client(
@@ -114,24 +124,42 @@ class RobotManager(Node):
         )
 
         # ------- Action clients ---------------
-        # This action lets the robot drive autonomously to an goal position
-        self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
-            self.__service_client_node,
-            NavigateToPose,
-            f"{self.get_namespace()}/navigate_to_pose",
-        )
-        # This action lets the turtlebot dock to its charging station
-        self.__tb4_aclient_dock: ActionClient = ActionClient(
-            self.__service_client_node, Dock, f"{self.get_namespace()}/dock"
-        )
-        # This action lets the turtlebot undock from its charging station
-        self.__tb4_aclient_undock: ActionClient = ActionClient(
-            self.__service_client_node, Undock, f"{self.get_namespace()}/undock"
-        )
+        if self.get_namespace() == "/":
+            # This action lets the robot drive autonomously to an goal position
+            self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
+                self.__service_client_node,
+                NavigateToPose,
+                "/navigate_to_pose",
+            )
+            # This action lets the turtlebot dock to its charging station
+            self.__tb4_aclient_dock: ActionClient = ActionClient(
+                self.__service_client_node, Dock, "/dock"
+            )
+            # This action lets the turtlebot undock from its charging station
+            self.__tb4_aclient_undock: ActionClient = ActionClient(
+                self.__service_client_node, Undock, "/undock"
+            )
+        else:
+            # This action lets the robot drive autonomously to an goal position
+            self.__nav2_aclient_driveToPos: ActionClient = ActionClient(
+                self.__service_client_node,
+                NavigateToPose,
+                f"{self.get_namespace()}/navigate_to_pose",
+            )
+            # This action lets the turtlebot dock to its charging station
+            self.__tb4_aclient_dock: ActionClient = ActionClient(
+                self.__service_client_node, Dock, f"{self.get_namespace()}/dock"
+            )
+            # This action lets the turtlebot undock from its charging station
+            self.__tb4_aclient_undock: ActionClient = ActionClient(
+                self.__service_client_node, Undock, f"{self.get_namespace()}/undock"
+            )
 
         # ---------- Publishers ----------------
-        self.__cmd_vel_pub = self.create_publisher(
-            Twist, f"{self.get_namespace()}/cmd_vel", 10
+        self.__cmd_vel_pub = (
+            self.create_publisher(Twist, f"{self.get_namespace()}/cmd_vel", 10)
+            if self.get_namespace() != "/"
+            else self.create_publisher(Twist, "/cmd_vel", 10)
         )
 
         # ---------- Shell processes to run nodes ----------
@@ -145,14 +173,15 @@ class RobotManager(Node):
         )
         self.__mapping_launch_service: node_tools.LaunchService = (
             node_tools.LaunchService(
-                ros2_package="ſsopias4_framework",
+                ros2_package="sopias4_framework",
                 launch_file="bringup_slam.launch.py",
-                launch_file_arguments=f"namespace:={self.get_namespace()}",
             )
         )
+        if self.get_namespace() != "/":
+            self.__mapping_launch_service.add_launchfile_arguments(
+                f"namespace:={self.get_namespace()}"
+            )
 
-        # Log level 10 is debug
-        self.get_logger().set_level(10)
         self.get_logger().info("Started node")
 
     def __drive__to_pos(
@@ -284,6 +313,8 @@ class RobotManager(Node):
 
         self.__nav2_stack_launch_service.add_launchfile_arguments(
             f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
+        ) if self.get_namespace() != "/" else self.__nav2_stack_launch_service.add_launchfile_arguments(
+            f'use_simulation:={"true" if request_data.use_simulation  else "false"}'
         )
         if self.__nav2_stack_launch_service.start():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
@@ -526,7 +557,10 @@ class RobotManager(Node):
         save_map_req.map_url = save_params.map_name
 
         # Add namespace to topic if not given
-        if self.get_namespace() not in save_map_req.map_topic:
+        if (
+            self.get_namespace() not in save_map_req.map_topic
+            and self.get_namespace() != "/"
+        ):
             save_map_req.map_topic = f"{self.get_namespace()}/{save_map_req.map_topic}"
 
         self.get_logger().debug(
@@ -654,9 +688,15 @@ class RobotManager(Node):
         """
         self.get_logger().info("Shutting down node")
         # Unregister namespace
-        request = RegistryService.Request()
-        request.name_space = self.get_namespace()
-        self.__mrc__sclient__unregister.call_async(request)
+        if self.get_namespace() != "/":
+            request = RegistryService.Request()
+            request.name_space = self.get_namespace()
+            node_tools.call_service(
+                self.__mrc__sclient__unregister,
+                request,
+                self.__service_client_node,
+                timeout_sec=10,
+            )
 
         self.__nav2_stack_launch_service.shutdown()
         self.__mapping_launch_service.shutdown()
@@ -672,7 +712,7 @@ def main(args=None):
     # Initialize node context
     rclpy.init(args=args)
     # Create ROS2 Node
-    node = RobotManager(namespace="".join(random.choices(string.ascii_lowercase, k=8)))
+    node = RobotManager()
     # Run node
     rclpy.spin(node)
     # Cleanup

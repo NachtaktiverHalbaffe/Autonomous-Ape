@@ -53,7 +53,6 @@ class PathLayer(LayerPyPlugin):
             ),
         )
         self.get_logger().info("Started node")
-        self.get_logger().set_level(30)
 
     def update_costs(
         self, min_i: int, min_j: int, max_i: int, max_j: int, costmap: PyCostmap2D

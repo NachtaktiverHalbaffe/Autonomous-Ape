@@ -39,10 +39,7 @@ class PlannerPyPlugin(Node):
         namespace: str | None = None,
         goal_tolerance: float = 0.2,
     ) -> None:
-        if namespace is None:
-            super().__init__(node_name)  # type: ignore
-        else:
-            super().__init__(node_name, namespace=namespace)  # type: ignore
+        super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
 
         # Service server
         self.__plugin_bridge_server: Service = self.create_service(
