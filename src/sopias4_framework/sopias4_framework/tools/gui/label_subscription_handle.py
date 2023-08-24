@@ -1,3 +1,4 @@
+from geometry_msgs.msg import PoseStamped
 from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QLabel
@@ -46,7 +47,9 @@ class LabelSubscriptionHandler(QObject):
         if message_type == BatteryState:
             self.sub = node.create_subscription(
                 BatteryState,
-                f"{node.get_namespace()}/battery_state",
+                f"{node.get_namespace()}/battery_state"
+                if node.get_namespace() != "/"
+                else "/battery_state",
                 self.set_label_battery,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -57,7 +60,9 @@ class LabelSubscriptionHandler(QObject):
         elif message_type == WheelVels:
             self.sub = node.create_subscription(
                 WheelVels,
-                f"{node.get_namespace()}/wheel_vels",
+                f"{node.get_namespace()}/wheel_vels"
+                if node.get_namespace() != "/"
+                else "/wheels_vels",
                 self.set_label_velocity,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -68,7 +73,9 @@ class LabelSubscriptionHandler(QObject):
         elif message_type == DockStatus:
             self.sub = node.create_subscription(
                 DockStatus,
-                f"{node.get_namespace()}/dock_status",
+                f"{node.get_namespace()}/dock_status"
+                if node.get_logger() != "/"
+                else "/dock_status",
                 self.set_label_dockstatus,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -79,8 +86,23 @@ class LabelSubscriptionHandler(QObject):
         elif message_type == KidnapStatus:
             self.sub = node.create_subscription(
                 KidnapStatus,
-                f"{node.get_namespace()}/kidnap_status",
+                f"{node.get_namespace()}/kidnap_status"
+                if node.get_namespace() != "/"
+                else "/kidnap_status",
                 self.set_label_kidnap_status,
+                QoSProfile(
+                    reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                    durability=QoSDurabilityPolicy.VOLATILE,
+                    depth=5,
+                ),
+            )
+        elif message_type == PoseStamped:
+            self.sub = node.create_subscription(
+                PoseStamped,
+                f"{node.get_namespace()}/goal_pose"
+                if node.get_namespace() != "/"
+                else "goal_pose",
+                self.set_label_navstatus,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
                     durability=QoSDurabilityPolicy.VOLATILE,
@@ -123,6 +145,15 @@ class LabelSubscriptionHandler(QObject):
         # average wheel speed * wheel radius
         vel = ((msg.velocity_left + msg.velocity_right) / 2) * 0.035
         self.value_signal.emit(str(round(vel, 2)))
+
+    def set_label_navstatus(self, msg: PoseStamped):
+        is_navigating: str = "Unknown"
+
+        if msg.pose.position.x != 0 and msg.pose.position.y != 0:
+            is_navigating = "True"
+        else:
+            is_navigating = "False"
+        self.value_signal.emit(is_navigating)
 
 
 if __name__ == "__main__":
