@@ -17,7 +17,7 @@ from sopias4_framework.tools.ros2 import node_tools
 from sopias4_map_server.ui_object import Ui_MainWindow
 
 from sopias4_msgs.msg import Robot, RobotStates
-from sopias4_msgs.srv import ShowDialog
+from sopias4_msgs.srv import RegistryService, ShowDialog
 
 
 class GUI(GUINode):
@@ -42,11 +42,14 @@ class GUI(GUINode):
         )
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
-        self.__sclient_load_map: Client = self.node.create_client(
+        self.__sclient_load_map: Client = self.node.service_client_node.create_client(
             LoadMap, "/map_server/load_map"
         )
-        self.__sclient_save_map: Client = self.node.create_client(
+        self.__sclient_save_map: Client = self.node.service_client_node.create_client(
             SaveMap, "/map_saver/save_map"
+        )
+        self.__sclient_unregister: Client = self.node.service_client_node.create_client(
+            RegistryService, "/unregister_namespace"
         )
 
         self.node.create_subscription(
@@ -73,6 +76,9 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_mrv.clicked.connect(
             lambda: Thread(target=self.__launch_mrc).start()
+        )
+        self.ui.pushButton_unregister.clicked.connect(
+            lambda: Thread(target=self.__unregister_namespace).start()
         )
         # Filepickers
         self.ui.pushButton_pick_params_file.clicked.connect(
@@ -260,6 +266,50 @@ class GUI(GUINode):
         elif response.result:
             self.node.get_logger().info("Successfully saved map")
             self.ui.lineEdit.setText(req.map_url)
+
+    def __unregister_namespace(self):
+        """
+        Loads a map from a file which can be picked with a file picker and loads it into the map server
+        """
+        # Pick map file
+        self.node.get_logger().info(
+            f"Unregistering namespace {self.ui.lineEdit_unregister.text()}"
+        )
+
+        # Call map saver service
+        self.node.get_logger().debug("Sending corresponding service call")
+        namespace = self.ui.lineEdit_unregister.text()
+        req = RegistryService.Request()
+        req.name_space = f"/{namespace}" if namespace[0] != "/" else namespace
+
+        response: RegistryService.Response | None = node_tools.call_service(
+            self.__sclient_unregister, req, self.node.service_client_node, timeout_sec=3
+        )
+
+        if response is None:
+            return
+        elif response.statuscode == RegistryService.Response.SUCCESS:
+            return
+        else:
+            msg_2_user = ShowDialog.Request()
+            msg_2_user.title = "Error while unregistering namespace"
+            msg_2_user.icon = ShowDialog.Request.ICON_ERROR
+
+            match response.statuscode:
+                case RegistryService.Response.NS_NOT_FOUND:
+                    self.get_logger().error(
+                        "Couldn't unregister namespace: Namespace not found"
+                    )
+                    msg_2_user.content = "Namespace isn't registered. Choose another one or unregistering is not neccessary"
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
+                case RegistryService.Response.UNKNOWN_ERROR:
+                    self.get_logger().error(
+                        "Couldn't register namespace: Unknown error"
+                    )
+                    msg_2_user.content = "Unknown error occured"
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+
+            self.display_dialog(msg_2_user)
 
     def __fill_tableview_robotstates(self, robot_states: RobotStates):
         """

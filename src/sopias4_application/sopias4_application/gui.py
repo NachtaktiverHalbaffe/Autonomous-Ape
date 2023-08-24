@@ -161,6 +161,7 @@ class GUI(GUINode):
         )
 
     def set_default_values(self):
+        self.ui.comboBox_namespace.addItems(["/turtle1", "/turtle2", "/turtle3"])
         self.ui.comboBox_map_mode.addItems(["trinary", "scale", "raw"])
         self.ui.comboBox_map_mode.setCurrentIndex(0)
         self.ui.comboBox_image_format.addItems(["png", "pgm", "bmp"])
@@ -193,7 +194,7 @@ class GUI(GUINode):
         self.ui.pushButton_undock.setEnabled(False)
 
     def __register_turtlebot(self):
-        if self.register_namespace(self.ui.lineEdit_namespace.text()):
+        if self.register_namespace(self.ui.comboBox_namespace.currentText()):
             self.ui.pushButton_launch_turtlebot.setEnabled(True)
             self.ui.pushButton_start_mapping.setEnabled(True)
             self.ui.pushButton_stop_turtlebot.setEnabled(True)
@@ -207,7 +208,7 @@ class GUI(GUINode):
             self.ui.pushButton_undock.setEnabled(True)
 
     def __unregister_turtlebot(self):
-        if self.unregister_namespace(self.ui.lineEdit_namespace.text()):
+        if self.unregister_namespace(self.ui.comboBox_namespace.currentText()):
             self.ui.pushButton_unregister.setEnabled(False)
             self.ui.pushButton_namespace.setEnabled(True)
             self.ui.pushButton_launch_turtlebot.setEnabled(False)

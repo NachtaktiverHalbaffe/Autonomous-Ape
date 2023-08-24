@@ -695,8 +695,6 @@ class GrapficalNode(Node):
         self.show_dialog_signal = display_dialog_signal
         showed_dialog_signal.connect(self.__set_response_data)
         self.dialog_return_data: ShowDialog.Response | None = None
-        # Log level 10 is debug
-        self.get_logger().set_level(20)
         self.get_logger().info(f"Node started with namespace {self.get_namespace()}")
 
         # ---- Setup services -----
@@ -769,7 +767,7 @@ class GrapficalNode(Node):
             f"Sending service request to register namespace {namespace}"
         )
         request: RegistryService.Request = RegistryService.Request()
-        request.name_space = f"/{namespace}"
+        request.name_space = f"/{namespace}" if namespace[0] != "/" else namespace
         response: RegistryService.Response | None = node_tools.call_service(
             client=self.__mrc_sclient_register,
             service_req=request,
@@ -834,7 +832,7 @@ class GrapficalNode(Node):
             f"Sending service request to register namespace {namespace}"
         )
         request: RegistryService.Request = RegistryService.Request()
-        request.name_space = f"/{namespace}"
+        request.name_space = f"/{namespace}" if namespace[0] != "/" else namespace
         response: RegistryService.Response | None = node_tools.call_service(
             client=self.__mrc_sclient_manual_unregister,
             service_req=request,
