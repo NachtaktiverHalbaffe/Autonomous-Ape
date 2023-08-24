@@ -20,6 +20,14 @@ sopias4\_framework.tools.scripts.generate\_ui module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.tools.scripts.restart\_turtlebot\_nodes module
+-----------------------------------------------------------------
+
+.. automodule:: sopias4_framework.tools.scripts.restart_turtlebot_nodes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

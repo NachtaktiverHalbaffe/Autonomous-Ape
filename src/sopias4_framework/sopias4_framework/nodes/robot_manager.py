@@ -316,7 +316,7 @@ class RobotManager(Node):
         ) if self.get_namespace() != "/" else self.__nav2_stack_launch_service.add_launchfile_arguments(
             f'use_simulation:={"true" if request_data.use_simulation  else "false"}'
         )
-        if self.__nav2_stack_launch_service.start():
+        if self.__nav2_stack_launch_service.run():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -442,7 +442,7 @@ class RobotManager(Node):
 
         # ------ start slam toolbox ---------
         self.get_logger().debug("Starting slam nodes")
-        if self.__mapping_launch_service.start():
+        if self.__mapping_launch_service.run():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(

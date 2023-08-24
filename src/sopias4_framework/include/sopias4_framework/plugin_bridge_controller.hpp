@@ -14,7 +14,6 @@
 
 namespace plugin_bridges
 {
-    // TODO Update configuration documentation
     /**
      * @class ControllerBridge
      * @brief A plugin bridge that allows to write Nav2 controller plugins in another programming language than C++
@@ -26,12 +25,12 @@ namespace plugin_bridges
      * If you plan to use this Plugin bridge, then you have to do the following steps:
      *      1. Configure your Navigation 2 configuration to use this bridge as an costmap layer:        
      *            \code{.yaml}
-     *             planner_server:
+                        controller_server:
                         ros__parameters:
-                            plugins: ["GridBased"]
-                            GridBased:
-                            plugin: "plugin_bridges/PlannerBridge"
-                            plugin_name: "Astar"
+                            controller_plugins: ["FollowPath"]
+                            FollowPath:
+                            plugin:  "plugin_bridges/ControllerBridge"
+                            plugin_name: "Example"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/compute_velocity_commands (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)

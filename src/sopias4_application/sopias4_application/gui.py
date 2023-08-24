@@ -250,7 +250,7 @@ class GUI(GUINode):
         self.__enable_drive_buttons(True)
 
     def __launch_rviz2(self):
-        self.__launch_service_rviz2.start()
+        self.__launch_service_rviz2.run()
         self.ui.pushButton_launch_rviz2.setEnabled(False)
 
     def __launch_nav2(self):
@@ -280,7 +280,7 @@ class GUI(GUINode):
         self.node_executor.add_node(self.__robot_layer_node)
         self.node_executor.wake()
 
-        self.__launch_service_nav2.start()
+        self.__launch_service_nav2.run()
         self.ui.pushButton_launch_nav2.setEnabled(False)
 
     def __launch_amcl(self):
@@ -289,7 +289,7 @@ class GUI(GUINode):
             "config",
         )
 
-        self.__launch_service_amcl.start()
+        self.__launch_service_amcl.run()
         self.ui.pushButton_launch_amcl.setEnabled(False)
 
     def __stop_nav_stack(self):

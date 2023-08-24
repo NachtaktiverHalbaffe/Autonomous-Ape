@@ -9,7 +9,6 @@
 
 namespace plugin_bridges
 {
-    // TODO Update configuration documentation
     /**
      * @class LayerBridge
      * @brief  A plugin bridge that allows to write Nav2 layer plugins in another programming language than C++
@@ -21,16 +20,17 @@ namespace plugin_bridges
      * If you plan to use this Plugin bridge, then you have to do the following steps:
      *      1. Configure your Navigation 2 configuration to use this bridge as an costmap layer:           
      *            \code{.yaml}
-     *             planner_server:
-                        ros__parameters:
-                            plugins: ["GridBased"]
-                            GridBased:
-                            plugin: "plugin_bridges/PlannerBridge"
-                            plugin_name: "Astar"
+                        local_costmap:
+                            local_costmap:
+                                ros__parameters:
+                                    plugins: [robot_layer]
+                                    robot_layer:
+                                        plugin: plugin_bridges/LayerPlugin
+                                        plugin_name: "robot_layer"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/update_costs (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)
-     *          - The service must return a nav_msgs/OccupancyGrid instance where the planned path is given back as an response. Look at service definition sopias4_msgs/drv/UpdateCosts.srv
+     *          - The service must return a nav_msgs/OccupancyGrid instance where the planned path is given back as an response. Look at service definition sopias4_msgs/srv/UpdateCosts.srv
      *          - If using Python: The LayerPyPlugin class from this framework does this already under the hood, so you can inherit from this class
      *          - A service can be implemented in any programming language, as long as following conditions are met:
      *              - There must be a ROS2 client library available, installed and running

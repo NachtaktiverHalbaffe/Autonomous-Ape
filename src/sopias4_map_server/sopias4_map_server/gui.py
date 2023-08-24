@@ -144,7 +144,7 @@ class GUI(GUINode):
         # Launch launchfile in own subprocess
         launch_args: str = " ".join(launch_args_list)
         self.__launch_service_system.add_launchfile_arguments(launch_args)
-        self.__launch_service_system.start()
+        self.__launch_service_system.run()
         # Enable buttons which are only useable when map server launched
         self.ui.pushButton_stop_map_server.setEnabled(True)
         self.ui.pushButton_bringup_server.setEnabled(False)
@@ -169,11 +169,11 @@ class GUI(GUINode):
         self.node.get_logger().info("Successfully stopped Sopias4 Map-Server nodes")
 
     def __launch_mrc(self):
-        self.__launch_service_mrc.start()
+        self.__launch_service_mrc.run()
         self.ui.pushButton_launch_mrv.setEnabled(False)
 
     def __launch_mapserver(self):
-        self.__launch_service_mapserver.start()
+        self.__launch_service_mapserver.run()
         self.ui.pushButton_launch_map_server.setEnabled(False)
 
     def __load_map(self):
