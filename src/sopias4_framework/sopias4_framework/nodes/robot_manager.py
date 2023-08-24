@@ -137,8 +137,19 @@ class RobotManager(Node):
         # ---------- Shell processes to run nodes ----------
         # The necessary turtlebot and mapping nodes are run inside shell processes via subprocess.popen,
         # because so they can be shutdown cleanly during runtime and they run non-blocking
-        self.__turtlebot_shell_process: subprocess.Popen | None = None
-        self.__mapping_shell_process: subprocess.Popen | None = None
+        self.__nav2_stack_launch_service: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_framework",
+                launch_file="bringup_turtlebot.launch.py",
+            )
+        )
+        self.__mapping_launch_service: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="ſsopias4_framework",
+                launch_file="bringup_slam.launch.py",
+                launch_file_arguments=f"namespace:={self.get_namespace()}",
+            )
+        )
 
         # Log level 10 is debug
         self.get_logger().set_level(10)
@@ -257,7 +268,7 @@ class RobotManager(Node):
         )
         # --- Add namespace to yaml config of nav2 and amcl launch file ---
         base_path = os.path.join(
-            get_package_share_directory("sopias4_framework"), "config"
+            get_package_share_directory("sopias4_application"), "config"
         )
         yaml_tools.insert_namespace_into_yaml_config(
             namespace=self.get_namespace(),
@@ -271,13 +282,10 @@ class RobotManager(Node):
             ),
         )
 
-        if self.__turtlebot_shell_process is None:
-            # Launch launchfile
-            self.__turtlebot_shell_process = node_tools.start_launch_file(
-                ros2_package="sopias4_framework",
-                launch_file="bringup_turtlebot.launch.py",
-                arguments=f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}',
-            )
+        self.__nav2_stack_launch_service.add_launchfile_arguments(
+            f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
+        )
+        if self.__nav2_stack_launch_service.start():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -324,11 +332,10 @@ class RobotManager(Node):
                                                                     Look at service definition in srv/EmptyWithStatusCode.srv
         """
         # Kill turtlebot nodes by killing the process which runs these
-        self.get_logger().info("Got service rquest to stop turtlebot nodes")
+        self.get_logger().info("Got service request to stop turtlebot nodes")
 
         self.get_logger().debug("Shutting down turtlebot nodes")
-        if node_tools.shutdown_ros_shell_process(self.__turtlebot_shell_process):
-            self.__turtlebot_shell_process = None
+        if self.__nav2_stack_launch_service.shutdown():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -404,12 +411,7 @@ class RobotManager(Node):
 
         # ------ start slam toolbox ---------
         self.get_logger().debug("Starting slam nodes")
-        if self.__mapping_shell_process is None:
-            self.__mapping_shell_process = node_tools.start_launch_file(
-                ros2_package="sopias4_framework",
-                launch_file="bringup_slam.launch.py",
-                arguments=f"namespace:={self.get_namespace()}",
-            )
+        if self.__mapping_launch_service.start():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
             self.get_logger().warning(
@@ -462,8 +464,7 @@ class RobotManager(Node):
         # ------ Stop slam toolbox ---------
         self.get_logger().debug("Stopping slam nodes")
 
-        if node_tools.shutdown_ros_shell_process(self.__mapping_shell_process):
-            self.__mapping_shell_process = None
+        if self.__mapping_launch_service.shutdown():
             response_data.statuscode = StopMapping.Response.SUCCESS
         else:
             self.get_logger().warning("Couldn't stop slam nodes: Nodes already stopped")
@@ -657,8 +658,8 @@ class RobotManager(Node):
         request.name_space = self.get_namespace()
         self.__mrc__sclient__unregister.call_async(request)
 
-        node_tools.shutdown_ros_shell_process(self.__turtlebot_shell_process)
-        node_tools.shutdown_ros_shell_process(self.__mapping_shell_process)
+        self.__nav2_stack_launch_service.shutdown()
+        self.__mapping_launch_service.shutdown()
 
         super().destroy_node()
 
