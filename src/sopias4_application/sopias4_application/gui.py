@@ -32,10 +32,23 @@ class GUI(GUINode):
         self.__robot_layer_node: RobotLayer | None = None
         self.__path_layer_node: PathLayer | None = None
         # launch file processes
-        self.__launch_process_amcl: subprocess.Popen | None = None
-        self.__launch_process_nav2: subprocess.Popen | None = None
-        self.__launch_process_rviz2: subprocess.Popen | None = None
-        self.__launch_process_tf_relay: subprocess.Popen | None = None
+        self.__launch_service_amcl: node_tools.LaunchService = node_tools.LaunchService(
+            ros2_package="sopias4_framework",
+            launch_file="amcl.launch.py",
+            launch_file_arguments=f"namespace:={self.node.get_namespace()}",
+        )
+        self.__launch_service_nav2: node_tools.LaunchService = node_tools.LaunchService(
+            ros2_package="sopias4_framework",
+            launch_file="nav2.launch.py",
+            launch_file_arguments=f"namespace:={self.node.get_namespace()}",
+        )
+        self.__launch_service_rviz2: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_framework",
+                launch_file="rviz.launch.py",
+                launch_file_arguments=f"namespace:={self.node.get_namespace()}",
+            )
+        )
 
     def connect_labels_to_subscriptions(self):
         GuiLogger(
@@ -222,22 +235,13 @@ class GUI(GUINode):
         self.__enable_drive_buttons(True)
 
     def __launch_rviz2(self):
-        base_path = os.path.join(
-            ament_index_python.get_package_share_directory("sopias4_framework"),
-            "config",
-        )
-
-        self.__launch_process_rviz2 = node_tools.start_launch_file(
-            ros2_package="sopias4_framework",
-            launch_file="rviz.launch.py",
-            arguments=f"namespace:={self.node.get_namespace()}",
-        )
+        self.__launch_service_rviz2.start()
         self.ui.pushButton_launch_rviz2.setEnabled(False)
 
     def __launch_nav2(self):
         # --- Add namespace to yaml config of nav2 and amcl launch file ---
         base_path = os.path.join(
-            ament_index_python.get_package_share_directory("sopias4_framework"),
+            ament_index_python.get_package_share_directory("sopias4_application"),
             "config",
         )
         yaml_tools.insert_namespace_into_yaml_config(
@@ -261,11 +265,7 @@ class GUI(GUINode):
         self.node_executor.add_node(self.__robot_layer_node)
         self.node_executor.wake()
 
-        self.__launch_process_nav2 = node_tools.start_launch_file(
-            ros2_package="sopias4_framework",
-            launch_file="nav2.launch.py",
-            arguments=f"namespace:={self.node.get_namespace()}",
-        )
+        self.__launch_service_nav2.start()
         self.ui.pushButton_launch_nav2.setEnabled(False)
 
     def __launch_amcl(self):
@@ -274,22 +274,18 @@ class GUI(GUINode):
             "config",
         )
 
-        self.__launch_process_amcl = node_tools.start_launch_file(
-            ros2_package="sopias4_framework",
-            launch_file="amcl.launch.py",
-            arguments=f"namespace:={self.node.get_namespace()}",
-        )
+        self.__launch_service_amcl.start()
         self.ui.pushButton_launch_amcl.setEnabled(False)
 
     def __stop_nav_stack(self):
         self.stop_nav_stack()
-
         if self.__astar_node is not None:
             self.node_executor.remove_node(self.__astar_node)
         if self.__path_layer_node is not None:
             self.node_executor.remove_node(self.__path_layer_node)
         if self.__robot_layer_node is not None:
             self.node_executor.remove_node(self.__robot_layer_node)
+
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
         self.__enable_drive_buttons(False)
@@ -343,17 +339,15 @@ class GUI(GUINode):
         self.ui.pushButton_right.setEnabled(isEnabled)
 
     def closeEvent(self, event):
-        node_tools.shutdown_ros_shell_process(self.__launch_process_amcl)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_nav2)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_rviz2)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_tf_relay)
+        self.__launch_service_nav2.shutdown()
+        self.__launch_service_rviz2.shutdown()
+        self.__launch_service_amcl.shutdown()
         super().closeEvent(event)
 
     def destroy_node(self):
-        node_tools.shutdown_ros_shell_process(self.__launch_process_amcl)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_nav2)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_rviz2)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_tf_relay)
+        self.__launch_service_nav2.shutdown()
+        self.__launch_service_rviz2.shutdown()
+        self.__launch_service_amcl.shutdown()
         super().destroy_node()
 
 

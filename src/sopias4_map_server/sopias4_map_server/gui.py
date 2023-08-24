@@ -26,9 +26,20 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow(), node_name="gui_sopias4_map_server")
-        self.__launch_process_system: subprocess.Popen | None = None
-        self.__launch_process_mapserver: subprocess.Popen | None = None
-        self.__launch_process_mrc: subprocess.Popen | None = None
+        self.__launch_service_system: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_map_server",
+                launch_file="bringup_server.launch.py",
+            )
+        )
+        self.__launch_service_mapserver: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
+            )
+        )
+        self.__launch_service_mrc: node_tools.LaunchService = node_tools.LaunchService(
+            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
+        )
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
         self.__sclient_load_map: Client = self.node.create_client(
@@ -41,7 +52,6 @@ class GUI(GUINode):
         self.node.create_subscription(
             RobotStates, "/robot_states", self.__callback_robot_states, 10
         )
-        self.node.get_logger().set_level(10)
 
     def connect_labels_to_subscriptions(self):
         GuiLogger(
@@ -127,11 +137,8 @@ class GUI(GUINode):
 
         # Launch launchfile in own subprocess
         launch_args: str = " ".join(launch_args_list)
-        self.__launch_process_system = node_tools.start_launch_file(
-            ros2_package="sopias4_map_server",
-            launch_file="bringup_server.launch.py",
-            arguments=launch_args,
-        )
+        self.__launch_service_system.add_launchfile_arguments(launch_args)
+        self.__launch_service_system.start()
         # Enable buttons which are only useable when map server launched
         self.ui.pushButton_stop_map_server.setEnabled(True)
         self.ui.pushButton_bringup_server.setEnabled(False)
@@ -145,8 +152,7 @@ class GUI(GUINode):
         Stops the nodes itself. It is done by sending a SIG-INT signal (STRG+C) to the shell process which runs the nodes
         """
         self.node.get_logger().info("Stopping Sopias4 Mp-Server nodes")
-        if node_tools.shutdown_ros_shell_process(self.__launch_process_system):
-            self.__launch_process_system = None
+        self.__launch_service_system.shutdown()
 
         # Enable buttons which are only useable when map server isn't running
         self.ui.pushButton_stop_map_server.setEnabled(False)
@@ -157,15 +163,11 @@ class GUI(GUINode):
         self.node.get_logger().info("Successfully stopped Sopias4 Map-Server nodes")
 
     def __launch_mrc(self):
-        self.__launch_process_mrc = node_tools.start_node(
-            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
-        )
+        self.__launch_service_mrc.start()
         self.ui.pushButton_launch_mrv.setEnabled(False)
 
     def __launch_mapserver(self):
-        self.__launch_process_mapserver = node_tools.start_launch_file(
-            ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
-        )
+        self.__launch_service_mapserver.start()
         self.ui.pushButton_launch_map_server.setEnabled(False)
 
     def __load_map(self):
@@ -300,16 +302,16 @@ class GUI(GUINode):
 
     def closeEvent(self, event):
         """Cleanup process when GUI is closed"""
-        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
+        self.__launch_service_mapserver.shutdown()
+        self.__launch_service_mrc.shutdown()
+        self.__launch_service_system.shutdown()
         super().closeEvent(event)
 
     def destroy_node(self):
         """Cleanup process when GUI node is destroyed"""
-        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
+        self.__launch_service_mapserver.shutdown()
+        self.__launch_service_mrc.shutdown()
+        self.__launch_service_system.shutdown()
         super().destroy_node()
 
 

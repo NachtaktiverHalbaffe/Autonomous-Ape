@@ -519,7 +519,7 @@ class GUINode(QMainWindow):
             node.destroy_node()
             self.node_executor.remove_node(node)
         self.node_executor.wake()
-        self.node_executor.shutdown()
+        self.node_executor.shutdown(timeout_sec=10)
 
         rclpy.shutdown()
         event.accept()
