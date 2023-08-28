@@ -109,7 +109,7 @@ controller_server:
       ##############
       # plugin: teb_local_planner::TebLocalPlannerROS
       primary_controller: teb_local_planner::TebLocalPlannerROS
-      map_frame: "odom"
+      # map_frame: "odom"
       # odom_topic: "odom"
 
       teb_autosize: 1.0
@@ -126,11 +126,11 @@ controller_server:
       publish_feedback: False
 
       # Robot
-      max_vel_x: 0.26
-      max_vel_theta: 1.0
+      max_vel_x: 0.2
+      max_vel_theta: 0.7
       min_turning_radius: 0.0
-      acc_lim_x: 2.5
-      acc_lim_theta: 3.2
+      acc_lim_x: 2.0
+      acc_lim_theta: 2.0
       footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
         type: "circular"
         radius: 0.17 # for type "circular"
@@ -375,7 +375,7 @@ behavior_server:
     cost: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
     cycle_frequency: 10.0
-    behavior_plugins: [spin, backup, drive_on_heading, assisted_teleop, wait]
+    behavior_plugins: [spin, drive_on_heading, assisted_teleop]
     spin:
       plugin: nav2_behaviors/Spin
     backup:
