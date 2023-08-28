@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from nav_msgs.msg import OccupancyGrid
 
-LETHAL_COST = 150
+LETHAL_COST = 180
 
 
 def costmap_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
@@ -29,8 +29,6 @@ def costmap_2_pose(x: int, y: int, costmap: PyCostmap2D) -> Pose:
         Pose: The pose of the cell in the map frame
     """
     pose: Pose = Pose()
-    # pose.position.x = x * costmap.getResolution() + costmap.getOriginX()
-    # pose.position.y = y * costmap.getResolution() + costmap.getOriginY()
     pose.position.x, pose.position.y = costmap.mapToWorld(x, y)
 
     return pose
@@ -48,8 +46,6 @@ def pose_2_costmap(pose: Pose | PoseStamped, costmap: PyCostmap2D) -> Tuple[int,
         int: The x-index of the cell
         int: The y-index of the cell
     """
-    # x: int = int(round((pose.position.x - costmap.origin_x) / costmap.getResolution()))
-    # y: int = int(round((pose.position.y - costmap.origin_y) / costmap.getResolution()))
     x: int = 0
     y: int = 0
 
@@ -74,8 +70,6 @@ def index_2_costmap(index: int, costmap: PyCostmap2D) -> Tuple[int, int]:
         int: The x-index of the cell
         int: The y-index of the cell
     """
-    # x: int = int(round((pose.position.x - costmap.origin_x) / costmap.getResolution()))
-    # y: int = int(round((pose.position.y - costmap.origin_y) / costmap.getResolution()))
     x: int = index % costmap.getSizeInCellsX()
     y: int = math.floor(index / costmap.getSizeInCellsX())
 
@@ -145,7 +139,11 @@ def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
 
 
 def find_neighbors_coordinates(
-    node: Tuple[int, int], costmap: PyCostmap2D, step_size: int = 1
+    node: Tuple[int, int],
+    costmap: PyCostmap2D,
+    step_size: int = 1,
+    weight_distance_costs: float = 1.0,
+    weight_costmap_costs: float = 1.0,
 ) -> list[Tuple[Tuple[int, int], float]]:
     """
     Identifies neighbor nodes inspecting the 8 adjacent neighbors and is working woth coordinates. Checks if neighbor is inside the map boundaries\
@@ -156,6 +154,10 @@ def find_neighbors_coordinates(
         node (tuple(int,int)): The node as an x,y-coordinate in the costmap for which the neighbors should be found
         costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched.
         step_size (int, optional): The step size to the next neighbor in pixel. Defaults to 1
+        weight_distance_costs (float, optional): The weighting how much the distance cost should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_distance_costs * distance_cost + sum(other_weighted_costs). Defaults to 1.0
+        weight_costmap_costs (float, optional): The weighting how much the costs from the costmap should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_costmap_costs * distance_cost + sum(other_weighted_costs). Defaults to 1.0
     Returns:
          list(tuple(tuple(int,int), float)): A list with valid neighbour nodes as a tuple with [x,y-coordinates, step_cost] pairs
     """
@@ -166,7 +168,13 @@ def find_neighbors_coordinates(
         neighbors.append(
             (
                 upper_neighbor,
-                __calculate_cost(node_to_calculate=upper_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=upper_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -175,7 +183,13 @@ def find_neighbors_coordinates(
         neighbors.append(
             (
                 left_neighbor,
-                __calculate_cost(node_to_calculate=left_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=left_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -189,7 +203,11 @@ def find_neighbors_coordinates(
             (
                 upper_right_neighbor,
                 __calculate_cost(
-                    node_to_calculate=upper_right_neighbor, costmap=costmap
+                    node_to_calculate=upper_right_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -199,7 +217,13 @@ def find_neighbors_coordinates(
         neighbors.append(
             (
                 right_neighbor,
-                __calculate_cost(node_to_calculate=right_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=right_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -209,7 +233,11 @@ def find_neighbors_coordinates(
             (
                 lower_left_neighbor,
                 __calculate_cost(
-                    node_to_calculate=lower_left_neighbor, costmap=costmap
+                    node_to_calculate=lower_left_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -219,7 +247,13 @@ def find_neighbors_coordinates(
         neighbors.append(
             (
                 lower_neighbor,
-                __calculate_cost(node_to_calculate=lower_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=lower_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -229,7 +263,11 @@ def find_neighbors_coordinates(
             (
                 lower_right_neighbor,
                 __calculate_cost(
-                    node_to_calculate=lower_right_neighbor, costmap=costmap
+                    node_to_calculate=lower_right_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -238,7 +276,11 @@ def find_neighbors_coordinates(
 
 
 def find_neighbors_index(
-    node_index: int, costmap: PyCostmap2D, step_size: int = 1
+    node_index: int,
+    costmap: PyCostmap2D,
+    step_size: int = 1,
+    weight_distance_costs: float = 1.0,
+    weight_costmap_costs: float = 1.0,
 ) -> list[Tuple[int, float]]:
     """
     Identifies neighbor nodes inspecting the 8 adjacent neighbors and is working with index in 1d costmap array directly. Checks if neighbor is inside the map boundaries\
@@ -249,6 +291,10 @@ def find_neighbors_index(
         node (int): The node as an index in the 1d costmap array for which the neighbors should be found
         costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in which it should be searched
         step_size (int, optional): The step size to the next neighbor in pixel. Defaults to 1
+        weight_distance_costs (float, optional): The weighting how much the distance cost should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_distance_costs * distance_cost + sum(other_weighted_costs). Defaults to 1.0
+        weight_costmap_costs (float, optional): The weighting how much the costs from the costmap should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_costmap_costs * distance_cost + sum(other_weighted_costs). Defaults to 1.0
     Returns:
          list(tuple(int, float)): A list with valid neighbour nodes as a tuple with [index, step_cost] pairs
     """
@@ -265,7 +311,13 @@ def find_neighbors_index(
         neighbors.append(
             (
                 upper_neighbor,
-                __calculate_cost(node_to_calculate=upper_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=upper_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -278,7 +330,13 @@ def find_neighbors_index(
         neighbors.append(
             (
                 left_neighbor,
-                __calculate_cost(node_to_calculate=left_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=left_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -298,6 +356,9 @@ def find_neighbors_index(
                     node_to_calculate=upper_left_neighbor,
                     costmap=costmap,
                     is_diagonal=True,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -318,6 +379,9 @@ def find_neighbors_index(
                     node_to_calculate=upper_right_neighbor,
                     costmap=costmap,
                     is_diagonal=True,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -331,7 +395,13 @@ def find_neighbors_index(
         neighbors.append(
             (
                 right_neighbor,
-                __calculate_cost(node_to_calculate=right_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=right_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -351,6 +421,9 @@ def find_neighbors_index(
                     node_to_calculate=lower_left_neighbor,
                     costmap=costmap,
                     is_diagonal=True,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -364,7 +437,13 @@ def find_neighbors_index(
         neighbors.append(
             (
                 lower_neighbor,
-                __calculate_cost(node_to_calculate=lower_neighbor, costmap=costmap),
+                __calculate_cost(
+                    node_to_calculate=lower_neighbor,
+                    costmap=costmap,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
+                ),
             )
         )
 
@@ -384,6 +463,9 @@ def find_neighbors_index(
                     node_to_calculate=lower_right_neighbor,
                     costmap=costmap,
                     is_diagonal=True,
+                    step_size=step_size,
+                    weight_costmap_costs=weight_costmap_costs,
+                    weight_distance_costs=weight_distance_costs,
                 ),
             )
         )
@@ -464,6 +546,9 @@ def __check_constrains(
 def __calculate_cost(
     node_to_calculate: int | Tuple[int, int],
     costmap: PyCostmap2D,
+    step_size: int,
+    weight_distance_costs: float,
+    weight_costmap_costs: float,
     is_diagonal: bool = False,
 ) -> float:
     """
@@ -473,33 +558,45 @@ def __calculate_cost(
         node_to_calculate(tuple(int, int) or int): The node for which the constraints should be checked in either coordinate or index notation
         costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap from which the costs should be taken
         is_diagonal (bool) = If the node is a diagonal neighbor
+        step_size (int: The step size to the next neighbor in pixel
+        weight_distance_costs (float, optional): The weighting how much the distance cost should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_distance_costs * distance_cost + sum(other_weighted_costs)
+        weight_costmap_costs (float, optional): The weighting how much the costs from the costmap should be added to the total cost of the neighbor \
+                                                                            i.e. total_cost=weight_costmap_costs * distance_cost + sum(other_weighted_costs)
     Returns:
          bool: If constraints are fulfilled
     """
     # length of diagonal = length of one side by the square root of 2 (1.41421)
-    diagonal_step_cost: float = costmap.getResolution() * 1.41421
+    diagonal_step_cost: float = step_size * 1.41421 * weight_distance_costs
+    step_cost = step_size * weight_distance_costs
     if type(node_to_calculate) == int:
         if is_diagonal:
-            step_cost: float = diagonal_step_cost + float(
-                costmap.getCostIdx(node_to_calculate)
+            cost: float = (
+                diagonal_step_cost
+                + float(costmap.getCostIdx(node_to_calculate)) * weight_costmap_costs
             )
         else:
-            step_cost: float = costmap.getResolution() + float(
-                costmap.getCostIdx(node_to_calculate)
+            cost: float = (
+                step_cost
+                + float(costmap.getCostIdx(node_to_calculate)) * weight_costmap_costs
             )
     elif type(node_to_calculate) == Tuple[int, int]:
         if is_diagonal:
-            step_cost: float = diagonal_step_cost + float(
-                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1])
+            cost: float = (
+                diagonal_step_cost
+                + float(costmap.getCostXY(node_to_calculate[0], node_to_calculate[1]))
+                * weight_costmap_costs
             )
         else:
-            step_cost: float = costmap.getResolution() + float(
-                costmap.getCostXY(node_to_calculate[0], node_to_calculate[1])
+            cost: float = (
+                step_cost
+                + float(costmap.getCostXY(node_to_calculate[0], node_to_calculate[1]))
+                * weight_costmap_costs
             )
     else:
-        step_cost = 0.0
+        cost = math.inf
 
-    return step_cost
+    return cost
 
 
 def euclidian_distance_map_domain(

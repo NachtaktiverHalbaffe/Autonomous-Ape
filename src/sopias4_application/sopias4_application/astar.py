@@ -114,7 +114,11 @@ class Astar(PlannerPyPlugin):
             # --- Process neighbors of nodes ---
             # Get neighbors
             neighbors: list[Tuple[int, float]] = costmap_tools.find_neighbors_index(
-                current_index, costmap, step_size=1
+                current_index,
+                costmap,
+                step_size=1,
+                weight_distance_costs=1.0,
+                weight_costmap_costs=0.75,
             )
             for neighbor_index, cost in neighbors:
                 # Skip node if already processed
