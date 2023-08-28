@@ -11,6 +11,7 @@ Welcome to Sopias4 Framework's documentation!
    :caption: Setup
 
    installation_link 
+   troubleshooting
 
 API documentation
 =================
