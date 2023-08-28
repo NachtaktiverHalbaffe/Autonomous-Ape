@@ -1025,7 +1025,7 @@ class GrapficalNode(Node):
             client=self.__rm_sclient_drive,
             service_req=request,
             calling_node=self.service_client_node,
-            timeout_sec=5,
+            timeout_sec=2,
         )
 
         if response is None:

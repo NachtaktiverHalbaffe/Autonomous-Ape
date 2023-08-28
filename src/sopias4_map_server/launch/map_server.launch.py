@@ -44,7 +44,7 @@ def generate_launch_description():
         param_rewrites={},
         convert_types=True,
     )
-    lifecycle_nodes = ["map_server"]
+    lifecycle_nodes = ["map_server", "map_saver"]
 
     remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
@@ -111,20 +111,31 @@ def generate_launch_description():
         arguments=["--ros-args", "--log-level", log_level],
         remappings=remappings,
     )
-    map_saver = GroupAction(
-        [
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    PathJoinSubstitution(
-                        [
-                            FindPackageShare("nav2_map_server"),
-                            "launch",
-                            "map_saver_server.launch.py",
-                        ]
-                    )
-                ),
-            ),
-        ]
+    # map_saver = GroupAction(
+    #     [
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource(
+    #                 PathJoinSubstitution(
+    #                     [
+    #                         FindPackageShare("nav2_map_server"),
+    #                         "launch",
+    #                         "map_saver_server.launch.py",
+    #                     ]
+    #                 )
+    #             ),
+    #         ),
+    #     ]
+    # )
+    map_saver = Node(
+        package="nav2_map_server",
+        executable="map_saver_server",
+        output="screen",
+        emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+        parameters=[
+            {"save_map_timeout": 2.0},
+            {"free_thresh_default": 0.25},
+            {"occupied_thresh_default": 0.65},
+        ],
     )
 
     lifecycle_manager = Node(

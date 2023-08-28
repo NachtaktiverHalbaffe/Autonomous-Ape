@@ -19,7 +19,7 @@ class PlannerPyPlugin(Node):
     utilizes the planner plugin bridge so the planner can be implemented in python. This class handles all the service
     stuff under the hood, so the developer only has to implement the `generate_path()` method.
 
-    The `generate_path()` method gives the start and goal pose and the current costmap. The method should then return the
+    The `generate_path()` method gives the start & goal pose and the current costmap. The method should then return the
     generated path as an list of x,y-coordinates in the costmap. For this purpose, a suitable path finding algorithm should be implemented
     there.
 
@@ -30,6 +30,7 @@ class PlannerPyPlugin(Node):
         costmap (nav2_simple_commander.costmap_2d.PyCostmap2D): The current costmap which contains the costs of each region. Low costs means\
                                                                                                                     free regions and higher costs that there may be an obstacle or other reasons why \
                                                                                                                     the robot should avoid this region
+        goal_tolerance (float, optional): The tolerance distance in meters to the goal under which the algorithm considers its goal reached. Defaults to 0.2
     """
 
     def __init__(
@@ -57,7 +58,9 @@ class PlannerPyPlugin(Node):
         necessary to work with the PlannerBridge. The path finding algorithm itself should be implemented
         in `generate_path()`
         """
-        self.get_logger().info("Got request to generate a global path from the Planner")
+        self.get_logger().debug(
+            "Got request to generate a global path from the Planner"
+        )
         start = costmap_tools.pose_2_costmap(
             request.start, PyCostmap2D(request.costmap)
         )
@@ -69,7 +72,7 @@ class PlannerPyPlugin(Node):
         )
 
         pixel_path: list[Tuple[int, int]] = self.generate_path(
-            start=start, goal=goal, goal_tolerance=0.2
+            start=start, goal=goal, costmap=self.costmap, goal_tolerance=0.2
         )
 
         self.get_logger().debug(
@@ -92,7 +95,11 @@ class PlannerPyPlugin(Node):
 
     @abc.abstractmethod
     def generate_path(
-        self, start: Tuple[int, int], goal: Tuple[int, int], goal_tolerance: float = 0.2
+        self,
+        start: Tuple[int, int],
+        goal: Tuple[int, int],
+        costmap: PyCostmap2D,
+        goal_tolerance: float = 0.2,
     ) -> list[Tuple[int, int]]:
         """
         Here the path finding algorithm should be implemented. Some tips for implementing the algorithm:
@@ -100,12 +107,12 @@ class PlannerPyPlugin(Node):
         2. Be careful with loops when iterating through datasets. When applying first tip, there are often ways to directly update, \
             searching or updating values in datasets instead of iterating through them
         3. The module costmap_tools from sopias4_framework.tools.ros2 package has useful tools for interacting with the given costmap. \
-            Remember that the costmap is stored in self.costmap of this class
 
         Args:
             start (tuple(int, int)): The position from which the path should start as an x,y-coordinate in the costmap
             goal (tuple(int, int)): The position in which the path should end as an x,y-coordinate in the costmap
-            goal_tolerance (float): The tolerance distance in meters to the goal under which the algorithm considers its goal reached
+            costmap (nav2_simple_commander.costmap_2d.PyCostmap2D): The global costmap in which the path should be computed
+            goal_tolerance (float, optional): The tolerance distance in meters to the goal under which the algorithm considers its goal reached. Defaults to 0.2
 
         Returns:
             list(tuple(int,int)): The generated path as a list of x,y-coordinates in the costmap

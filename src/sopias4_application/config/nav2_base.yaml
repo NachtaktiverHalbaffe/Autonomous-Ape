@@ -109,7 +109,7 @@ controller_server:
       ##############
       # plugin: teb_local_planner::TebLocalPlannerROS
       primary_controller: teb_local_planner::TebLocalPlannerROS
-      # map_frame: "odom"
+      map_frame: "odom"
       # odom_topic: "odom"
 
       teb_autosize: 1.0

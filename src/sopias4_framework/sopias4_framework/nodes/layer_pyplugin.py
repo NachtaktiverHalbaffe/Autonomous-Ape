@@ -44,7 +44,7 @@ class LayerPyPlugin(Node):
         """
         Callback function which executes when the update_costs service is called
         """
-        self.get_logger().info(
+        self.get_logger().debug(
             "Got request to update costs in robot layer",
             throttle_duration_sec=2,
         )
