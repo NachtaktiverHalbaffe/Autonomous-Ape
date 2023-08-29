@@ -100,6 +100,8 @@ ament_python_install_package(${PROJECT_NAME})
 # Install executables
 install(PROGRAMS
   sopias4_framework/nodes/robot_manager.py
+  sopias4_framework/nodes/path_layer.py
+  sopias4_framework/nodes/robot_layer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -8,6 +8,11 @@ endif()
 #######################################
 # ----------- Find dependencies --------------
 #######################################
+# Declare dependecies here
+find_package(sopias4_msgs REQUIRED)
+find_package(sopias4_framework REQUIRED)
+
+# Include dependecies in compiled plugins
 # ------------------- C++ ------------------------
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -27,16 +32,6 @@ find_package(rclpy REQUIRED)
 ######################################
 # ------------------- C++ ------------------------
 include_directories(include)
-# Create exectuables. For this purpose, add 
-# following line for each node:
-# add_executable(cpp_exe src/<node file>)
-# ament_target_dependencies(cpp_exe rclcpp)
-# Install C++ executables. For this purpose, add 
-# following line for each node:
-# install(TARGETS
-#     cpp_exe
-#     DESTINATION lib/${PROJECT_NAME}
-# )
 
 #------------------ Python ---------------------
 # Install Python modules
@@ -45,8 +40,6 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   sopias4_application/gui.py
   sopias4_application/astar.py
-  sopias4_application/path_layer.py
-  sopias4_application/robot_layer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

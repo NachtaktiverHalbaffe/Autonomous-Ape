@@ -16,6 +16,11 @@
   <!-- Python dependencies -->
   <depend>rclpy</depend>
 
+  <!-- Ros2 packages -->
+  <depend>sopias4_msgs</depend>
+  <depend>sopias4_framework</depend>
+  <depend>teb_local_planner</depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
