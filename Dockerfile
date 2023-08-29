@@ -1,4 +1,6 @@
-FROM ros:humble
+ARG ROS_DISTRO=humble
+
+FROM ros:${ROS_DISTRO}
 ARG USERNAME= ros
 ARG WORKSPACE
 ARG USER_UID=1000
@@ -17,37 +19,56 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # --------------------- Installing packages & Dependencies ------------------------- 
 ######################################################################
 
-# Install apps etc. outside ros dependencies
+# Install general apps, tools, dependencies etc.
 RUN sudo apt-get update && apt-get upgrade -y --with-new-pkgs \ 
 	&& sudo apt-get install -y\
-	wget python3-pip \
-	doxygen figlet qttools5-dev-tools qttools5-dev python3-mock \ 
-	libgl1-mesa-glx libgl1-mesa-dri mesa-utils 
+	wget\ 
+	python3-pip \
+	doxygen\ 
+	figlet\
+	qttools5-dev-tools\
+	qttools5-dev\
+	python3-mock \ 
+	libgl1-mesa-glx \
+	libgl1-mesa-dri \
+	mesa-utils 
 
-# Install ros dependencies 
+# Install ROS2 dependencies 
 ARG RTI_NC_LICENSE_ACCEPTED=yes
 RUN apt-get update && apt-get install -y --no-install-recommends\
-	ros-humble-rmw-cyclonedds-cpp ros-humble-rmw-fastrtps-cpp \
-	ros-humble-rmw-connextdds 
+	ros-${ROS_DISTRO}-rmw-cyclonedds-cpp\
+	ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
+	ros-${ROS_DISTRO}-rmw-connextdds 
 
-# Install turtlebot4 dependencies
+# Install Turtlebot4 dependencies
 RUN sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
 	&& wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add - \
 	&& apt-get update  && apt-get install -y \
-	ros-humble-turtlebot4-description \
-	ros-humble-turtlebot4-msgs \ 
-	ros-humble-turtlebot4-navigation \ 
-	ros-humble-teleop-twist-keyboard \
-	ros-humble-turtlebot4-simulator ignition-fortress \
-	ros-dev-tools gazebo 
+	ros-${ROS_DISTRO}-turtlebot4-description \
+	ros-${ROS_DISTRO}-turtlebot4-msgs \ 
+	ros-${ROS_DISTRO}-turtlebot4-navigation \ 
+	ros-${ROS_DISTRO}-teleop-twist-keyboard \
+	ros-${ROS_DISTRO}-turtlebot4-simulator\ 
+	ignition-fortress \
+	gazebo \
+	ros-dev-tools 
 
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 
 
-# Install pip3 deps
+# Install Pip3 deps from requirements.txt file
 COPY ./requirements.txt /tmp/pip-tmp/requirements.txt
 RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 	&& rm -rf /tmp/pip-tmp
+
+# Copy workspace into container
+WORKDIR ${WORKSPACE}/src
+COPY ./ ./src
+# Install ros dependencies
+WORKDIR ${WORKSPACE}
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
+	&& apt-get update -y \
+	&& rosdep install --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -y 
 
 ######################################################################
 # ------------------------------- Setup Environment ---------------------------------- 
@@ -55,13 +76,12 @@ RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 
 # Setup right RMW implementation 
 ENV RMW_IMPLEMENTATION rmw_fastrtps_cpp
-# ENV FASTRTPS_DEFAULT_PROFILES_FILE home/ws/.devcontainer/fastrtps-profile.xml
 # ENV RMW_IMPLEMENTATION rmw_cyclonedds_cpp
-ENV RCYCLONEDDS_URI home/ws/.devcontainer/cyclonedds_pc.xml
+ENV RCYCLONEDDS_URI ${WORKSPACE}/cyclonedds_pc.xml
 RUN echo 'net.core.rmem_max=2147483647' >> /etc/sysctl.d/10-cyclone-max.conf
 
 # Setup directory where log files are stored
-ENV ROS_LOG_DIR /home/ws/log
+ENV ROS_LOG_DIR ${WORKSPACE}/log
 
 # For nvidia cards working right in docker
 ENV NVIDIA_VISIBLE_DEVICES \
@@ -78,7 +98,7 @@ ENV SHELL /bin/bash
 # Happy Easter
 RUN echo 'figlet "Linux is great" ' >> /home/${USERNAME}/.bashrc 
 # Automatic sourcing of ROS2
-RUN echo 'source /opt/ros/humble/setup.bash' >>  /home/${USERNAME}/.bashrc
+RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >>  /home/${USERNAME}/.bashrc
 RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
 # Setup some aliases
 RUN echo 'alias sopias4-application="ros2 run sopias4_application gui.py"' >>  /home/${USERNAME}/.bashrc
