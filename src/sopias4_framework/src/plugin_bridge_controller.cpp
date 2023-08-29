@@ -5,6 +5,7 @@
 #include "nav2_core/exceptions.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_util/geometry_utils.hpp"
+#include "sopias4_framework/msgs_utils.hpp"
 
 #include "sopias4_framework/plugin_bridge_controller.hpp"
 #include "sopias4_msgs/srv/compute_velocity_commands.hpp"
@@ -58,27 +59,16 @@ namespace plugin_bridges
     clock_ = node->get_clock();
 
     nav2_util::declare_parameter_if_not_declared(
-        node, name_ + ".desired_linear_vel", rclcpp::ParameterValue(0.2));
-    nav2_util::declare_parameter_if_not_declared(
-        node, name_ + ".lookahead_dist",
-        rclcpp::ParameterValue(0.4));
-    nav2_util::declare_parameter_if_not_declared(
-        node, name_ + ".max_angular_vel", rclcpp::ParameterValue(1.0));
-    nav2_util::declare_parameter_if_not_declared(
         node, name_ + ".transform_tolerance", rclcpp::ParameterValue(0.1));
     nav2_util::declare_parameter_if_not_declared(node, name_ + "plugin_name", rclcpp::ParameterValue("local_layer"));
-
+    
     node->get_parameter(name_ + "plugin_name", plugin_name_);
-    node->get_parameter(name_ + ".desired_linear_vel", desired_linear_vel_);
-    node->get_parameter(name_ + ".lookahead_dist", lookahead_dist_);
-    node->get_parameter(name_ + ".max_angular_vel", max_angular_vel_);
     double transform_tolerance;
     node->get_parameter(name_ + ".transform_tolerance", transform_tolerance);
     transform_tolerance_ = rclcpp::Duration::from_seconds(transform_tolerance);
 
     // Service client node
     service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
-
     global_pub_ = node->create_publisher<nav_msgs::msg::Path>("received_global_plan", 1);
   }
 
@@ -97,8 +87,8 @@ namespace plugin_bridges
         logger_,
         "Activating controller: %s of type plugin_bridges::ControllerBridge\"  %s",
         name_.c_str());
-    global_pub_->on_activate();
 
+    global_pub_->on_activate();
     client_compute_vel_ = service_node_->create_client<sopias4_msgs::srv::ComputeVelocityCommands>(plugin_name_ + "/compute_velocity_commands");
   }
 
@@ -120,7 +110,7 @@ namespace plugin_bridges
     // Find the first pose which is at a distance greater than the specified lookahed distance
     auto goal_pose_it = std::find_if(
         transformed_plan.poses.begin(), transformed_plan.poses.end(), [&](const auto &ps)
-        { return hypot(ps.pose.position.x, ps.pose.position.y) >= lookahead_dist_; });
+        { return hypot(ps.pose.position.x, ps.pose.position.y) >= 0.4; });
 
     // If the last pose is still within lookahed distance, take the last pose
     if (goal_pose_it == transformed_plan.poses.end())
@@ -133,6 +123,7 @@ namespace plugin_bridges
     request->current_pose = pose;
     request->goal_pose = goal_pose;
     request->current_vel_cmd = velocity;
+    request->local_costmap = sopias4_framework::tools::costmap_2_costmap_msg(costmap_ros_->getCostmap());
 
     auto future = client_compute_vel_->async_send_request(request);
     auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
@@ -158,7 +149,7 @@ namespace plugin_bridges
   ControllerBridge::transformGlobalPlan(
       const geometry_msgs::msg::PoseStamped &pose)
   {
-    // Original mplementation taken fron nav2_dwb_controller
+    // Original implementation taken from nav2_dwb_controller
 
     if (global_plan_.poses.empty())
     {

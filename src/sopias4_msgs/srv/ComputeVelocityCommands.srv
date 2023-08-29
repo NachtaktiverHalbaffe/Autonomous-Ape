@@ -2,6 +2,7 @@
 geometry_msgs/PoseStamped current_pose
 geometry_msgs/Pose goal_pose
 geometry_msgs/Twist current_vel_cmd
+nav_msgs/OccupancyGrid local_costmap
 ---
 # Response
 geometry_msgs/TwistStamped cmd_vel
