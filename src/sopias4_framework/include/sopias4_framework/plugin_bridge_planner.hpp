@@ -32,8 +32,8 @@ namespace plugin_bridges
                         ros__parameters:
                             plugins: ["GridBased"]
                             GridBased:
-                            plugin: "plugin_bridges/PlannerBridge"
-                            plugin_name: "Astar"
+                                plugin: "plugin_bridges/PlannerBridge"
+                                plugin_name: "Astar"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/create_plan (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)

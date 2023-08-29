@@ -4,6 +4,14 @@ sopias4\_framework.nodes package
 Submodules
 ----------
 
+sopias4\_framework.nodes.controller\_pyplugin module
+----------------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.controller_pyplugin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.nodes.gui\_node module
 -----------------------------------------
 

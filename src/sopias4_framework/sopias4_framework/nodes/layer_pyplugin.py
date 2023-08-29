@@ -22,7 +22,18 @@ class LayerPyPlugin(Node):
     the costmap itself which should be updated. The method should then return the updated costmap
 
     Also, the plugin bridge itself must be configurated in the Navigation2 Stack. For this purpose, make shure to configure the LayerBridge
-    as a layer plugin and give it the same plugin name as this class.
+    as a layer plugin and give it the same plugin name as this class. The configuration inside the yaml-configuration should look something like that:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        local_costmap:
+            local_costmap:
+                ros__parameters:
+                    plugins: [robot_layer]
+                    robot_layer:
+                        plugin: plugin_bridges/LayerPlugin
+                        plugin_name: "robot_layer"
     """
 
     def __init__(

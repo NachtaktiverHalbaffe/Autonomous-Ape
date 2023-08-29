@@ -24,7 +24,17 @@ class PlannerPyPlugin(Node):
     there.
 
     Also, the plugin bridge itself must be configurated in the Navigation2 Stack. For this purpose, make shure to configure the PlannerBridge
-    as a planner plugin and give it the same plugin name as this class
+    as a planner plugin and give it the same plugin name as this class. The configuration inside the yaml-configuration should look something like that:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+            planner_server:
+                ros__parameters:
+                    plugins: ["GridBased"]
+                    GridBased:
+                        plugin: "plugin_bridges/PlannerBridge"
+                        plugin_name: "Astar"
 
     Attributes:
         costmap (nav2_simple_commander.costmap_2d.PyCostmap2D): The current costmap which contains the costs of each region. Low costs means\

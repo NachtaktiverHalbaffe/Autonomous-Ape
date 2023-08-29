@@ -132,18 +132,6 @@ namespace plugin_bridges
         rclcpp::Clock::SharedPtr clock_;
 
         /**
-         * The linear velocity which is aimed to reach
-         */
-        double desired_linear_vel_;
-        /**
-         * The maximum rotating velocity the robot is allowed to take
-         */
-        double max_angular_vel_;
-        /**
-         * How far to look ahead of the planned path
-         */
-        double lookahead_dist_;
-        /**
          * Name of the plugin bridge. Needed to configure the service name of the bridge correctly.
          * Should match with the bridge implementation
          */

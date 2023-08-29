@@ -21,7 +21,7 @@ class Astar(PlannerPyPlugin):
         ) if namespace is None else super().__init__(
             node_name="planner_astar", plugin_name="astar", namespace=namespace
         )
-
+        self.enable_caching()
         self.get_logger().info("Started node")
         self.get_logger().set_level(30)
 
