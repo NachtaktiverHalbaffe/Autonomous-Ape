@@ -7,14 +7,14 @@ import numpy as np
 import rclpy
 from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
-from nav_msgs.msg import Path
+from nav_msgs.msg import OccupancyGrid, Path
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from scipy import ndimage
 from skimage import draw
 from sopias4_framework.nodes.layer_pyplugin import LayerPyPlugin
 from sopias4_framework.tools.ros2 import costmap_tools
 
-from sopias4_msgs.msg import RobotStates
+from sopias4_msgs.msg import Robot, RobotStates
 
 
 class PathLayer(LayerPyPlugin):
@@ -40,6 +40,7 @@ class PathLayer(LayerPyPlugin):
         self.ROBOT_RADIUS: float = 0.25
 
         self.robot_paths: list[Path] = list()
+        self.costmap: PyCostmap2D = PyCostmap2D(OccupancyGrid())
 
         # Create own sub node for service clients so they can spin independently
         self.__sub_robot_states = self.create_subscription(
@@ -78,6 +79,7 @@ class PathLayer(LayerPyPlugin):
             "Path layer is inserting planned paths of other robots as moderate costs",
             throttle_duration_sec=2,
         )
+        self.costmap = PyCostmap2D(costmap.costmap)
         costmap.costmap.fill(np.uint8(0))
         # Convert 1d array costmap data to a 2d grid because it makes things easier and copy it into a new numpy array
         costmap_grid = costmap_tools.costmap_2_grid(costmap)
@@ -142,8 +144,24 @@ class PathLayer(LayerPyPlugin):
 
         # Add new position of robots to list
         for robot in msg.robot_states:
-            if robot.name_space != self.get_namespace():
-                self.robot_paths.append(robot.nav_path)
+            # Check if robotstate is the robot itself
+            if robot.name_space == self.get_namespace():
+                continue
+
+            # Check if robot already finished driving the route
+            last_node_pose = costmap_tools.pose_2_costmap(
+                robot.nav_path.poses[-1], self.costmap
+            )
+            current_pose = costmap_tools.pose_2_costmap(robot.pose, self.costmap)
+            if (
+                costmap_tools.euclidian_distance_map_domain(
+                    last_node_pose, current_pose, self.costmap
+                )
+                <= 0.2
+            ):
+                continue
+
+            self.robot_paths.append(robot.nav_path)
 
 
 def main(args=None):

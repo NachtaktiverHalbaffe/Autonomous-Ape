@@ -12,10 +12,10 @@ from PyQt5.QtWidgets import QApplication
 from rcl_interfaces.msg import Log
 from sensor_msgs.msg import BatteryState
 from sopias4_application.astar import Astar
-from sopias4_application.path_layer import PathLayer
-from sopias4_application.robot_layer import RobotLayer
 from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
+from sopias4_framework.nodes.path_layer import PathLayer
+from sopias4_framework.nodes.robot_layer import RobotLayer
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
 from sopias4_framework.tools.gui.label_subscription_handle import (
     LabelSubscriptionHandler,
@@ -259,17 +259,17 @@ class GUI(GUINode):
             ament_index_python.get_package_share_directory("sopias4_application"),
             "config",
         )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.node.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "nav2_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "nav2.yaml",
-            ),
-        )
+        # yaml_tools.insert_namespace_into_yaml_config(
+        #     namespace=self.node.get_namespace(),
+        #     path=os.path.join(
+        #         base_path,
+        #         "nav2_base.yaml",
+        #     ),
+        #     output_path=os.path.join(
+        #         base_path,
+        #         "nav2.yaml",
+        #     ),
+        # )
 
         self.__astar_node = Astar(namespace=self.node.get_namespace())
         self.__robot_layer_node = RobotLayer(namespace=self.node.get_namespace())

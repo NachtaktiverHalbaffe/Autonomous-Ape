@@ -299,17 +299,17 @@ class RobotManager(Node):
         base_path = os.path.join(
             get_package_share_directory("sopias4_application"), "config"
         )
-        yaml_tools.insert_namespace_into_yaml_config(
-            namespace=self.get_namespace(),
-            path=os.path.join(
-                base_path,
-                "nav2_base.yaml",
-            ),
-            output_path=os.path.join(
-                base_path,
-                "nav2.yaml",
-            ),
-        )
+        # yaml_tools.insert_namespace_into_yaml_config(
+        #     namespace=self.get_namespace(),
+        #     path=os.path.join(
+        #         base_path,
+        #         "nav2_base.yaml",
+        #     ),
+        #     output_path=os.path.join(
+        #         base_path,
+        #         "nav2.yaml",
+        #     ),
+        # )
 
         self.__nav2_stack_launch_service.add_launchfile_arguments(
             f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
