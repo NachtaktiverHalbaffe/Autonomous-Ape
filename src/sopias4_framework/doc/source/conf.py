@@ -44,7 +44,7 @@ extensions = [
     "sphinx.ext.todo",
 ]
 autodoc_member_order = "bysource"
-# pygments_style = "sphinx"
+pygments_style = "sphinx"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -76,7 +76,7 @@ html_theme_options = {
     "titles_only": False,
 }
 html_static_path = ["_static"]
-hmtl_css_files = ["hide_toctree_caption.css"]
+# hmtl_css_files = ["hide_toctree_caption.css"]
 html_logo = "assets/ias_logo.jpeg"
 # html_favicon = 'images/nav2_48x48.png'
 

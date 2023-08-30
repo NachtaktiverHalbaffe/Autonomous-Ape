@@ -3,10 +3,11 @@ import numpy as np
 import rclpy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from sopias4_framework.nodes.layer_pyplugin import LayerPyPlugin
 from sopias4_framework.tools.ros2 import costmap_tools
 
-from sopias4_msgs.msg import RobotStates
+from sopias4_msgs.msg import Robot, RobotStates
 
 
 class RobotLayer(LayerPyPlugin):
@@ -19,22 +20,29 @@ class RobotLayer(LayerPyPlugin):
     """
 
     def __init__(self, namespace: str | None = None) -> None:
-        if namespace is None:
-            super().__init__(node_name="robot_layer_node", plugin_name="robot_layer")
-        else:
-            super().__init__(
-                node_name="robot_layer_node",
-                plugin_name="robot_layer",
-                namespace=namespace,
-            )
-        self.COST_ROBOTS: np.uint8 = np.uint8(255)
+        super().__init__(
+            node_name="robot_layer_node", plugin_name="robot_layer"
+        ) if namespace is None else super().__init__(
+            node_name="robot_layer_node",
+            plugin_name="robot_layer",
+            namespace=namespace,
+        )
+
+        self.COST_ROBOTS: np.uint8 = np.uint8(254)
         self.ROBOT_RADIUS: float = 0.20
 
-        self.robot_positions: list[PoseWithCovarianceStamped]
+        self.robot_positions: list[PoseWithCovarianceStamped] = list()
 
         # Create own sub node for service clients so they can spin independently
         self.__sub_robot_states = self.create_subscription(
-            RobotStates, "robot_states", self.__update_robot_states, 10
+            RobotStates,
+            "/robot_states",
+            self.__update_robot_states,
+            QoSProfile(
+                reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                durability=QoSDurabilityPolicy.VOLATILE,
+                depth=5,
+            ),
         )
         self.get_logger().info("Started node")
 
@@ -58,15 +66,19 @@ class RobotLayer(LayerPyPlugin):
         # TODO If neccessary only update within the specified boundary window
         # Set cost of all pixels in costmap to zero, because only the costs calculated by this layer should be included in the map.
         # In the plugin bridge, all layers get combined so the cleared data doesn't get lost if it is up to date
-        costmap.costmap.fill(0)
+        self.get_logger().debug(
+            "Robot layer is inserting robot positions as lethal obstacles",
+            throttle_duration_sec=2,
+        )
+        costmap.costmap.fill(np.uint8(0))
 
         # Iterate through all known robot positions
         for position in self.robot_positions:
             central_point = costmap_tools.pose_2_costmap(position.pose.pose, costmap)
             radius_pixel: int = int(self.ROBOT_RADIUS * (1 / costmap.getResolution()))
+
             # The footprint is a circle => Only check if pixel in one quarter is within robot radius and
             # mirror setting costs to all 4 quadrants if pixel is within robot radius
-
             for x_offset in range(radius_pixel + 1):
                 for y_offset in range(radius_pixel + 1):
                     # Check upper right quadrant
@@ -112,10 +124,10 @@ class RobotLayer(LayerPyPlugin):
         """
         # Clear last known positions
         self.robot_positions.clear()
-
         # Add new position of robots to list
         for robot in msg.robot_states:
-            self.robot_positions.append(robot.pose)
+            if robot.name_space != self.get_namespace():
+                self.robot_positions.append(robot.pose)
 
 
 def main(args=None):

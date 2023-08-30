@@ -6,3 +6,5 @@ string ipv4
 geometry_msgs/PoseWithCovarianceStamped pose
 # The current planned global path of the robot. The robots sends them to the multi robot coordinator when planned, so path data could be a little bit old
 nav_msgs/Path nav_path
+# If the robot is currently navigatinf
+bool is_navigating

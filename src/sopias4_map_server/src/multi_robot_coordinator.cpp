@@ -6,6 +6,7 @@
 #include "rmw/validate_namespace.h"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "nav_msgs/msg/path.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "sopias4_msgs/msg/robot.hpp"
 #include "sopias4_msgs/msg/namespaces.hpp"
 #include "sopias4_msgs/msg/robot_states.hpp"
@@ -40,6 +41,7 @@ private:
 	std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr> pose_slam_subscribers_;
 	std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr> pose_amcl_subscribers_;
 	std::map<std::string, rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr> plan_subscribers_;
+	std::map<std::string, rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr> nav_state_subscribers_;
 	// logger
 	rclcpp::Logger logger = this->get_logger();
 	// logger.set_level(rclcpp::Logger::Level::DEBUG);
@@ -131,6 +133,7 @@ private:
 		// Use a callback factory to pass a second argument to callback function (known bug in ros2, so this workaround is needed)
 		std::function<void(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)> callback_fcn = std::bind(&MultiRobotCoordinator::set_pose_callback, this, std::placeholders::_1, request->name_space);
 		std::function<void(nav_msgs::msg::Path::SharedPtr msg)> callback_fcn_path = std::bind(&MultiRobotCoordinator::set_robot_path_sub_callback, this, std::placeholders::_1, request->name_space);
+		std::function<void(std_msgs::msg::Bool::SharedPtr msg)> callback_fcn_nav_state = std::bind(&MultiRobotCoordinator::nav_state_sub_callback, this, std::placeholders::_1, request->name_space);
 
 		std::string topic_name = request->name_space + std::string("/amcl_pose");
 		pose_amcl_subscribers_[request -> name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn);
@@ -138,6 +141,8 @@ private:
 		pose_slam_subscribers_[request -> name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn);
 		topic_name = request->name_space + std::string("/plan");
 		plan_subscribers_[request -> name_space]= this->create_subscription<nav_msgs::msg::Path>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_path);
+		topic_name = request->name_space + std::string("/is_navigating");
+		nav_state_subscribers_[request -> name_space]= this->create_subscription<std_msgs::msg::Bool>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_nav_state);
 
 		RCLCPP_DEBUG(logger, "Added subscriptions for namespace %s", request->name_space.c_str());
 
@@ -209,7 +214,7 @@ private:
 			{
 				element->nav_path = *path;
 				publish_robot_states();
-				RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
+				RCLCPP_DEBUG(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
 				return;
 			}
 		}
@@ -222,6 +227,20 @@ private:
 			if (element->name_space == name_space)
 			{
 				element->pose = *pose;
+				// Publish updated state of robots
+				publish_robot_states();
+				return;
+			}
+		}
+	}
+
+	void nav_state_sub_callback(const std_msgs::msg::Bool::SharedPtr is_navigating, const std::string name_space)
+	{
+		for (auto element = robot_states.begin(); element != robot_states.end(); ++element)
+		{
+			if (element->name_space == name_space)
+			{
+				element->is_navigating = is_navigating->data;
 				// Publish updated state of robots
 				publish_robot_states();
 				return;

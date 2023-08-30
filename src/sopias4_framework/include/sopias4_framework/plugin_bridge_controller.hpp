@@ -14,7 +14,6 @@
 
 namespace plugin_bridges
 {
-    // TODO Update configuration documentation
     /**
      * @class ControllerBridge
      * @brief A plugin bridge that allows to write Nav2 controller plugins in another programming language than C++
@@ -26,12 +25,12 @@ namespace plugin_bridges
      * If you plan to use this Plugin bridge, then you have to do the following steps:
      *      1. Configure your Navigation 2 configuration to use this bridge as an costmap layer:        
      *            \code{.yaml}
-     *             planner_server:
+                        controller_server:
                         ros__parameters:
-                            plugins: ["GridBased"]
-                            GridBased:
-                            plugin: "plugin_bridges/PlannerBridge"
-                            plugin_name: "Astar"
+                            controller_plugins: ["FollowPath"]
+                            FollowPath:
+                            plugin:  "plugin_bridges/ControllerBridge"
+                            plugin_name: "Example"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/compute_velocity_commands (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)
@@ -132,18 +131,6 @@ namespace plugin_bridges
          */
         rclcpp::Clock::SharedPtr clock_;
 
-        /**
-         * The linear velocity which is aimed to reach
-         */
-        double desired_linear_vel_;
-        /**
-         * The maximum rotating velocity the robot is allowed to take
-         */
-        double max_angular_vel_;
-        /**
-         * How far to look ahead of the planned path
-         */
-        double lookahead_dist_;
         /**
          * Name of the plugin bridge. Needed to configure the service name of the bridge correctly.
          * Should match with the bridge implementation

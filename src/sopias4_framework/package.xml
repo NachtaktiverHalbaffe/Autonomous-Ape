@@ -40,7 +40,7 @@
   <depend>nav2_costmap_2d</depend>
   <depend>nav2_core</depend>
   <depend>pluginlib</depend>
-  <!-- <depend>teb_local_planner</depend> -->
+  <depend>sopias4_msgs</depend>
 
   <!-- Message, service and action definition generators -->
   <build_depend>rosidl_default_generators</build_depend>
@@ -52,6 +52,8 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <costmap_2d plugin="${prefix}/plugin_bridge_layer.xml" />
+    <nav2_core plugin="${prefix}/plugin_bridge_planner.xml" />
   </export>
 
 

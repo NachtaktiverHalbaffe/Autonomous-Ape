@@ -4,3 +4,6 @@ ruamel.yaml==0.17.32
 ruamel.yaml.clib==0.2.7
 scikit-image==0.21.0
 myst==1.0.4
+paramiko==3.3.1
+# Downgraded version of sphinx because after theat were breaking changes introduced
+sphinx==7.1.2

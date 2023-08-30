@@ -167,7 +167,7 @@
        <attribute name="title">
         <string>Monitoring</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
@@ -228,6 +228,30 @@
               <string>Current navigation goal</string>
              </property>
             </column>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>**Unregister namespace:**</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_unregister"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_unregister">
+            <property name="text">
+             <string>Unregister</string>
+            </property>
            </widget>
           </item>
          </layout>

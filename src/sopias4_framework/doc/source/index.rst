@@ -11,11 +11,12 @@ Welcome to Sopias4 Framework's documentation!
    :caption: Setup
 
    installation_link 
+   troubleshooting
 
 API documentation
 =================
 This ROS2 package contains parts in Python and in C++. Although sharing the same ROS2 principles, they differ in their 
-project and as a consequence in their documentation structure. For this reason the documentation is split into the docs 
+project structure and as a consequence in their documentation structure. For this reason the documentation is split into the docs 
 for the Python and the C++ packages. The documentation provides the complete API documentation and integrated in there 
 also additional guides and information if you have to follow some neccessary steps e.g. correct configuration of some specific tool.
 

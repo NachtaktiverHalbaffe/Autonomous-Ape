@@ -60,6 +60,11 @@ namespace plugin_bridges
     global_path.header.frame_id= global_frame_;
     global_path.header.stamp =node_-> now();
 
+    if (!client_->service_is_ready()){
+      RCLCPP_ERROR(node_->get_logger(),"No service is online where the planner bridge can send an service request to");
+      return global_path;
+    }
+
     // Checking if the goal and start state is in the global frame
     if (start.header.frame_id != global_frame_)
     {

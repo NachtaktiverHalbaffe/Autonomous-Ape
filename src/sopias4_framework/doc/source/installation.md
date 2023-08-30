@@ -21,7 +21,7 @@ colcon build
 Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
 
 If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
-1. Install `docker`  **and** `docker-buildx` for build proper build caching  
+1. Install `docker`   
     - For Ubuntu:
         ```Bash
         sudo apt-get update
@@ -50,20 +50,21 @@ If you want to use the pre-configured Dev Container, then the configuration is f
     sudo usermod -aG docker $USER
     newgrp docker
     ```
-3. Modify `.devcontainer/devcontainer.json`: Replace `nachtaktiverhalbaffe` with your Linux username. If you do not know your username, you can find it by running `echo $USERNAME` in the terminal
-4. Repeat last step in `.devcontainer/Dockerfile`
+3. Rename the right devcontainer file inside `.devcontainer/` to `devcontainer.json` depending on your graphics card. Note: Only `devcontainer_intel.json` is tested.
+4. Optional: Replace `nachtaktiverhalbaffe` inside `.devcontainer/devcontainer.json` with your preferred username under which the container runs
 5. Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`
+6. Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
 
 ### Run directly on host
 Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands.
 
-You also need to install these packages to run the prototype:
-- [Turtlebot4 Packages](https://turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_common.html)
-- python3-pip
-- If you want to use the Gazebo simulation: [Turtlebot4 Simulator](https://turtlebot.github.io/turtlebot4-user-manual/software/turtlebot4_simulator.html)
-- If documentation generation is wanted: Install [rosdoc2](https://github.com/ros-infrastructure/rosdoc2):
-    1. Clone repository and cd into it
-    2. Run `pip3 install -e .`
+In general you can setup your environment by "running" the `DOCKERFILE`  after line 16 by hand:
+- Execute every `RUN` command in your terminal
+- Set the environment variables which are set with the `ENV` command. Simply enter `export <variable extracted from dockerfile>` in your terminal. Note: you have to do this every time you open a new terminal. To make this permanent, then use the command `echo "export <variable extracted from dockerfile>" >>/home/<your linux user>/.bashrc`
+- Replace all variables like the following:
+  - Replace `${ROS-DISTRO}` with `humble`
+  - Replace `${WORKSPACE}` with the (absolute) path to your workspace
+  - Replace `${USERNAME}` with your linux username
 
  You have to source ROS2 and the workspace everytime you open a terminal and your IDE needs to be started from a sourced terminal so you get all linter and syntax highlighting capabilities. For this you have to run these commands in the opened terminal:
 ```bash
@@ -75,3 +76,16 @@ If you want this done automatically each time, when run this commands once:
 echo "source /opt/ros/humble/setup.bash" >>/home/<your linux user>/.bashrc
 echo "if [ -f <path to ros workspace>/install/setup.bash ]; then source <path to ros workspace>/install/setup.bash; fi" >> /home/<your linux user>/.bashrc
 ```
+
+## Setting up Turtlebots
+1. Download the latest ISO at [http://download.ros.org/downloads/turtlebot4/](http://download.ros.org/downloads/turtlebot4/)
+2. Install a disk flashing application e.g. [Balena Etcher](https://etcher.balena.io)
+3. Remove the SD-Cart from the Raspberry Pi in the Turtlebot:
+   1. Screw of the top plate and the long standoffs
+   2. Lift of the plate where the LIDAR is mounted on
+   3. The SD card is on the bottom side of the Raspberry Pi. Removing it is a little bit tricky
+4. Connect the SD cart with your PC and use your flashing programm to flash the downloaded ISO onto the SD cart
+5. Follow the setup instruction: [https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot](https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot)
+6. Connect the Create3 to the access point: [https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3](https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3)
+7. Update the firmware of the Create 3 over the webserver. If connected to Wifi, it will automatically download the latest image
+8. Change the NTP Configuration of the Create 3: [https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215](https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215)

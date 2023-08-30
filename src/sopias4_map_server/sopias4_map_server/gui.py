@@ -17,7 +17,7 @@ from sopias4_framework.tools.ros2 import node_tools
 from sopias4_map_server.ui_object import Ui_MainWindow
 
 from sopias4_msgs.msg import Robot, RobotStates
-from sopias4_msgs.srv import ShowDialog
+from sopias4_msgs.srv import RegistryService, ShowDialog
 
 
 class GUI(GUINode):
@@ -26,22 +26,35 @@ class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
         super().__init__(Ui_MainWindow(), node_name="gui_sopias4_map_server")
-        self.__launch_process_system: subprocess.Popen | None = None
-        self.__launch_process_mapserver: subprocess.Popen | None = None
-        self.__launch_process_mrc: subprocess.Popen | None = None
+        self.__launch_service_system: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_map_server",
+                launch_file="bringup_server.launch.py",
+            )
+        )
+        self.__launch_service_mapserver: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
+            )
+        )
+        self.__launch_service_mrc: node_tools.LaunchService = node_tools.LaunchService(
+            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
+        )
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
-        self.__sclient_load_map: Client = self.node.create_client(
+        self.__sclient_load_map: Client = self.node.service_client_node.create_client(
             LoadMap, "/map_server/load_map"
         )
-        self.__sclient_save_map: Client = self.node.create_client(
+        self.__sclient_save_map: Client = self.node.service_client_node.create_client(
             SaveMap, "/map_saver/save_map"
+        )
+        self.__sclient_unregister: Client = self.node.service_client_node.create_client(
+            RegistryService, "/unregister_namespace"
         )
 
         self.node.create_subscription(
             RobotStates, "/robot_states", self.__callback_robot_states, 10
         )
-        self.node.get_logger().set_level(10)
 
     def connect_labels_to_subscriptions(self):
         GuiLogger(
@@ -63,6 +76,9 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_mrv.clicked.connect(
             lambda: Thread(target=self.__launch_mrc).start()
+        )
+        self.ui.pushButton_unregister.clicked.connect(
+            lambda: Thread(target=self.__unregister_namespace).start()
         )
         # Filepickers
         self.ui.pushButton_pick_params_file.clicked.connect(
@@ -127,11 +143,8 @@ class GUI(GUINode):
 
         # Launch launchfile in own subprocess
         launch_args: str = " ".join(launch_args_list)
-        self.__launch_process_system = node_tools.start_launch_file(
-            ros2_package="sopias4_map_server",
-            launch_file="bringup_server.launch.py",
-            arguments=launch_args,
-        )
+        self.__launch_service_system.add_launchfile_arguments(launch_args)
+        self.__launch_service_system.run()
         # Enable buttons which are only useable when map server launched
         self.ui.pushButton_stop_map_server.setEnabled(True)
         self.ui.pushButton_bringup_server.setEnabled(False)
@@ -145,8 +158,7 @@ class GUI(GUINode):
         Stops the nodes itself. It is done by sending a SIG-INT signal (STRG+C) to the shell process which runs the nodes
         """
         self.node.get_logger().info("Stopping Sopias4 Mp-Server nodes")
-        if node_tools.shutdown_ros_shell_process(self.__launch_process_system):
-            self.__launch_process_system = None
+        self.__launch_service_system.shutdown()
 
         # Enable buttons which are only useable when map server isn't running
         self.ui.pushButton_stop_map_server.setEnabled(False)
@@ -157,15 +169,11 @@ class GUI(GUINode):
         self.node.get_logger().info("Successfully stopped Sopias4 Map-Server nodes")
 
     def __launch_mrc(self):
-        self.__launch_process_mrc = node_tools.start_node(
-            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
-        )
+        self.__launch_service_mrc.run()
         self.ui.pushButton_launch_mrv.setEnabled(False)
 
     def __launch_mapserver(self):
-        self.__launch_process_mapserver = node_tools.start_launch_file(
-            ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
-        )
+        self.__launch_service_mapserver.run()
         self.ui.pushButton_launch_map_server.setEnabled(False)
 
     def __load_map(self):
@@ -259,6 +267,50 @@ class GUI(GUINode):
             self.node.get_logger().info("Successfully saved map")
             self.ui.lineEdit.setText(req.map_url)
 
+    def __unregister_namespace(self):
+        """
+        Loads a map from a file which can be picked with a file picker and loads it into the map server
+        """
+        # Pick map file
+        self.node.get_logger().info(
+            f"Unregistering namespace {self.ui.lineEdit_unregister.text()}"
+        )
+
+        # Call map saver service
+        self.node.get_logger().debug("Sending corresponding service call")
+        namespace = self.ui.lineEdit_unregister.text()
+        req = RegistryService.Request()
+        req.name_space = f"/{namespace}" if namespace[0] != "/" else namespace
+
+        response: RegistryService.Response | None = node_tools.call_service(
+            self.__sclient_unregister, req, self.node.service_client_node, timeout_sec=3
+        )
+
+        if response is None:
+            return
+        elif response.statuscode == RegistryService.Response.SUCCESS:
+            return
+        else:
+            msg_2_user = ShowDialog.Request()
+            msg_2_user.title = "Error while unregistering namespace"
+            msg_2_user.icon = ShowDialog.Request.ICON_ERROR
+
+            match response.statuscode:
+                case RegistryService.Response.NS_NOT_FOUND:
+                    self.get_logger().error(
+                        "Couldn't unregister namespace: Namespace not found"
+                    )
+                    msg_2_user.content = "Namespace isn't registered. Choose another one or unregistering is not neccessary"
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM
+                case RegistryService.Response.UNKNOWN_ERROR:
+                    self.get_logger().error(
+                        "Couldn't register namespace: Unknown error"
+                    )
+                    msg_2_user.content = "Unknown error occured"
+                    msg_2_user.interaction_options = ShowDialog.Request.CONFIRM_RETRY
+
+            self.display_dialog(msg_2_user)
+
     def __fill_tableview_robotstates(self, robot_states: RobotStates):
         """
         Fills the tableview which displays the states of the registered robots
@@ -300,16 +352,16 @@ class GUI(GUINode):
 
     def closeEvent(self, event):
         """Cleanup process when GUI is closed"""
-        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
+        self.__launch_service_mapserver.shutdown()
+        self.__launch_service_mrc.shutdown()
+        self.__launch_service_system.shutdown()
         super().closeEvent(event)
 
     def destroy_node(self):
         """Cleanup process when GUI node is destroyed"""
-        node_tools.shutdown_ros_shell_process(self.__launch_process_system)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mapserver)
-        node_tools.shutdown_ros_shell_process(self.__launch_process_mrc)
+        self.__launch_service_mapserver.shutdown()
+        self.__launch_service_mrc.shutdown()
+        self.__launch_service_system.shutdown()
         super().destroy_node()
 
 

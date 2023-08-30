@@ -35,11 +35,6 @@ def generate_launch_description():
     sopias4_map_server_path = get_package_share_directory("sopias4_map_server")
 
     params_file = LaunchConfiguration("params_file")
-    configured_params = RewrittenYaml(
-        source_file=params_file,
-        param_rewrites={},
-        convert_types=True,
-    )
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         "map",

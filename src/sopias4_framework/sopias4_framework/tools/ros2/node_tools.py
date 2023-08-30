@@ -8,71 +8,129 @@ from rclpy.client import Client
 from rclpy.node import Node
 
 
-def start_launch_file(
-    ros2_package: str, launch_file: str, arguments: str = ""
-) -> subprocess.Popen:
+class LaunchService:
     """
-    Runs an ROS2 launch file as a shell process
+    This launch service is capable of launching either ROS2 launch files or nodes. It runs them in a own shell session in the \
+    background which enables it running it in a non blocking manner. Also they can dynamically be started and shutdown. It\
+    should also be robust against programm crashes so that no zombie processes continues running in the baclground if Sopias4\
+    crashes due to some reason.
 
-    Args:
-        ros2_package (str): The ROS2 package in which the launch file is located
-        launch_file (str): The name of the launchfile
-        arguments (str, optional): Launchfile arguments which should be passed. Written in syntax "arg_name:=arg_value"
-
-    Returns:
-        subprocess.Popen: The running instance of the shell process
+    Attributes:
+        ros2_package (str): Name of the ROS2 package in which the launch file or the node is located
+        launch_file (str, optional): Name of the launchfile which should be used. Dont forget the file extensions i.e. .py etc
+        executable (str, optional): Name of the node (the executable) which should be run
+        launch_file_arguments (str, optional): All the arguments which should be used when launching.  Only used when a launch file is run
+        ros_params (list(str), optional): Params which should be passed to the node. Each item is a key-value pair e.g. "param1:=value". Only uses when a node is run
+        params_file (str, optional): Path to a YAML-File with parameters in it. Only used when a node is run
     """
-    if arguments != "":
-        cmd = f"ros2 launch {ros2_package} {launch_file} {arguments}"
-    else:
-        cmd = f"ros2 launch {ros2_package} {launch_file}"
-    return subprocess.Popen(cmd.split(" "))
 
+    def __init__(
+        self,
+        ros2_package: str,
+        launch_file: str = "",
+        executable: str = "",
+        launch_file_arguments: str = "",
+        ros_params: list[str] = [],
+        params_file: str = "",
+    ):
+        self.package: str = ros2_package
+        # Launch file params
+        self.launch_file: str | None = launch_file if launch_file != "" else None
+        self.arguments: str | None = (
+            launch_file_arguments if launch_file_arguments != "" else None
+        )
+        # Node param
+        self.executable: str | None = executable if executable != "" else None
+        self.ros_params: list[str] | None = ros_params if len(ros_params) != 0 else None
+        self.params_file: str | None = params_file if params_file != "" else None
 
-def start_node(
-    ros2_package: str,
-    executable: str,
-    ros_params: list[str] = [],
-    params_file: str = "",
-) -> subprocess.Popen:
-    """
-    Runs an ROS2 launch file as a shell process
+        self.__shell_session: subprocess.Popen | None = None
 
-    Args:
-        ros2_package (str): The ROS2 package in which the launch file is located
-        executable (str): Name of executable which should be run
-        ros_params (list(str), optional): List of ROS2 parameters which should be passed
-        params_file (str, optional): Path to a yaml configuration file where parameters are located which should be passed to the node
+    def __del__(self):
+        self.shutdown()
 
-    Returns:
-        subprocess.Popen: The running instance of the shell process
-    """
-    if len(ros_params) != 0:
-        cmd = f"ros2 run {ros2_package}  {executable} {ros_params}"
-    elif params_file != "":
-        cmd = f"ros2 run {ros2_package} {executable} __params:={params_file}"
-    else:
-        cmd = f"ros2 run {ros2_package} {executable}"
-    return subprocess.Popen(cmd.split(" "))
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.shutdown()
 
+    def run(self) -> bool:
+        """
+        Runs the launch_file or node. It automatically detects if a launch_file or a node is run by checking the passed arguments of the class
+        """
+        if self.launch_file is not None:
+            return self.__start_launchfile()
+        elif self.executable is not None:
+            return self.__start_node()
+        else:
+            print("Neither a launch file nor a executabel is specified for launching")
+            return False
 
-def shutdown_ros_shell_process(shell_process: subprocess.Popen | None) -> bool:
-    """
-    Shutdown a process which runs over a shell i.e. was called with `subprocess.Popen()`
+    def add_launchfile_arguments(self, arguments: str):
+        """
+        Add launchfile arguments to the launch service. Only needed/used when a launch file is run
+        """
+        self.arguments = arguments
 
-    Args:
-        shell_process (Popen or None): The shell process which should be should down
+    def __start_launchfile(self) -> bool:
+        """
+        Runs an ROS2 launch file as a shell process
 
-    Returns:
-        bool: Indicating if process was shutdown successfully or not
-    """
-    if shell_process is not None:
-        shell_process.send_signal(signal.SIGINT)
-        shell_process.wait(timeout=30)
-        shell_process = None
+        Args:
+            ros2_package (str): The ROS2 package in which the launch file is located
+            launch_file (str): The name of the launchfile
+            arguments (str, optional): Launchfile arguments which should be passed. Written in syntax "arg_name:=arg_value"
+
+        Returns:
+            subprocess.Popen: The running instance of the shell process
+        """
+        if self.__shell_session is not None:
+            print("Launchfile is already running. Skipping start")
+            return False
+
+        if self.arguments is not None:
+            cmd = f"ros2 launch {self.package} {self.launch_file} {self.arguments}"
+        else:
+            cmd = f"ros2 launch {self.package} {self.launch_file}"
+
+        self.__shell_session = subprocess.Popen(cmd.split(" "))
         return True
-    else:
-        return False
+
+    def __start_node(
+        self,
+    ) -> bool:
+        """
+        Runs an ROS2 launch file as a shell process
+
+        Returns:
+            subprocess.Popen: The running instance of the shell process
+        """
+        if self.__shell_session is not None:
+            print("Launchfile is already running. Skipping start")
+            return False
+
+        if self.ros_params is not None:
+            cmd = f"ros2 run {self.package}  {self.executable} {self.ros_params}"
+        elif self.params_file is not None:
+            cmd = f"ros2 run {self.package} {self.executable} __params:={self.params_file}"
+        else:
+            cmd = f"ros2 run {self.package} {self.executable}"
+
+        self.__shell_session = subprocess.Popen(cmd.split(" "))
+        return True
+
+    def shutdown(self) -> bool:
+        """
+        Shutdown a the running launch file or node
+
+        Returns:
+            bool: Indicating if process was shutdown successfully or not (It also returns False if the launchfile was already stopped/is not running)
+        """
+        if self.__shell_session is not None:
+            self.__shell_session.send_signal(signal.SIGINT)
+            self.__shell_session.wait(timeout=30)
+            self.__shell_session = None
+            return True
+        else:
+            return False
 
 
 def call_service(

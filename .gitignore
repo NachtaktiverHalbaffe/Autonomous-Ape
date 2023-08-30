@@ -3,7 +3,8 @@
 output/
 cross_reference/
 generated/
-nav2.yaml
+# nav2.yaml
+devcontainer.json
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/ros2,python,c++,cmake

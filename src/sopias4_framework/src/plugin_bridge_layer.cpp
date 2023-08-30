@@ -6,6 +6,7 @@
 #include "nav2_costmap_2d/footprint.hpp"
 #include "rclcpp/parameter_events_filter.hpp"
 #include "nav2_util/node_utils.hpp"
+#include <iostream>
 
 using nav2_costmap_2d::INSCRIBED_INFLATED_OBSTACLE;
 using nav2_costmap_2d::LETHAL_OBSTACLE;
@@ -14,10 +15,10 @@ using nav2_costmap_2d::NO_INFORMATION;
 namespace plugin_bridges
 {
 
-    LayerBridge::LayerBridge() : last_min_x_(-std::numeric_limits<float>::max()),
-                                 last_min_y_(-std::numeric_limits<float>::max()),
-                                 last_max_x_(std::numeric_limits<float>::max()),
-                                 last_max_y_(std::numeric_limits<float>::max())
+    LayerBridge::LayerBridge() : last_min_x_(-std::numeric_limits<double>::min()),
+                                 last_min_y_(-std::numeric_limits<double>::min()),
+                                 last_max_x_(std::numeric_limits<double>::max()),
+                                 last_max_y_(std::numeric_limits<double>::max())
     {
     }
 
@@ -31,13 +32,13 @@ namespace plugin_bridges
         declareParameter("enabled", rclcpp::ParameterValue(true));
         node->get_parameter(name_ + "." + "enabled", enabled_);
         declareParameter("plugin_name", rclcpp::ParameterValue("local_layer"));
-        node->get_parameter(name_ + "plugin_name", plugin_name_);
+        node->get_parameter(name_ + ".plugin_name", plugin_name_);
 
         // Service client node
         service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
 
-        client_ = node->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
-
+        client_ = service_node_->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
+        
         need_recalculation_ = false;
         current_ = true;
     }
@@ -50,16 +51,17 @@ namespace plugin_bridges
         double /*robot_x*/, double /*robot_y*/, double /*robot_yaw*/, double *min_x,
         double *min_y, double *max_x, double *max_y)
     {
+        std::lock_guard<Costmap2D::mutex_t> guard(*getMutex());
         if (need_recalculation_)
         {
             last_min_x_ = *min_x;
             last_min_y_ = *min_y;
             last_max_x_ = *max_x;
             last_max_y_ = *max_y;
-            *min_x = -std::numeric_limits<float>::max();
-            *min_y = -std::numeric_limits<float>::max();
-            *max_x = std::numeric_limits<float>::max();
-            *max_y = std::numeric_limits<float>::max();
+            *min_x = -std::numeric_limits<double>::max();
+            *min_y = -std::numeric_limits<double>::max();
+            *max_x = std::numeric_limits<double>::max();
+            *max_y = std::numeric_limits<double>::max();
             need_recalculation_ = false;
         }
         else
@@ -102,8 +104,13 @@ namespace plugin_bridges
         int max_i,
         int max_j)
     {
+        std::lock_guard<Costmap2D::mutex_t> guard(*getMutex());
         if (!enabled_)
         {
+            return;
+        }
+        if(!client_->service_is_ready()){
+            RCLCPP_WARN(service_node_->get_logger(),"Service isn't online, cant update %s layer",plugin_name_.c_str());
             return;
         }
 
@@ -140,14 +147,14 @@ namespace plugin_bridges
 
         // Send request and receive response
         auto future = client_->async_send_request(request);
-        auto node = node_.lock();
-        auto return_code = rclcpp::spin_until_future_complete(node, future);
+        auto return_code = rclcpp::spin_until_future_complete(service_node_, future);
 
         if (return_code == rclcpp::FutureReturnCode::SUCCESS)
         {
-            sopias4_framework::tools::update_costmap_with_msg(&future.get()->updated_costmap, costmap_);
-            updateWithMax(master_grid, min_i, min_j, max_i, max_j);
+            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&future.get()->updated_costmap, master_grid, min_i,min_j,max_i,max_j);
+            // updateWithMax(master_grid, min_i, min_j, max_i, max_j);
         }
+        current_ = true;
     }
         void LayerBridge::reset()
         {
@@ -162,4 +169,4 @@ namespace plugin_bridges
 // to be registered in order to be dynamically loadable of base type nav2_costmap_2d::Layer.
 // Usually places in the end of cpp-file where the loadable class written.
 #include "pluginlib/class_list_macros.hpp"
-PLUGINLIB_EXPORT_CLASS(plugin_bridges::LayerBridge, nav2_costmap_2d::CostmapLayer)
+PLUGINLIB_EXPORT_CLASS(plugin_bridges::LayerBridge, nav2_costmap_2d::Layer)

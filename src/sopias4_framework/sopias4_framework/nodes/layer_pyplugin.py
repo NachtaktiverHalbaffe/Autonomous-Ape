@@ -22,21 +22,29 @@ class LayerPyPlugin(Node):
     the costmap itself which should be updated. The method should then return the updated costmap
 
     Also, the plugin bridge itself must be configurated in the Navigation2 Stack. For this purpose, make shure to configure the LayerBridge
-    as a layer plugin and give it the same plugin name as this class.
+    as a layer plugin and give it the same plugin name as this class. The configuration inside the yaml-configuration should look something like that:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        local_costmap:
+            local_costmap:
+                ros__parameters:
+                    plugins: [robot_layer]
+                    robot_layer:
+                        plugin: plugin_bridges/LayerPlugin
+                        plugin_name: "robot_layer"
     """
 
     def __init__(
         self,
         node_name: str = "layer_pyplugin",
-        plugin_name: str = "abstract plugin",
+        plugin_name: str = "abstract_plugin",
         namespace: str | None = None,
     ) -> None:
-        if namespace is None:
-            super().__init__(node_name)  # type: ignore
-        else:
-            super().__init__(node_name, namespace=namespace)  # type: ignore
+        super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
 
-        # Service server
+        # Service
         self.__plugin_bridge_server: Service = self.create_service(
             UpdateCosts, f"{plugin_name}/update_costs", self.__update_costs_callback
         )
@@ -47,12 +55,20 @@ class LayerPyPlugin(Node):
         """
         Callback function which executes when the update_costs service is called
         """
+        self.get_logger().debug(
+            "Got request to update costs in robot layer",
+            throttle_duration_sec=2,
+        )
         updated_costmap: PyCostmap2D = self.update_costs(
             min_i=request.min_i,
             min_j=request.min_j,
             max_i=request.max_i,
             max_j=request.max_j,
             costmap=PyCostmap2D(request.current_costmap),
+        )
+        self.get_logger().debug(
+            "Updated costmap, returning costmap to service requester",
+            throttle_duration_sec=2,
         )
         response.updated_costmap = pycostmap2d_2_occupancygrid(updated_costmap)
         return response
@@ -80,23 +96,3 @@ class LayerPyPlugin(Node):
         self.get_logger().info("Shutting down node")
         self.__plugin_bridge_server.destroy()
         super().destroy_node()
-
-
-def main(args=None):
-    """
-    Start the node. It basically initializes the ROS2 context and creates a instance of PlannerPyPlugin
-    :meta private:
-    """
-    # Initialize node context
-    rclpy.init(args=args)
-    # Create ROS2 Node
-    node = LayerPyPlugin()
-    # Run node
-    rclpy.spin(node)
-    # Cleanup
-    node.destroy_node()
-    rclpy.shutdown()
-
-
-if __name__ == "__main__":
-    main()
