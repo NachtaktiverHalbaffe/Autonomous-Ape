@@ -36,7 +36,7 @@ class PathLayer(LayerPyPlugin):
                 plugin_name="path_layer",
                 namespace=namespace,
             )
-        self.COST_PATH: np.uint8 = np.uint8(180)
+        self.COST_PATH: np.uint8 = np.uint8(142)
         self.ROBOT_RADIUS: float = 0.25
 
         self.robot_paths: list[Path] = list()
@@ -75,17 +75,20 @@ class PathLayer(LayerPyPlugin):
         # TODO If neccessary only update within the specified boundary window
         # Set cost of all pixels in costmap to zero, because only the costs calculated by this layer should be included in the map.
         # In the plugin bridge, all layers get combined so the cleared data doesn't get lost if it is up to date
+        costmap.costmap.fill(np.uint8(0))
         self.get_logger().debug(
             "Path layer is inserting planned paths of other robots as moderate costs",
             throttle_duration_sec=2,
         )
-        self.costmap = PyCostmap2D(costmap.costmap)
-        costmap.costmap.fill(np.uint8(0))
-        # Convert 1d array costmap data to a 2d grid because it makes things easier and copy it into a new numpy array
-        costmap_grid = costmap_tools.costmap_2_grid(costmap)
+        self.costmap = costmap
 
-        # --- Set costs for path itself which is only 1 pixel wide ---
-        # For each path of each registered robot
+        # Calculate how thick the pixels need to be inflated to meet size of robot
+        inflation_distance_pxl: int = math.ceil(
+            self.ROBOT_RADIUS * (1 / costmap.getResolution())
+        )
+        if inflation_distance_pxl < 1:
+            inflation_distance_pxl = 1
+
         for path in self.robot_paths:
             # Ignore if robot hasnt a planned path
             if len(path.poses) == 0:
@@ -102,36 +105,27 @@ class PathLayer(LayerPyPlugin):
                 )
                 for x in rr:
                     for y in cc:
+                        # Set cost of path
                         costmap.setCost(x, y, self.COST_PATH)
-                last_node = current_node
 
-        # --- Inflate the path so it is as thick as needed ---
-        inflation_distance_pxl: int = math.ceil(
-            self.ROBOT_RADIUS * (1 / costmap.getResolution())
-        )
-
-        if inflation_distance_pxl < 1:
-            inflation_distance_pxl = 1
-
-        # Iterate through the array
-        for row in range(costmap.getSizeInCellsY()):
-            for col in range(costmap.getSizeInCellsX()):
-                if costmap_grid[row, col] == self.COST_PATH:
-                    # Iterate through the neighboring cells within the inflation_distance
-                    for y in range(
-                        max(0, row - inflation_distance_pxl),
-                        min(
-                            costmap.getSizeInCellsY(), row + inflation_distance_pxl + 1
-                        ),
-                    ):
-                        for x in range(
-                            max(0, col - inflation_distance_pxl),
+                        # Inflate this pixel so path is as thick as the robot
+                        for y_infl in range(
+                            max(0, int(y) - inflation_distance_pxl),
                             min(
-                                costmap.getSizeInCellsX(),
-                                col + inflation_distance_pxl + 1,
+                                costmap.getSizeInCellsY(),
+                                int(y) + inflation_distance_pxl + 1,
                             ),
                         ):
-                            costmap.setCost(x, y, self.COST_PATH)
+                            for x_infl in range(
+                                max(0, int(x) - inflation_distance_pxl),
+                                min(
+                                    costmap.getSizeInCellsX(),
+                                    int(x) + inflation_distance_pxl + 1,
+                                ),
+                            ):
+                                costmap.setCost(x_infl, y_infl, self.COST_PATH)
+
+                last_node = current_node
 
         return costmap
 
@@ -146,6 +140,9 @@ class PathLayer(LayerPyPlugin):
         for robot in msg.robot_states:
             # Check if robotstate is the robot itself
             if robot.name_space == self.get_namespace():
+                continue
+
+            if len(robot.nav_path.poses) == 0:
                 continue
 
             # Check if robot already finished driving the route

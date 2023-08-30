@@ -375,7 +375,7 @@ behavior_server:
     cost: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
     cycle_frequency: 10.0
-    behavior_plugins: [spin, drive_on_heading, assisted_teleop]
+    behavior_plugins: [spin, drive_on_heading, assisted_teleop, wait, backup]
     spin:
       plugin: nav2_behaviors/Spin
     backup:

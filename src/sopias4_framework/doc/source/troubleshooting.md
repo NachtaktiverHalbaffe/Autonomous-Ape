@@ -7,7 +7,17 @@ Until then, it could take sometimes 2-3 minutes. If it takes longer or something
 - Check if Turtlebot is running correctly. You can see it in the LED ring on the powerbutton. It should normally be steady white. You can see the color coding at [https://iroboteducation.github.io/create3_docs/hw/face/](https://iroboteducation.github.io/create3_docs/hw/face/)
 - Run `ros2 node list` and see if the nodes from the Robot show up. It should look like the following (namespaces can vary):
     ```Bash
-    dsf
+        /turtle1/analyzers
+        /turtle1/joint_state_publisher
+        /turtle1/joy_linux_node
+        /turtle1/oakd
+        /turtle1/oakd_container
+        /turtle1/robot_state_publisher
+        /turtle1/rplidar_composition
+        /turtle1/teleop_twist_joy_node
+        /turtle1/turtlebot4_base_node
+        /turtle1/turtlebot4_diagnostics
+        /turtle1/turtlebot4_node
     ```
     If not, then you can use `restart_turtlebot_nodes.py` in the Python package `sopias4_framework.tools.scripts` to restart the nodes remotely until they show up. Note: After restarting it can take up to approx. 30 seconds until are nodes are shown
 
