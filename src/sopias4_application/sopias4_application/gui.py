@@ -21,12 +21,12 @@ from sopias4_framework.tools.gui.label_subscription_handle import (
     LabelSubscriptionHandler,
 )
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
+from std_msgs.msg import Bool
 
 
 class GUI(GUINode):
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
-        super().__init__(Ui_MainWindow())
         # Nav2 plugins
         self.__astar_node: Astar | None = None
         self.__robot_layer_node: RobotLayer | None = None
@@ -46,7 +46,9 @@ class GUI(GUINode):
                 launch_file="rviz.launch.py",
             )
         )
+        super().__init__(Ui_MainWindow())
 
+    def connect_labels_to_subscriptions(self):
         if self.node.get_namespace() != "/":
             self.__launch_service_amcl.add_launchfile_arguments(
                 f"namespace:={self.node.get_namespace()}"
@@ -58,7 +60,6 @@ class GUI(GUINode):
                 f"namespace:={self.node.get_namespace()}"
             )
 
-    def connect_labels_to_subscriptions(self):
         GuiLogger(
             widget=self.ui.textEdit,
             node=self.node,
@@ -74,9 +75,7 @@ class GUI(GUINode):
             LabelSubscriptionHandler(self.ui.label_current_speed, self.node, WheelVels)
             LabelSubscriptionHandler(self.ui.label_docked, self.node, DockStatus)
             LabelSubscriptionHandler(self.ui.label_kidnapped, self.node, KidnapStatus)
-            LabelSubscriptionHandler(
-                self.ui.label_is_navigating, self.node, PoseStamped
-            )
+            LabelSubscriptionHandler(self.ui.label_is_navigating, self.node, Bool)
 
         except Exception as e:
             self.node.get_logger().error(f"Couldn't add LabelSubscriptionHandler: {e}")

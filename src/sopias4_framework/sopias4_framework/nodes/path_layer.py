@@ -144,7 +144,6 @@ class PathLayer(LayerPyPlugin):
 
             if len(robot.nav_path.poses) == 0:
                 continue
-
             # Check if robot already finished driving the route
             last_node_pose = costmap_tools.pose_2_costmap(
                 robot.nav_path.poses[-1], self.costmap

@@ -28,6 +28,7 @@ namespace sopias4_map_server {
         rclcpp::Service<sopias4_framework::srv::GetRobotIdentity>::SharedPtr get_robot_identity_service;
         rclcpp::Service<sopias4_framework::srv::GetRobots>::SharedPtr get_robots_service;
         rclcpp::Service<sopias4_framework::srv::Register>::SharedPtr register_service;
+        std::map<std::string, rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr> nav_state_subscribers_;
 
         /**
          * @brief Callback function which gets executed when the get_namespace  service gets called

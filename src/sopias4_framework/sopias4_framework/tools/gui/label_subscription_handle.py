@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QLabel
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import BatteryState
+from std_msgs.msg import Bool
 
 
 class LabelSubscriptionHandler(QObject):
@@ -96,12 +97,12 @@ class LabelSubscriptionHandler(QObject):
                     depth=5,
                 ),
             )
-        elif message_type == PoseStamped:
+        elif message_type == Bool:
             self.sub = node.create_subscription(
-                PoseStamped,
-                f"{node.get_namespace()}/goal_pose"
+                Bool,
+                f"{node.get_namespace()}/is_navigating"
                 if node.get_namespace() != "/"
-                else "goal_pose",
+                else "/is_navigating",
                 self.set_label_navstatus,
                 QoSProfile(
                     reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -146,14 +147,8 @@ class LabelSubscriptionHandler(QObject):
         vel = ((msg.velocity_left + msg.velocity_right) / 2) * 0.035
         self.value_signal.emit(str(round(vel, 2)))
 
-    def set_label_navstatus(self, msg: PoseStamped):
-        is_navigating: str = "Unknown"
-
-        if msg.pose.position.x != 0 and msg.pose.position.y != 0:
-            is_navigating = "True"
-        else:
-            is_navigating = "False"
-        self.value_signal.emit(is_navigating)
+    def set_label_navstatus(self, msg: Bool):
+        self.value_signal.emit(str(msg.data))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math
 import os
 import random
 import string
@@ -6,7 +7,7 @@ import subprocess
 
 import rclpy
 from ament_index_python.packages import get_package_share_directory
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose, PoseStamped, Twist
 from irobot_create_msgs.action import Dock, Undock
 from lifecycle_msgs.msg import Transition
 from lifecycle_msgs.srv import ChangeState
@@ -16,11 +17,14 @@ from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from rclpy.service import Service
 from slam_toolbox import srv as slam_toolbox_srv
 from sopias4_framework.tools.ros2 import node_tools, yaml_tools
+from std_msgs.msg import Bool
 from std_srvs.srv import Empty
 
+from sopias4_msgs.msg import Robot, RobotStates
 from sopias4_msgs.srv import (
     Drive,
     DriveToPos,
@@ -155,11 +159,26 @@ class RobotManager(Node):
                 self.__service_client_node, Undock, f"{self.get_namespace()}/undock"
             )
 
-        # ---------- Publishers ----------------
+        # ---------- Publishers/ Subscribers ----------------
         self.__cmd_vel_pub = (
             self.create_publisher(Twist, f"{self.get_namespace()}/cmd_vel", 10)
             if self.get_namespace() != "/"
             else self.create_publisher(Twist, "/cmd_vel", 10)
+        )
+        self.__nav_state_pub = (
+            self.create_publisher(Bool, f"{self.get_namespace()}/is_navigating", 10)
+            if self.get_namespace() != "/"
+            else self.create_publisher(Bool, "/is_navigating", 10)
+        )
+        self.__sub_robot_states = self.create_subscription(
+            RobotStates,
+            "/robot_states",
+            self.__check_navigation_state,
+            QoSProfile(
+                reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                durability=QoSDurabilityPolicy.VOLATILE,
+                depth=5,
+            ),
         )
 
         # ---------- Shell processes to run nodes ----------
@@ -680,6 +699,41 @@ class RobotManager(Node):
             response_data.statuscode = EmptyWithStatuscode.Response.UNKNOWN_ERROR
 
         return response_data
+
+    def __check_navigation_state(self, msg: RobotStates) -> None:
+        """
+        Callback function for the robot states subscriber. It checks if the robot is navigating and then publishes it on /<namespace>/is_navigating.
+        This is done by checking the lenght of the global plan of the robot (must be greater than zero) and checking if robot is in target region of the global plan
+        """
+        # Add new position of robots to list
+        is_navigating: Bool = Bool()
+        is_navigating.data = False
+
+        for robot in msg.robot_states:
+            if robot.name_space == self.get_namespace():
+                # Check if robot has a global plan assigned which he drives
+                if len(robot.nav_path.poses) == 0:
+                    is_navigating.data = False
+                    # break to avoid index errors
+                    break
+                else:
+                    is_navigating.data = True
+
+                # Check if robot already finished driving the route
+                nav_goal: PoseStamped = robot.nav_path.poses[-1]
+                current_pose: Pose = robot.pose.pose.pose
+
+                distance_to_goal = math.sqrt(
+                    (nav_goal.pose.position.x - current_pose.position.x) ** 2
+                    + (nav_goal.pose.position.y - current_pose.position.y) ** 2
+                )
+
+                if distance_to_goal <= 0.2:
+                    is_navigating.data = False
+
+                break
+
+        self.__nav_state_pub.publish(is_navigating)
 
     def destroy_node(self):
         """
