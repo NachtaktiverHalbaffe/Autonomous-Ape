@@ -6,6 +6,8 @@ from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDesc
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import PushRosNamespace, SetRemap
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import ReplaceString, RewrittenYaml
 
 ARGUMENTS = [
     DeclareLaunchArgument(
@@ -19,7 +21,6 @@ ARGUMENTS = [
 
 
 def generate_launch_description():
-    pkg_sopias4_framework = get_package_share_directory("sopias4_framework")
     pkg_nav2_bringup = get_package_share_directory("nav2_bringup")
 
     namespace = LaunchConfiguration("namespace")
@@ -27,8 +28,23 @@ def generate_launch_description():
 
     nav2_params_arg = DeclareLaunchArgument(
         "params_file",
-        default_value=os.path.join(pkg_sopias4_framework, "config", "nav2.yaml"),
+        default_value=os.path.join(
+            get_package_share_directory("sopias4_application"), "config", "nav2.yaml"
+        ),
         description="Nav2 parameters",
+    )
+
+    # '<robot_namespace>' keyword shall be replaced by 'namespace' launch argument
+    # User defined config file should contain '<robot_namespace>' keyword for the replacements.
+    # Make shure that the keyword doesnt have a leading "/"
+    params_file = ReplaceString(
+        source_file=LaunchConfiguration("params_file"),
+        replacements={"<robot_namespace>": ("/", namespace)},
+    )
+    # Replace double "/" in case no namespace was passed
+    params_file = ReplaceString(
+        source_file=params_file,
+        replacements={"//": ("/")},
     )
 
     nav2 = GroupAction(
@@ -43,7 +59,7 @@ def generate_launch_description():
                 launch_arguments={
                     "use_sim_time": use_sim_time,
                     "use_composition": "False",
-                    "params_file": LaunchConfiguration("params_file"),
+                    "params_file": params_file,
                 }.items(),
             ),
         ]
