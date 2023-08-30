@@ -209,7 +209,7 @@ private:
 			{
 				element->nav_path = *path;
 				publish_robot_states();
-				RCLCPP_INFO(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
+				RCLCPP_DEBUG(logger, "Successfully set path for robot with namespace %s", name_space.c_str());
 				return;
 			}
 		}

@@ -42,7 +42,7 @@ def send_ssh_cmd(
         return
     print("Connected!")
 
-    print("Executing command...")
+    print(f"Executing command {command} ...")
     # Execute command
     try:
         ssh.get_transport().open_session().exec_command(command)  # type: ignore
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         if opt in ("-c", "--command"):
             command = str(arg)
 
-    send_ssh_cmd(ipv4_addr, command, port) if port is not None else send_ssh_cmd(
-        ipv4_addr, command
-    )
+    send_ssh_cmd(
+        ip_adress=ipv4_addr, command=command, port=port
+    ) if port is not None else send_ssh_cmd(ip_adress=ipv4_addr, command=command)
     sys.exit()

@@ -28,10 +28,26 @@ sopias4\_framework.nodes.layer\_pyplugin module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.nodes.path\_layer module
+-------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.path_layer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.nodes.planner\_pyplugin module
 -------------------------------------------------
 
 .. automodule:: sopias4_framework.nodes.planner_pyplugin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sopias4\_framework.nodes.robot\_layer module
+--------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.robot_layer
    :members:
    :undoc-members:
    :show-inheritance:

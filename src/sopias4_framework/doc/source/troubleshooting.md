@@ -12,7 +12,11 @@ Until then, it could take sometimes 2-3 minutes. If it takes longer or something
     If not, then you can use `restart_turtlebot_nodes.py` in the Python package `sopias4_framework.tools.scripts` to restart the nodes remotely until they show up. Note: After restarting it can take up to approx. 30 seconds until are nodes are shown
 
 ## The LED ring of the Turtlebot is showing red
-If its pulsing red, then the Turtlebot needs to be charged. If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regulary because the Create3 has very limited CPU power 
+If its pulsing red, then the Turtlebot needs to be charged. 
+
+If the robot is rebooting/starting, then this could temporary be normal. Just wait if it fixes itself. Usually after 3-5 minutes the Turtlebot should have been started and the red LED ring disappeared.
+
+If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regulary because the Create3 has very limited CPU power 
 an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completly locked. In longterm this can be fixed by new firmware which optimizes load on the CPU, but 
 until then you can try doing following:
 - See if you updated the NTP configuration like mentioned in the Turtlebot4 installation guide in this documentation
