@@ -56,14 +56,14 @@ class GUI(GUINode):
             RobotStates, "/robot_states", self.__callback_robot_states, 10
         )
 
-    def connect_labels_to_subscriptions(self):
+    def connect_ros2_callbacks(self):
         GuiLogger(
             widget=self.ui.textEdit_logger,
             node=self.node,
             namespace_filter="no_namespace",
         )
 
-    def connect_callbacks(self):
+    def connect_ui_callbacks(self):
         # Pushbuttons
         self.ui.pushButton_bringup_server.clicked.connect(
             lambda: Thread(target=self.__start_map_server).start()
