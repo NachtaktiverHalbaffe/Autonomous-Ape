@@ -248,7 +248,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Sopias4 Fleetbroker"))
         self.label.setText(_translate("MainWindow", "# Initialization and Configuration"))
         self.label_5.setText(_translate("MainWindow", "## Manage Turtlebot"))
         self.checkBox_use_respawn.setText(_translate("MainWindow", "Use respawn"))

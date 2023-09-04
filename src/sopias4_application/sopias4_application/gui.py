@@ -6,13 +6,9 @@ import sys
 from threading import Thread
 
 import ament_index_python
-from geometry_msgs.msg import PoseStamped
 from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtWidgets import QApplication
-from rcl_interfaces.msg import Log
 from sensor_msgs.msg import BatteryState
-from sopias4_application.astar import Astar
-from sopias4_application.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.nodes.path_layer import PathLayer
 from sopias4_framework.nodes.robot_layer import RobotLayer
@@ -20,8 +16,11 @@ from sopias4_framework.tools.gui.gui_logger import GuiLogger
 from sopias4_framework.tools.gui.label_subscription_handle import (
     LabelSubscriptionHandler,
 )
-from sopias4_framework.tools.ros2 import node_tools, yaml_tools
+from sopias4_framework.tools.ros2 import node_tools
 from std_msgs.msg import Bool
+
+from sopias4_application.astar import Astar
+from sopias4_application.ui_object import Ui_MainWindow
 
 
 class GUI(GUINode):
@@ -48,7 +47,7 @@ class GUI(GUINode):
         )
         super().__init__(Ui_MainWindow())
 
-    def connect_labels_to_subscriptions(self):
+    def connect_ros2_callbacks(self):
         if self.node.get_namespace() != "/":
             self.__launch_service_amcl.add_launchfile_arguments(
                 f"namespace:={self.node.get_namespace()}"
@@ -80,7 +79,7 @@ class GUI(GUINode):
         except Exception as e:
             self.node.get_logger().error(f"Couldn't add LabelSubscriptionHandler: {e}")
 
-    def connect_callbacks(self):
+    def connect_ui_callbacks(self):
         #########################
         # ------- Push buttons -------
         #########################
@@ -114,6 +113,12 @@ class GUI(GUINode):
         self.ui.pushButton_launch_amcl.clicked.connect(lambda: self.__launch_amcl())
         self.ui.pushButton_launch_nav2.clicked.connect(lambda: self.__launch_nav2())
         self.ui.pushButton_launch_rviz2.clicked.connect(lambda: self.__launch_rviz2())
+        self.ui.pushButton_launch_pathlayer.clicked.connect(
+            lambda: self.__launch_pathlayer()
+        )
+        self.ui.pushButton_stop_pathlayer.clicked.connect(
+            lambda: self.__stop_pathlayer()
+        )
         # --- Tab: Advanced/Manual operation ---
         # Each button is connected to two signals: Pressed which sends the corresponding drive command
         # and released which sends a stop command when the button is released
@@ -198,6 +203,8 @@ class GUI(GUINode):
         self.ui.pushButton_launch_amcl.setEnabled(False)
         self.ui.pushButton_launch_nav2.setEnabled(False)
         self.ui.pushButton_launch_rviz2.setEnabled(False)
+        self.ui.pushButton_stop_pathlayer.setEnabled(False)
+
         # --- Tab: Mapping ---
         self.ui.pushButton_start_mapping.setEnabled(False)
         self.ui.pushButton_stop_mapping.setEnabled(False)
@@ -241,10 +248,9 @@ class GUI(GUINode):
         self.__robot_layer_node = RobotLayer(namespace=self.node.get_namespace())
         self.__path_layer_node = PathLayer(namespace=self.node.get_namespace())
 
-        self.node_executor.add_node(self.__astar_node)
-        self.node_executor.add_node(self.__path_layer_node)
-        self.node_executor.add_node(self.__robot_layer_node)
-        self.node_executor.wake()
+        self.load_ros2_node(self.__astar_node)
+        self.load_ros2_node(self.__path_layer_node)
+        self.load_ros2_node(self.__robot_layer_node)
         self.ui.pushButton_launch_turtlebot.setEnabled(False)
         self.__enable_drive_buttons(True)
 
@@ -253,23 +259,6 @@ class GUI(GUINode):
         self.ui.pushButton_launch_rviz2.setEnabled(False)
 
     def __launch_nav2(self):
-        # --- Add namespace to yaml config of nav2 and amcl launch file ---
-        base_path = os.path.join(
-            ament_index_python.get_package_share_directory("sopias4_application"),
-            "config",
-        )
-        # yaml_tools.insert_namespace_into_yaml_config(
-        #     namespace=self.node.get_namespace(),
-        #     path=os.path.join(
-        #         base_path,
-        #         "nav2_base.yaml",
-        #     ),
-        #     output_path=os.path.join(
-        #         base_path,
-        #         "nav2.yaml",
-        #     ),
-        # )
-
         self.__astar_node = Astar(namespace=self.node.get_namespace())
         self.__robot_layer_node = RobotLayer(namespace=self.node.get_namespace())
         self.__path_layer_node = PathLayer(namespace=self.node.get_namespace())
@@ -283,22 +272,34 @@ class GUI(GUINode):
         self.ui.pushButton_launch_nav2.setEnabled(False)
 
     def __launch_amcl(self):
-        base_path = os.path.join(
-            ament_index_python.get_package_share_directory("sopias4_framework"),
-            "config",
-        )
-
         self.__launch_service_amcl.run()
         self.ui.pushButton_launch_amcl.setEnabled(False)
+
+    def __launch_pathlayer(self):
+        if self.__path_layer_node is None:
+            self.__path_layer_node = PathLayer(namespace=self.node.get_namespace())
+            self.load_ros2_node(self.__path_layer_node)
+            self.ui.pushButton_launch_pathlayer.setEnabled(False)
+            self.ui.pushButton_stop_pathlayer.setEnabled(True)
+
+    def __stop_pathlayer(self):
+        if self.__path_layer_node is not None:
+            self.unload_ros2_node(self.__path_layer_node)
+            self.__path_layer_node = None
+            self.ui.pushButton_launch_pathlayer.setEnabled(True)
+            self.ui.pushButton_stop_pathlayer.setEnabled(False)
 
     def __stop_nav_stack(self):
         self.stop_nav_stack()
         if self.__astar_node is not None:
-            self.node_executor.remove_node(self.__astar_node)
+            self.unload_ros2_node(self.__astar_node)
+            self.__astar_node = None
         if self.__path_layer_node is not None:
-            self.node_executor.remove_node(self.__path_layer_node)
+            self.unload_ros2_node(self.__path_layer_node)
+            self.__path_layer_node = None
         if self.__robot_layer_node is not None:
-            self.node_executor.remove_node(self.__robot_layer_node)
+            self.unload_ros2_node(self.__robot_layer_node)
+            self.__path_layer_node = None
 
         self.ui.pushButton_launch_turtlebot.setEnabled(True)
         self.ui.pushButton_left.setEnabled(True)
@@ -365,8 +366,12 @@ class GUI(GUINode):
         super().destroy_node()
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     widget = GUI()
     widget.show()
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
