@@ -55,8 +55,8 @@ If you want to use the pre-configured Dev Container, then the configuration is f
 5. Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`
 6. Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
 
-### Run directly on host
-Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands.
+### Run directly on host (deprecated)
+Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands. Additionally, all tools are tailored to the dev containers and thus some rare things arent supported on bare metal out of the box. Finally, all other guides are assuming you are using the dev containers, so you may have to modify some stuff by yourself if following the guides of this documentation.
 
 In general you can setup your environment by "running" the `DOCKERFILE`  after line 16 by hand:
 - Execute every `RUN` command in your terminal
@@ -77,15 +77,3 @@ echo "source /opt/ros/humble/setup.bash" >>/home/<your linux user>/.bashrc
 echo "if [ -f <path to ros workspace>/install/setup.bash ]; then source <path to ros workspace>/install/setup.bash; fi" >> /home/<your linux user>/.bashrc
 ```
 
-## Setting up Turtlebots
-1. Download the latest ISO at [http://download.ros.org/downloads/turtlebot4/](http://download.ros.org/downloads/turtlebot4/)
-2. Install a disk flashing application e.g. [Balena Etcher](https://etcher.balena.io)
-3. Remove the SD-Cart from the Raspberry Pi in the Turtlebot:
-   1. Screw of the top plate and the long standoffs
-   2. Lift of the plate where the LIDAR is mounted on
-   3. The SD card is on the bottom side of the Raspberry Pi. Removing it is a little bit tricky
-4. Connect the SD cart with your PC and use your flashing programm to flash the downloaded ISO onto the SD cart
-5. Follow the setup instruction: [https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot](https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot)
-6. Connect the Create3 to the access point: [https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3](https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3)
-7. Update the firmware of the Create 3 over the webserver. If connected to Wifi, it will automatically download the latest image
-8. Change the NTP Configuration of the Create 3: [https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215](https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215)

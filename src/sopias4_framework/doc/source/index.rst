@@ -12,6 +12,14 @@ Welcome to Sopias4 Framework's documentation!
 
    installation_link 
    troubleshooting
+   advanced_infos
+
+.. Heading is displayed via toctree
+.. toctree::
+   :maxdepth: 3
+   :caption: Guides
+
+   things_to_consider
 
 API documentation
 =================
