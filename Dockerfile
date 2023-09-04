@@ -68,7 +68,8 @@ COPY ./ ./src
 WORKDIR ${WORKSPACE}
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
 	&& apt-get update -y \
-	&& rosdep install --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -y 
+	&& rosdep update \
+	&& rosdep install --from-paths src --ignore-src  -y 
 
 ######################################################################
 # ------------------------------- Setup Environment ---------------------------------- 
@@ -101,7 +102,7 @@ RUN echo 'figlet "Linux is great" ' >> /home/${USERNAME}/.bashrc
 RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >>  /home/${USERNAME}/.bashrc
 RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
 # Setup some aliases
-RUN echo 'alias sopias4-application="ros2 run sopias4_application gui.py"' >>  /home/${USERNAME}/.bashrc
+RUN echo 'alias sopias4-application="ros2 run sopias4_application gui"' >>  /home/${USERNAME}/.bashrc
 RUN echo 'alias sopias4-mapserver="ros2 run sopias4_map_server gui.py"' >>  /home/${USERNAME}/.bashrc
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.

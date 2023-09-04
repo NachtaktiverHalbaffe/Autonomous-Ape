@@ -7,14 +7,12 @@
   <maintainer email="LeMonkay.VTIT@tutanota.com">NachtaktiverHalbaffe</maintainer>
   <license>Apache-2.0</license>
 
-  <!-- Use both ament_cmake and ament_cmake_python to use C++ and Python nodes in same package -->
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>ament_cmake_python</buildtool_depend>
-
-  <!-- C++ dependencies -->
-  <depend>rclcpp</depend>
   <!-- Python dependencies -->
   <depend>rclpy</depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <!-- Ros2 packages -->
   <depend>sopias4_msgs</depend>
@@ -25,6 +23,6 @@
   <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>
