@@ -5,19 +5,17 @@ import os
 import random
 import string
 import time
-from threading import Event, Thread
+from threading import Thread
 
 import rclpy
-from ament_index_python import get_package_share_directory
 from geometry_msgs.msg import Twist
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox
-from rclpy.action import ActionClient
 from rclpy.client import Client
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sopias4_framework.nodes.robot_manager import RobotManager
-from sopias4_framework.tools.ros2 import drive_tools, node_tools, yaml_tools
+from sopias4_framework.tools.ros2 import drive_tools, node_tools
 
 from sopias4_msgs.srv import (
     Drive,
@@ -54,10 +52,9 @@ class GUINode(QMainWindow):
                     # The script should name the Python object this way, but can vary. Doublecheck the class name
                     # within the generated Python file to be sure
                     self.ui: Ui_MainWindow # To enable auto-completion in IDE
-                    ui_file = Ui_MainWindow() 
-                    super().__init(self, ui_file)
+                    super().__init__(Ui_MainWindow())
 
-                def connect_callbacks(self):
+                def connect_ui_callbacks(self):
                     # You need to overrride this method. Connect your UI elements with the callacks here.
                     # The ui elements are in self.ui field of the GUINode class
                     self.ui.example_button.clicked.connect(lambda: Thread(target=self.__foobar).start())
@@ -70,23 +67,32 @@ class GUINode(QMainWindow):
                     # Disable the desired elements here
                     self.ui.pushButton_example.setEnabled(False)
 
-                def connect_labels_to_subscriptions(self):
+                def connect_ros2_callbacks(self):
                     # CReate and connect subscriptions here
-                    gui_logger = GuiLogger(self.ui.textEdit)
-                    self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
+                    GuiLogger(
+                        widget=self.ui.textEdit,
+                        node=self.node,
+                        namespace_filter=self.node.get_namespace(),
+                    ) 
+                    LabelSubscriptionHandler(
+                        widget=self.ui.label_battery, node=self.node, message_type=BatteryState
+                    )
                     
                 def __foobar():
                     print("Hello World!")
 
 
     Following methods needs to be overriden (look further into documentation for more details):
-        - connect_callbacks()
+        - connect_ui_callbacks()
+        - connect_ros2_callbacks()
         - set_default_values()
         - set_initial_enabled_elements()
-        - connect_labels_to_subscriptions()
     
     It also has builtin methods which you can use as callback function for certain tasks in Sopias4 (look further into documentation for more details):
+        - load_ros2_node(): Loads and runs a Python ROS2 node into the executor
+        - unload_ros2_node(): Unloads and stops a Ptyhon ROS2 node from the executor
         - register_namespace(): Register namespace in Sopias4 Map-Server
+        - unregister_namespace(): Unregisters a namespace in Sopias4 Fleetbroker
         - launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
         - stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot
         - start_mapping(): Starts the mapping process
@@ -103,6 +109,9 @@ class GUINode(QMainWindow):
             node_name (str, optional): Name of the Node. Defaults to gui_node
             namespace (str, optional): The namespace of the node. It should not be specified by the developer. Instead the User should use the register service and \
                                                         let the service set the namespace of this class. Defaults to None
+            node (rclpy.node): The underlying ROS2 node which runs in the background
+            node_executor (rclpy.executors.MultiThreadedExecutor): A executor which runs the nodes which are loaded into it. By default the GUI node and the\
+                                                                                                            RobotManager (if application is registered in the Sopias4 Fleetbroker) are loaded into it
     """
 
     __metaclass__ = abc.ABCMeta
@@ -120,12 +129,10 @@ class GUINode(QMainWindow):
         self.ui = ui
         self.node_name: str = node_name
         self.namespace: str | None = namespace
-        self.turtlebot_running: bool = False
-        self.is_mapping: bool = False
         # Private class attributes
         self.__rm_node: RobotManager | None = None
         self.__display_dialog_signal.connect(self.display_dialog)
-        self.__registered_signal.connect(self.connect_labels_to_subscriptions)
+        self.__registered_signal.connect(self.connect_ros2_callbacks)
 
         rclpy.init()
         self.node: GrapficalNode = GrapficalNode(
@@ -135,20 +142,19 @@ class GUINode(QMainWindow):
             namespace=namespace,
         )
         self.node_executor = MultiThreadedExecutor()
-        self.node_executor.add_node(self.node)
-        self.__spin_node_thread = Thread(target=self.node_executor.spin)
-        self.__spin_node_thread.start()
+        self.load_ros2_node(self.node)
+        Thread(target=self.node_executor.spin).start()
 
         # Setup GUI
         self.ui.setupUi(self)
         # Connecting the ui elements with callbacks and set values
-        self.connect_callbacks()
+        self.connect_ui_callbacks()
+        self.connect_ros2_callbacks()
         self.set_default_values()
         self.set_initial_disabled_elements()
-        self.connect_labels_to_subscriptions()
 
     @abc.abstractmethod
-    def connect_callbacks(self) -> None:
+    def connect_ui_callbacks(self) -> None:
         """
         Connect the callback functions from the QT UI elements here. This connects user interactions like clicking a button with the execution of an callback function. Needs to be overridden
 
@@ -156,10 +162,26 @@ class GUINode(QMainWindow):
             .. highlight:: python
             .. code-block:: python
 
-                    def connect_callbacks(self):
+                    def connect_ui_callbacks(self):
                         # The ui elements are in self.ui field of the GUINode class
                         self.ui.example_button.clicked.connect( lambda: Thread(target=self.hello_world).start())
 
+        """
+
+    @abc.abstractmethod
+    def connect_ros2_callbacks(self) -> None:
+        """
+        Connects ROS2 callbacks e.g. subscriptions. Mainly used to create LabelSubcriptions which sets the value of UI labels then a \
+        subscriptions receives a message.
+
+        Example:
+            .. highlight:: python
+            .. code-block:: python
+
+                    def connect_ros2_callback(self):
+                        # Create and connect subscriptions here
+                        gui_logger = GuiLogger(self.ui.textEdit)
+                        self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
         """
 
     @abc.abstractmethod
@@ -191,20 +213,59 @@ class GUINode(QMainWindow):
                         self.ui.pushButton_example.setEnabled(False)
         """
 
-    @abc.abstractmethod
-    def connect_labels_to_subscriptions(self) -> None:
+    def load_ros2_node(self, node: Node) -> bool:
         """
-        Create ROS2 subscriptions which sets the value of text labels (if used and implemented)
+        Loads and runs a ROS2 node during runtime. Only Python nodes are supported. For C++ nodes and/or launchfiles,
+        use the sopias4_framework.tools.ros.LaunchService package.
 
-        Example:
-            .. highlight:: python
-            .. code-block:: python
+        Args:
+            node (rclpy.Node): A instantiated object of the node which should be loaded
 
-                    def connect_labels_to_subscriptions(self):
-                        # Create and connect subscriptions here
-                        gui_logger = GuiLogger(self.ui.textEdit)
-                        self.node.create_subscription(Log, "/rosout", gui_logger.add_log_msg, 10)
+        Returns:
+            bool: If node was loaded successfully
         """
+        if self.node_executor.add_node(node):
+            self.node.get_logger().info(
+                f"Loaded node {node.get_name()} into running executor"
+            )
+            return True
+        else:
+            self.node.get_logger().info(
+                f"Coulnd't load node {node.get_name()} into running executor"
+            )
+            return False
+
+    def unload_ros2_node(self, node: Node | None) -> bool:
+        """
+        Unloads and stops a ROS2 node during runtime. Only use if node was loaded with `load_ros2_node` before
+
+        Args:
+            node (rclpy.Node): A instantiated object of the node which should be unloaded
+
+        Returns:
+            bool: If node was loaded successfully
+        """
+        if node is not None:
+            self.node_executor.remove_node(node)
+            self.node_executor.wake()
+
+            if node not in self.node_executor.get_nodes():
+                # Stop and cleanup node itself
+                self.node.get_logger().info(
+                    f"Unloaded node {node.get_name()} from running executor"
+                )
+                node.destroy_node()
+                return True
+            else:
+                self.node.get_logger().info(
+                    f"Coulnd't unload node {node.get_name()} from running executor"
+                )
+                return False
+        else:
+            self.node.get_logger().warning(
+                "Couldn't unload node from running executor: Node is already unloaded or is None"
+            )
+            return False
 
     def register_namespace(self, namespace: str) -> bool:
         """
@@ -233,11 +294,8 @@ class GUINode(QMainWindow):
             raise e
 
         # Restart node with namespace
-        self.node_executor.remove_node(self.node)
         for node in self.node_executor.get_nodes():
-            self.node_executor.remove_node(node)
-            node.destroy_node()
-        self.node_executor.wake()
+            self.unload_ros2_node(node)
 
         self.node = GrapficalNode(
             showed_dialog_signal=self.__showed_dialog_signal,
@@ -247,9 +305,8 @@ class GUINode(QMainWindow):
         )
         # Start robot manager
         self.__rm_node = RobotManager(namespace=self.namespace)
-        self.node_executor.add_node(self.node)
-        self.node_executor.add_node(self.__rm_node)
-        self.node_executor.wake()
+        self.load_ros2_node(self.node)
+        self.load_ros2_node(self.__rm_node)
 
         self.__registered_signal.emit()
         self.node.get_logger().info(
@@ -276,9 +333,7 @@ class GUINode(QMainWindow):
                 # Remove robot manager if running
                 self.namespace = None
                 if self.__rm_node is not None:
-                    self.node_executor.remove_node(self.__rm_node)
-                    self.node_executor.wake()
-                    self.__rm_node.destroy_node()
+                    self.unload_ros2_node(self.__rm_node)
                     self.__rm_node = None
 
                 self.node.get_logger().info(
@@ -297,8 +352,7 @@ class GUINode(QMainWindow):
         """
         Launches all the nodes in Sopias4 Application so the system is ready for autonomous navigation. It's basically
         a wrapper and calling the launcg service client in the underlying node object. Before running this, a namespace
-        must already be registered and the gui node needs to be running under this namespace. If the operation was
-        successful, then it sets `self.turtlebot_running` to `True`
+        must already be registered and the gui node needs to be running under this namespace.
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
@@ -306,10 +360,8 @@ class GUINode(QMainWindow):
             status_response = self.node._launch_nav_stack(use_simulation=use_simulation)
 
             if status_response:
-                self.turtlebot_running = True
                 self.node.get_logger().info("Launched robot")
             else:
-                self.turtlebot_running = False
                 self.node.get_logger().error(
                     f"Could'nt launch robot. Turtlebot is either already running or is'nt reachable"
                 )
@@ -322,8 +374,7 @@ class GUINode(QMainWindow):
     def stop_nav_stack(self) -> None:
         """
         Stops all the nodes in Sopias4 Application so the system cant navigate autonomously anymore. It's basically
-        a wrapper and calling the launch service client in the underlying node object. If the operation was
-        successful, then it sets `self.turtlebot_running` to `True`
+        a wrapper and calling the launch service client in the underlying node object.
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
@@ -331,10 +382,8 @@ class GUINode(QMainWindow):
             status_response = self.node._disconnect_turtlebot()
 
             if status_response:
-                self.turtlebot_running = False
                 self.node.get_logger().debug("Stopped robot")
             else:
-                self.turtlebot_running = True
                 self.node.get_logger().error(
                     "Couldnt stop robot: Nodes are either already stopped or error is unknown"
                 )
@@ -348,25 +397,17 @@ class GUINode(QMainWindow):
         """
         Starts the mapping process. This can only be done if Sopias4 Application is fully running, otherwise
         will directly abort this process. It's basically a wrapper and calling the start_mapping service client
-        in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+        in the underlying node object.
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
         try:
-            if not self.is_mapping:
-                status_response = self.node._start_mapping()
-
-                if status_response:
-                    self.is_mapping = True
-                    self.node.get_logger().info("Started mapping")
-                else:
-                    self.is_mapping = False
-                    self.node.get_logger().error(
-                        "Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
-                    )
+            status_response = self.node._start_mapping()
+            if status_response:
+                self.node.get_logger().info("Started mapping")
             else:
-                self.node.get_logger().warning(
-                    "Couldnt start mapping: Mapping already in process or Turtlebot is offline"
+                self.node.get_logger().error(
+                    "Couldnt start mapping: Slam node couldn't be launched or unknown error occured"
                 )
         except Exception as e:
             # Re-raise exception if one occurs. Only for debugging and shouldn't
@@ -374,10 +415,56 @@ class GUINode(QMainWindow):
             self.node.get_logger().error(f"Couldnt start mapping: {e}")
             raise e
 
+    def stop_mapping(
+        self,
+        map_path: str = "map_default",
+        map_topic: str = "/map",
+        image_format: str = "png",
+        map_mode: str = "trinary",
+        free_thres: float = 0.196,
+        occupied_thres: float = 0.65,
+    ) -> None:
+        """
+        Stops the mapping process. This can only be done if Sopias4 Application and the mapping process is fully running,
+        otherwise itwill directly abort this process. It's basically a wrapper and calling the start_mapping service
+        client in the underlying node object.
+
+        Args:
+            map_path(str, optional): The path to the map. Can be absolute or relative to a ros package. Defaults to "maps/map_default"
+            map_topic (str, optional): The topic under which the map should be served. Defaults to "/map"
+            image_format (str, optional): The image format under which the visualization of the map is saved. Can be either "png" "pgm", or "bmp". Defaults to "png"
+            map_mode (str, optional): Map modes: "trinary", "scale" or "raw". Defaults to "trinary"
+            free_thres (float, optional): Threshold over which a region is considered as free. Defaults to 0.196
+            occupied_thres (float, optional): Threshold over which a region is considered as occupied/obstacle. Defaults to 0.65
+
+        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
+        """
+
+        try:
+            status_response = self.node._stop_mapping(
+                image_format=image_format,
+                map_topic=map_topic,
+                map_path=map_path,
+                occupied_thres=occupied_thres,
+                free_thres=free_thres,
+                map_mode=map_mode,
+            )
+            if status_response:
+                self.node.get_logger().debug("Stopped Mapping")
+            else:
+                self.node.get_logger().error(
+                    "Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
+                )
+        except Exception as e:
+            # Re-raise exception if one occurs. Only for debugging and shouldn't
+            # appear on production if carefully tested
+            self.node.get_logger().error(f"Couldnt stop mapping: {e}")
+            raise e
+
     def dock(self) -> None:
         """
         Starts the docking process. This can only be done if the namespace is registered. It's basically a wrapper and calling the
-        dock service client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+        dock service client in the underlying node object.
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
@@ -397,7 +484,7 @@ class GUINode(QMainWindow):
     def undock(self) -> None:
         """
         Starts the undocking process. This can only be done if the namespace is registered. It's basically a wrapper and calling the
-        dock service client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `True`
+        dock service client in the underlying node object.
 
         Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
         """
@@ -412,62 +499,6 @@ class GUINode(QMainWindow):
             # Re-raise exception if one occurs. Only for debugging and shouldn't
             # appear on production if carefully tested
             self.node.get_logger().error(f"Couldnt undock: {e}")
-            raise e
-
-    def stop_mapping(
-        self,
-        map_path: str = "map_default",
-        map_topic: str = "/map",
-        image_format: str = "png",
-        map_mode: str = "trinary",
-        free_thres: float = 0.196,
-        occupied_thres: float = 0.65,
-    ) -> None:
-        """
-        Stops the mapping process. This can only be done if Sopias4 Application and the mapping process is fully running,
-        otherwise itwill directly abort this process. It's basically a wrapper and calling the start_mapping service
-        client in the underlying node object. If the operation was successful, then it sets `self.is_mapping` to `False`
-
-        Args:
-            map_path(str, optional): The path to the map. Can be absolute or relative to a ros package. Defaults to "maps/map_default"
-            map_topic (str, optional): The topic under which the map should be served. Defaults to "/map"
-            image_format (str, optional): The image format under which the visualization of the map is saved. Can be either "png" "pgm", or "bmp". Defaults to "png"
-            map_mode (str, optional): Map modes: "trinary", "scale" or "raw". Defaults to "trinary"
-            free_thres (float, optional): Threshold over which a region is considered as free. Defaults to 0.196
-            occupied_thres (float, optional): Threshold over which a region is considered as occupied/obstacle. Defaults to 0.65
-
-        Under normal circumstances, you use this as an callback to connect to Ui element when it is e.g. pressed
-        """
-
-        try:
-            if self.is_mapping:
-                status_response = self.node._stop_mapping(
-                    image_format=image_format,
-                    map_topic=map_topic,
-                    map_path=map_path,
-                    occupied_thres=occupied_thres,
-                    free_thres=free_thres,
-                    map_mode=map_mode,
-                )
-                if status_response:
-                    self.turtlebot_running = True
-                    self.is_mapping = False
-                    self.node.get_logger().debug("Stopped Mapping")
-                else:
-                    self.turtlebot_running = False
-                    self.node.get_logger().error(
-                        "Couldnt stop mapping: Either SLAM node couldn't be shutdown or a unknown error occured"
-                    )
-
-            else:
-                self.node.get_logger().warning(
-                    "Couldn't stop mapping: Mapping is already stopped or Turtlebot is offline"
-                )
-                # Inform user about failure and see for it's response
-        except Exception as e:
-            # Re-raise exception if one occurs. Only for debugging and shouldn't
-            # appear on production if carefully tested
-            self.node.get_logger().error(f"Couldnt stop mapping: {e}")
             raise e
 
     def drive(
@@ -508,21 +539,6 @@ class GUINode(QMainWindow):
                 f"Couldnt send drive command to Turtlebot: {e}"
             )
             raise e
-
-    def closeEvent(self, event):
-        """
-        Executes when the GUI is closed
-
-        :meta private:
-        """
-        for node in self.node_executor.get_nodes():
-            node.destroy_node()
-            self.node_executor.remove_node(node)
-        self.node_executor.wake()
-        self.node_executor.shutdown(timeout_sec=10)
-
-        rclpy.shutdown()
-        event.accept()
 
     def display_dialog(self, request_data: ShowDialog.Request):
         """
@@ -665,6 +681,21 @@ class GUINode(QMainWindow):
             )
 
         return filepath
+
+    def closeEvent(self, event):
+        """
+        Executes when the GUI is closed
+
+        :meta private:
+        """
+        for node in self.node_executor.get_nodes():
+            self.node_executor.remove_node(node)
+            node.destroy_node()
+        self.node_executor.wake()
+        self.node_executor.shutdown(timeout_sec=10)
+
+        rclpy.shutdown()
+        event.accept()
 
 
 class GrapficalNode(Node):

@@ -181,9 +181,7 @@ class RobotManager(Node):
             ),
         )
 
-        # ---------- Shell processes to run nodes ----------
-        # The necessary turtlebot and mapping nodes are run inside shell processes via subprocess.popen,
-        # because so they can be shutdown cleanly during runtime and they run non-blocking
+        # ---------- Launch services to run nodes ----------
         self.__nav2_stack_launch_service: node_tools.LaunchService = (
             node_tools.LaunchService(
                 ros2_package="sopias4_framework",
@@ -314,27 +312,17 @@ class RobotManager(Node):
         self.get_logger().info(
             "Got service request to launch necessary turtlebot nodes"
         )
-        # --- Add namespace to yaml config of nav2 and amcl launch file ---
-        base_path = os.path.join(
-            get_package_share_directory("sopias4_application"), "config"
-        )
-        # yaml_tools.insert_namespace_into_yaml_config(
-        #     namespace=self.get_namespace(),
-        #     path=os.path.join(
-        #         base_path,
-        #         "nav2_base.yaml",
-        #     ),
-        #     output_path=os.path.join(
-        #         base_path,
-        #         "nav2.yaml",
-        #     ),
-        # )
+        # Add launchfile argument
+        1
+        if self.get_namespace() != "/":
+            self.__nav2_stack_launch_service.add_launchfile_arguments(
+                f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
+            )
+        else:
+            self.__nav2_stack_launch_service.add_launchfile_arguments(
+                f'use_simulation:={"true" if request_data.use_simulation  else "false"}'
+            )
 
-        self.__nav2_stack_launch_service.add_launchfile_arguments(
-            f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'
-        ) if self.get_namespace() != "/" else self.__nav2_stack_launch_service.add_launchfile_arguments(
-            f'use_simulation:={"true" if request_data.use_simulation  else "false"}'
-        )
         if self.__nav2_stack_launch_service.run():
             response_data.statuscode = EmptyWithStatuscode.Response.SUCCESS
         else:
