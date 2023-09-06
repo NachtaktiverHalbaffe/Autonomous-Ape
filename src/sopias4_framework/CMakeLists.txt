@@ -102,6 +102,7 @@ install(PROGRAMS
   sopias4_framework/nodes/robot_manager.py
   sopias4_framework/nodes/path_layer.py
   sopias4_framework/nodes/robot_layer.py
+  sopias4_framework/nodes/global_planner_testserver.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -112,6 +113,8 @@ install(PROGRAMS
 # Install launch files, configs, plugin descriptions
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY assets DESTINATION share/${PROJECT_NAME})
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

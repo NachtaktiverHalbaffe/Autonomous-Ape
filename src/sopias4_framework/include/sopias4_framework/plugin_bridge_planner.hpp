@@ -34,6 +34,8 @@ namespace plugin_bridges
                             GridBased:
                                 plugin: "plugin_bridges/PlannerBridge"
                                 plugin_name: "Astar"
+                                save_costmaps: True
+                                save_path: "/home/ws/"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/create_plan (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)
@@ -101,6 +103,17 @@ namespace plugin_bridges
             const geometry_msgs::msg::PoseStamped &start,
             const geometry_msgs::msg::PoseStamped &goal) override;
 
+        /**
+         * @brief Records the request which is sent to the Plugin implementation to a JSON file
+         * 
+         * This could be useful for recording data requests and reusing them later in a offline test environment
+         * 
+         * @param request The request which should be recorded
+         * @param save_path Full path to which the JSON file should be saved
+         * @param costmap The global costmap which should be saved as a pgm
+        */
+        void save_request(sopias4_msgs::srv::CreatePlan::Request::SharedPtr request, std::string save_path, nav2_costmap_2d::Costmap2D *costmap);
+
     private:
         /**
          * A pointer to the transformation tree buffer
@@ -130,6 +143,15 @@ namespace plugin_bridges
          * Should match with the bridge implementation
          */
         std::string plugin_name_;
+        /**
+         * If the global costmaps which are sent to the planner should be saved. It is useful to gather
+         * costmap which then can be used to as mocking data
+        */
+       bool save_costmaps_;
+       /**
+        * The path to where the costmap should be saved
+       */
+       std::string save_path_;
         /**
          * Service client which bridges the create_plan() method to a bridge implementation
          */

@@ -359,6 +359,8 @@ planner_server:
     GridBased:
       plugin: plugin_bridges/PlannerBridge
       plugin_name: "astar"
+      save_costmaps: True
+      save_path: "/home/ws/src/sopias4_framework/assets/global_costmaps/"
 
 smoother_server:
   ros__parameters:
