@@ -129,11 +129,14 @@ def pycostmap2d_2_occupancygrid(pycostmap: PyCostmap2D) -> OccupancyGrid:
     # occ_grid.data = [0] * len(pycostmap.costmap)
     # for i in range(len(occ_grid.data)):
     #     occ_grid.data[i]
-    occ_grid.info.height = pycostmap.size_y
-    occ_grid.info.width = pycostmap.size_x
-    occ_grid.info.resolution = pycostmap.resolution
-    occ_grid.info.origin.position.x = pycostmap.origin_x
-    occ_grid.info.origin.position.y = pycostmap.origin_y
+    occ_grid.info.height = pycostmap.getSizeInCellsY()
+    occ_grid.info.width = pycostmap.getSizeInCellsX()
+    occ_grid.info.resolution = pycostmap.getOriginX()
+    occ_grid.info.origin.position.x = pycostmap.getOriginX()
+    occ_grid.info.origin.position.y = pycostmap.getOriginY()
+    occ_grid.info.origin.position.z = 0.0
+    occ_grid.info.origin.orientation.w = 0.0
+    occ_grid.header.frame_id = pycostmap.getGlobalFrameID()
 
     return occ_grid
 

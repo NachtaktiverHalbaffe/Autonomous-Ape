@@ -94,5 +94,4 @@ class LayerPyPlugin(Node):
 
     def destroy_node(self):
         self.get_logger().info("Shutting down node")
-        self.__plugin_bridge_server.destroy()
         super().destroy_node()

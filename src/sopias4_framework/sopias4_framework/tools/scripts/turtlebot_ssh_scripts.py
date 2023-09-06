@@ -70,7 +70,12 @@ def restart_turtlebot(
         port (int, optional): The SSH port. Defaults to 22 (standard SSH port)
         password (str, optional): The used password for connecting via SSH. Defaults to the default password, thus only needed to be changed if password was changed on the Raspberry Pi
     """
-    send_ssh_cmd(ip_adress, "turtlebot4-service-restart", port, password)
+    send_ssh_cmd(
+        ip_adress=ip_adress,
+        command="turtlebot4-service-restart",
+        port=port,
+        password=password,
+    )
 
 
 if __name__ == "__main__":
@@ -96,7 +101,8 @@ if __name__ == "__main__":
         if opt in ("-c", "--command"):
             command = str(arg)
 
-    send_ssh_cmd(
-        ip_adress=ipv4_addr, command=command, port=port
-    ) if port is not None else send_ssh_cmd(ip_adress=ipv4_addr, command=command)
+    # send_ssh_cmd(
+    #     ip_adress=ipv4_addr, command=command, port=port
+    # ) if port is not None else send_ssh_cmd(ip_adress=ipv4_addr, command=command)
+    restart_turtlebot(ipv4_addr)
     sys.exit()

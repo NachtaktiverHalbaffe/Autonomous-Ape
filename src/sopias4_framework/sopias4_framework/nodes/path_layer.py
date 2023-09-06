@@ -19,7 +19,20 @@ from sopias4_msgs.msg import Robot, RobotStates
 
 class PathLayer(LayerPyPlugin):
     """
-    A costmap layer into which the footprint of all known global navigation paths of all robots are set as an cost.
+    A costmap layer into which the footprint of all known global navigation paths of all robots are set as moderate costs. This layer
+    is already implemented and only needs to be configured to be run in the Navigation 2 stack. For this purpose, make sure that this node
+    is running and add following to your costmap configuration inside `nav2.yaml` according to this example:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        local_costmap:
+            local_costmap:
+                ros__parameters:
+                    plugins: [robot_layer]
+                    robot_layer:
+                        plugin: plugin_bridges/LayerPlugin
+                        plugin_name: "path_layer"
 
     Attributes:
         COST_PATH(np.uint8): The cost the robot should have. Usually moderate cost because we want the roboter\
@@ -40,7 +53,6 @@ class PathLayer(LayerPyPlugin):
         self.ROBOT_RADIUS: float = 0.25
 
         self.robot_paths: list[Path] = list()
-        self.costmap: PyCostmap2D = PyCostmap2D(OccupancyGrid())
 
         # Create own sub node for service clients so they can spin independently
         self.__sub_robot_states = self.create_subscription(
@@ -72,15 +84,15 @@ class PathLayer(LayerPyPlugin):
         Returns:
             nav2_simplecommander.costmap_2d.PyCostmap2D: The updated costmap 
         """
-        # TODO If neccessary only update within the specified boundary window
         # Set cost of all pixels in costmap to zero, because only the costs calculated by this layer should be included in the map.
         # In the plugin bridge, all layers get combined so the cleared data doesn't get lost if it is up to date
         costmap.costmap.fill(np.uint8(0))
+        costmap.global_frame_id = "map"
+
         self.get_logger().debug(
             "Path layer is inserting planned paths of other robots as moderate costs",
             throttle_duration_sec=2,
         )
-        self.costmap = costmap
 
         # Calculate how thick the pixels need to be inflated to meet size of robot
         inflation_distance_pxl: int = math.ceil(
@@ -106,7 +118,8 @@ class PathLayer(LayerPyPlugin):
                 for x in rr:
                     for y in cc:
                         # Set cost of path
-                        costmap.setCost(x, y, self.COST_PATH)
+                        if costmap.getIndex(x, y) < len(costmap.costmap):
+                            costmap.setCost(x, y, self.COST_PATH)
 
                         # Inflate this pixel so path is as thick as the robot
                         for y_infl in range(
@@ -123,7 +136,10 @@ class PathLayer(LayerPyPlugin):
                                     int(x) + inflation_distance_pxl + 1,
                                 ),
                             ):
-                                costmap.setCost(x_infl, y_infl, self.COST_PATH)
+                                if costmap.getIndex(x_infl, y_infl) < len(
+                                    costmap.costmap
+                                ):
+                                    costmap.setCost(x_infl, y_infl, self.COST_PATH)
 
                 last_node = current_node
 
@@ -138,23 +154,11 @@ class PathLayer(LayerPyPlugin):
 
         # Add new position of robots to list
         for robot in msg.robot_states:
-            # Check if robotstate is the robot itself
-            if robot.name_space == self.get_namespace():
+            # Check if robotstate is the robot itself or if robot isn't navigating => ignore these paths
+            if robot.name_space == self.get_namespace() or not robot.is_navigating:
                 continue
 
             if len(robot.nav_path.poses) == 0:
-                continue
-            # Check if robot already finished driving the route
-            last_node_pose = costmap_tools.pose_2_costmap(
-                robot.nav_path.poses[-1], self.costmap
-            )
-            current_pose = costmap_tools.pose_2_costmap(robot.pose, self.costmap)
-            if (
-                costmap_tools.euclidian_distance_map_domain(
-                    last_node_pose, current_pose, self.costmap
-                )
-                <= 0.2
-            ):
                 continue
 
             self.robot_paths.append(robot.nav_path)
