@@ -3,11 +3,11 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import PushRosNamespace, SetRemap
-from launch_ros.descriptions import ParameterFile
-from nav2_common.launch import ReplaceString, RewrittenYaml
+from launch_ros.actions import Node, PushRosNamespace
+from nav2_common.launch import ReplaceString
 
 ARGUMENTS = [
     DeclareLaunchArgument(
@@ -17,6 +17,22 @@ ARGUMENTS = [
         description="Use sim time",
     ),
     DeclareLaunchArgument("namespace", default_value="", description="Robot namespace"),
+    DeclareLaunchArgument(
+        "use_composition",
+        default_value="False",
+        description="Whether to use composed bringup",
+    ),
+    DeclareLaunchArgument(
+        "autostart",
+        default_value="true",
+        description="Automatically startup the nav2 stack",
+    ),
+    DeclareLaunchArgument("log_level", default_value="info", description="log level"),
+    DeclareLaunchArgument(
+        "container_name",
+        default_value="nav2_container",
+        description="the name of conatiner that nodes will load in if use composition",
+    ),
 ]
 
 
@@ -25,6 +41,11 @@ def generate_launch_description():
 
     namespace = LaunchConfiguration("namespace")
     use_sim_time = LaunchConfiguration("use_sim_time")
+    use_composition = LaunchConfiguration("use_composition")
+    log_level = LaunchConfiguration("log_level")
+    autostart = LaunchConfiguration("autostart")
+    container_name = LaunchConfiguration("container_name")
+    container_name_full = (namespace, "/", container_name)
 
     nav2_params_arg = DeclareLaunchArgument(
         "params_file",
@@ -46,10 +67,23 @@ def generate_launch_description():
         source_file=params_file,
         replacements={"//": ("/")},
     )
+    remappings = [("/tf", "tf"), ("/tf_static", "tf_static"), ("map", "/map")]
 
     nav2 = GroupAction(
         [
             PushRosNamespace(namespace),
+            Node(
+                condition=IfCondition(use_composition),
+                name=container_name,
+                package="rclcpp_components",
+                # TODO change to non-isolated container if communication is strange
+                executable="component_container_isolated",
+                parameters=[{"autostart": autostart}],
+                # arguments=["--ros-args", "--log-level", log_level],
+                remappings=remappings,
+                namespace=namespace,
+                output="screen",
+            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -58,8 +92,11 @@ def generate_launch_description():
                 ),
                 launch_arguments={
                     "use_sim_time": use_sim_time,
-                    "use_composition": "False",
+                    "use_composition": use_composition,
                     "params_file": params_file,
+                    "autostart": autostart,
+                    "container_name": container_name,
+                    "namespace": namespace,
                 }.items(),
             ),
         ]
