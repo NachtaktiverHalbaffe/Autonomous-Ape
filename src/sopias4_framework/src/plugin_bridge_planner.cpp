@@ -10,8 +10,7 @@
 #include "sopias4_framework/msgs_utils.hpp"
 #include "sopias4_msgs/srv/create_plan.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <fstream>
 #include <string>
 #include "yaml-cpp/yaml.h"
@@ -163,13 +162,14 @@ namespace plugin_bridges
       }
       json_object["costmap"]["data"] = data;
 
-      std::ofstream json_file;
-      json_file.open(save_path + "global_costmap_" + oss.str() + ".json");
-      Json::StyledWriter styledWriter;
-      json_file << styledWriter.write(json_object);
-      json_file.close();
+      Json::StreamWriterBuilder builder;
+      builder["commentStyle"] = "None";
+      builder["indentation"] = "   ";
+      std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+      std::ofstream outputFileStream(save_path + "global_costmap_" + oss.str() + ".json");
+      writer->write(json_object, &outputFileStream);
     }
-
+    
     // Save costmap as a map
     {
       costmap->saveMap(save_path + "global_costmap_" + oss.str() + ".pgm");

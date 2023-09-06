@@ -28,7 +28,10 @@ find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(sopias4_msgs REQUIRED)
-# find_package(teb_local_planner REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(yaml_cpp_vendor REQUIRED)
+find_package(jsoncpp REQUIRED)
+pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -45,7 +48,10 @@ find_package(rclpy REQUIRED)
 # --- Configure executabels/Nodes ---------
 ######################################
 # ------------------- C++ ------------------------
-include_directories(include)
+include_directories(
+  include
+  ${JSONCPP_INCLUDE_DIRS}
+)
 
 set(library_name plugin_bridges)
 # Declare dependecies here
@@ -65,6 +71,8 @@ set(dependencies
     nav2_core
     pluginlib
     sopias4_msgs
+    yaml_cpp_vendor
+    ${JSONCPP_LIBRARIES}
 )
 # Add the plugin bridges source files here
 add_library(${library_name} SHARED

@@ -14,7 +14,24 @@
 #include "nav2_util/lifecycle_node.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "sopias4_msgs/srv/create_plan.hpp"
-
+#include <cmath>
+#include <string>
+#include <memory>
+#include <iomanip>
+#include <iostream>
+#include <ctime>
+#include <sstream>
+#include "nav2_util/node_utils.hpp"
+#include "sopias4_framework/plugin_bridge_planner.hpp"
+#include "sopias4_framework/msgs_utils.hpp"
+#include "sopias4_msgs/srv/create_plan.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/writer.h>
+#include <fstream>
+#include <string>
+#include "yaml-cpp/yaml.h"
 namespace plugin_bridges
 {
     /**

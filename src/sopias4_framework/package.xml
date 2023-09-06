@@ -41,6 +41,9 @@
   <depend>nav2_core</depend>
   <depend>pluginlib</depend>
   <depend>sopias4_msgs</depend>
+  <depend>yaml-cpp</depend>
+  <build_depend>libjsoncpp-dev</build_depend>
+  <exec_depend>libjsoncpp</exec_depend>
 
   <!-- Message, service and action definition generators -->
   <build_depend>rosidl_default_generators</build_depend>
