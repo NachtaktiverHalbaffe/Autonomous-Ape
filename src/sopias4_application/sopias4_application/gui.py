@@ -252,6 +252,7 @@ class GUI(GUINode):
         self.load_ros2_node(self.__path_layer_node)
         self.load_ros2_node(self.__robot_layer_node)
         self.ui.pushButton_launch_turtlebot.setEnabled(False)
+        self.ui.pushButton_stop_pathlayer.setEnabled(True)
         self.__enable_drive_buttons(True)
 
     def __launch_rviz2(self):
@@ -306,6 +307,8 @@ class GUI(GUINode):
         self.__enable_drive_buttons(False)
         self.ui.pushButton_dock.setEnabled(False)
         self.ui.pushButton_undock.setEnabled(False)
+        self.ui.pushButton_launch_pathlayer.setEnabled(True)
+        self.ui.pushButton_stop_pathlayer.setEnabled(False)
 
     def __start_mapping(self):
         self.start_mapping()
