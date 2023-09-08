@@ -8,6 +8,8 @@ from nav2_simple_commander.costmap_2d import PyCostmap2D
 from sopias4_framework.nodes.planner_pyplugin import PlannerPyPlugin
 from sopias4_framework.tools.ros2 import costmap_tools
 
+from sopias4_application.planner_util import NeighborFinder
+
 
 class Astar(PlannerPyPlugin):
     """
@@ -51,6 +53,9 @@ class Astar(PlannerPyPlugin):
         ###################
         # --- Initialization ----
         ###################
+        neighbor_finder = NeighborFinder(
+            costmap, weight_distance_costs=1.0, weight_costmap_costs=0.75
+        )
         # The global path
         path = []
         self.get_logger().info("Using A* algorithm")
@@ -70,9 +75,7 @@ class Astar(PlannerPyPlugin):
         open_canditates.add(
             (
                 start_index,
-                costmap_tools.euclidian_distance_pixel_domain(
-                    start_index, goal, costmap
-                ),
+                neighbor_finder.euclidian_distance_pixel_domain(start_index, goal),
             )
         )
         # Dict for mapping children to parent
@@ -82,8 +85,8 @@ class Astar(PlannerPyPlugin):
         natural_costs[start_index] = 0
         # Final costs which are natural_costs + heuristic costs
         final_costs: dict = dict()
-        final_costs[start_index] = costmap_tools.euclidian_distance_pixel_domain(
-            start_index, goal_index, costmap
+        final_costs[start_index] = neighbor_finder.euclidian_distance_pixel_domain(
+            start_index, goal_index
         )
 
         path_found: bool = False
@@ -100,9 +103,7 @@ class Astar(PlannerPyPlugin):
 
             # If current_node is the goal, finish the algorithm execution
             if (
-                costmap_tools.euclidian_distance_map_domain(
-                    current_index, goal_index, costmap
-                )
+                neighbor_finder.euclidian_distance_map_domain(current_index, goal_index)
                 <= goal_tolerance
             ):
                 self.get_logger().debug("A* found goal node")
@@ -113,12 +114,8 @@ class Astar(PlannerPyPlugin):
 
             # --- Process neighbors of nodes ---
             # Get neighbors
-            neighbors: list[Tuple[int, float]] = costmap_tools.find_neighbors_index(
+            neighbors: list[Tuple[int, float]] = neighbor_finder.find_neighbors_index(
                 current_index,
-                costmap,
-                step_size=1,
-                weight_distance_costs=1.0,
-                weight_costmap_costs=0.75,
             )
             for neighbor_index, cost in neighbors:
                 # Skip node if already processed
@@ -128,8 +125,8 @@ class Astar(PlannerPyPlugin):
                 # Calculate natural costs of current neighbor node like in dijkstra
                 n_cost = natural_costs[current_index] + cost
                 # Add heuristic (euclidian distance) to costs
-                f_cost = n_cost + costmap_tools.euclidian_distance_pixel_domain(
-                    neighbor_index, goal, costmap
+                f_cost = n_cost + neighbor_finder.euclidian_distance_pixel_domain(
+                    neighbor_index, goal
                 )
 
                 # We can simply check if the neighbor has already costs
