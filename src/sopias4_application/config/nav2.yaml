@@ -4,8 +4,6 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_link
     odom_topic: odom
-    # default_nav_to_pose_bt_xml: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/nav_to_pose_with_consistent_replanning_and_if_path_becomes_invalid.xml
-    # default_nav_through_poses_bt_xml: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/nav_to_pose_with_consistent_replanning_and_if_path_becomes_invalid.xml
     bt_loop_duration: 10
     default_server_timeout: 20
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
@@ -109,8 +107,6 @@ controller_server:
       ##############
       # plugin: teb_local_planner::TebLocalPlannerROS
       primary_controller: teb_local_planner::TebLocalPlannerROS
-      # map_frame: "odom"
-      # odom_topic: "odom"
 
       teb_autosize: 1.0
       dt_ref: 0.3

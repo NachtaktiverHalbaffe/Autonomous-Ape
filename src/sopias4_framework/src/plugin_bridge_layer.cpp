@@ -38,7 +38,7 @@ namespace plugin_bridges
         service_node_ = std::make_shared<rclcpp::Node>("_planner_bridge_service_node_" + plugin_name_);
 
         client_ = service_node_->create_client<sopias4_msgs::srv::UpdateCosts>(plugin_name_ + "/update_costs");
-        
+
         need_recalculation_ = false;
         current_ = true;
     }
@@ -109,8 +109,9 @@ namespace plugin_bridges
         {
             return;
         }
-        if(!client_->service_is_ready()){
-            RCLCPP_WARN(service_node_->get_logger(),"Service isn't online, cant update %s layer",plugin_name_.c_str());
+        if (!client_->service_is_ready())
+        {
+            RCLCPP_WARN(service_node_->get_logger(), "Service isn't online, cant update %s layer", plugin_name_.c_str());
             return;
         }
 
@@ -125,6 +126,7 @@ namespace plugin_bridges
         // - updateWithTrueOverwrite()
         // In this case using master_array pointer is equal to modifying local costmap_
         // pointer and then calling updateWithTrueOverwrite():
+        unsigned char *master_array = master_grid.getCharMap();
         unsigned int size_x = master_grid.getSizeInCellsX(), size_y = master_grid.getSizeInCellsY();
 
         // {min_i, min_j} - {max_i, max_j} - are update-window coordinates.
@@ -143,7 +145,7 @@ namespace plugin_bridges
         request->min_j = min_j;
         request->max_i = max_i;
         request->max_j = max_j;
-        request->current_costmap = sopias4_framework::tools::costmap_2_costmap_msg(&master_grid);
+        request->current_costmap = sopias4_framework::tools::costmap_2_costmap_msg(&master_grid, layered_costmap_->getGlobalFrameID());
 
         // Send request and receive response
         auto future = client_->async_send_request(request);
@@ -151,18 +153,19 @@ namespace plugin_bridges
 
         if (return_code == rclcpp::FutureReturnCode::SUCCESS)
         {
-            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&future.get()->updated_costmap, master_grid, min_i,min_j,max_i,max_j);
-            // updateWithMax(master_grid, min_i, min_j, max_i, max_j);
+            nav_msgs::msg::OccupancyGrid received_map = future.get()->updated_costmap;
+            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&received_map, master_array, min_i, min_j, max_i, max_j);
+            
         }
         current_ = true;
     }
-        void LayerBridge::reset()
-        {
+    void LayerBridge::reset()
+    {
         resetMaps();
         current_ = false;
         need_recalculation_ = true;
-        }
-        
+    }
+
 } // namespace plugin_bridges
 
 // This is the macro allowing a plugin_bridges::LayerBridge class

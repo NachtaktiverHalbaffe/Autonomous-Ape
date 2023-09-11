@@ -84,7 +84,14 @@ add_library(${library_name} SHARED
 ament_target_dependencies(${library_name}
     ${dependencies}
 )
-
+target_include_directories(${library_name} SYSTEM
+  PUBLIC
+    ${JSONCPP_INCLUDE_DIRS}
+    ${YamlCpp_INCLUDE_DIRS})
+target_link_libraries(${library_name}
+  ${JSONCPP_LIBRARIES}
+  ${YamlCpp_LIBRARIES}
+)
 # Define plugins here
 target_compile_definitions(${library_name} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 pluginlib_export_plugin_description_file(nav2_core plugin_bridge_planner.xml)

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+import time
+
 import numpy as np
 import rclpy
-from geometry_msgs.msg import PoseWithCovarianceStamped
+import tf2_ros
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from sopias4_framework.nodes.layer_pyplugin import LayerPyPlugin
@@ -18,7 +21,6 @@ class RobotLayer(LayerPyPlugin):
 
     .. highlight:: yaml
     .. code-block:: yaml
-
         local_costmap:
             local_costmap:
                 ros__parameters:
@@ -51,13 +53,8 @@ class RobotLayer(LayerPyPlugin):
             RobotStates,
             "/robot_states",
             self.__update_robot_states,
-            QoSProfile(
-                reliability=QoSReliabilityPolicy.BEST_EFFORT,
-                durability=QoSDurabilityPolicy.VOLATILE,
-                depth=5,
-            ),
+            10,
         )
-        self.get_logger().info("Started node")
 
     def update_costs(
         self, min_i: int, min_j: int, max_i: int, max_j: int, costmap: PyCostmap2D
@@ -83,8 +80,6 @@ class RobotLayer(LayerPyPlugin):
             throttle_duration_sec=2,
         )
         costmap.costmap.fill(np.uint8(0))
-        costmap.global_frame_id = "map"
-
         radius_pixel: int = int(self.ROBOT_RADIUS * (1 / costmap.getResolution()))
 
         costmap = self.__draw_circle_simple(
@@ -104,7 +99,13 @@ class RobotLayer(LayerPyPlugin):
     ) -> PyCostmap2D:
         # Iterate through all known robot positions
         for position in self.robot_positions:
-            central_point = costmap_tools.pose_2_costmap(position.pose.pose, costmap)
+            # Position could be in another tf_frame => Use frame safe conversion
+            try:
+                central_point = self.pose_with_covariance_stamped_to_costmap_framesafe(
+                    position, costmap
+                )
+            except Exception as e:
+                continue
 
             # The footprint is a circle => Only check if pixel in one quarter is within robot radius and
             # mirror setting costs to all 4 quadrants if pixel is within robot radius
@@ -119,9 +120,16 @@ class RobotLayer(LayerPyPlugin):
                         )
                         < self.ROBOT_RADIUS
                     ):
-                        if costmap.getIndex(
-                            central_point[0] + x_offset, central_point[0] + 1
-                        ) > len(costmap.costmap):
+                        if (
+                            costmap.getIndex(
+                                central_point[0] + x_offset, central_point[1] + y_offset
+                            )
+                            >= len(costmap.costmap)
+                            or costmap.getIndex(
+                                central_point[0] + x_offset, central_point[1] + y_offset
+                            )
+                            <= 0
+                        ):
                             continue
                         # Update costs in all 4 quadrants if pixel is within robot radius
                         # Upper right quadrant
@@ -160,6 +168,7 @@ class RobotLayer(LayerPyPlugin):
         max_j: int,
         costmap: PyCostmap2D,
     ) -> PyCostmap2D:
+        tmp_costmap = costmap
         # Getting a generic circle
         y_indices, x_indices = np.ogrid[
             -radius_pixel : radius_pixel + 1, -radius_pixel : radius_pixel + 1
@@ -169,22 +178,32 @@ class RobotLayer(LayerPyPlugin):
         indices_in_circle = np.where(in_circle)
 
         for position in self.robot_positions:
-            central_point = costmap_tools.pose_2_costmap(position.pose.pose, costmap)
+            # Position could be in another tf_frame => Use frame safe conversion
+            try:
+                central_point = self.pose_with_covariance_stamped_to_costmap_framesafe(
+                    position, costmap
+                )
+            except Exception as e:
+                continue
+
             # Calculate indices in the costmap where the circle is projected into
             indices_in_1d = (
                 central_point[1] + indices_in_circle[0]
             ) * costmap.getSizeInCellsX() + (central_point[0] + indices_in_circle[1])
             # Cut all values off which are outside the update window
-            indices_in_update_window = np.where(
-                (central_point[0] + indices_in_circle[1] >= min_i)
-                & (central_point[0] + indices_in_circle[1] < max_i)
-                & (central_point[1] + indices_in_circle[0] >= min_j)
-                & (central_point[1] + indices_in_circle[0] < max_j)
-            )
+            # indices_in_update_window = np.where(
+            #     (central_point[0] + indices_in_circle[1] >= min_i)
+            #     & (central_point[0] + indices_in_circle[1] < max_i)
+            #     & (central_point[1] + indices_in_circle[0] >= min_j)
+            #     & (central_point[1] + indices_in_circle[0] < max_j)
+            # )
             # Set cost
-            costmap.costmap[indices_in_1d] = self.COST_ROBOTS
+            indices_in_1d_in_bound = np.delete(
+                indices_in_1d, np.argwhere(indices_in_1d >= len(tmp_costmap.costmap))
+            )
+            tmp_costmap.costmap[indices_in_1d_in_bound] = self.COST_ROBOTS
 
-        return costmap
+        return tmp_costmap
 
     def __update_robot_states(self, msg: RobotStates) -> None:
         """
@@ -192,6 +211,7 @@ class RobotLayer(LayerPyPlugin):
         """
         # Clear last known positions
         self.robot_positions.clear()
+
         # Add new position of robots to list
         for robot in msg.robot_states:
             if robot.name_space != self.get_namespace():

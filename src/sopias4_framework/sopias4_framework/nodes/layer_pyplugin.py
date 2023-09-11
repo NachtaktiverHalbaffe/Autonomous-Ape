@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
 import abc
 from threading import Thread
+from typing import Tuple
 
 import rclpy
 import sopias4_framework.tools.ros2
+import tf2_geometry_msgs
+from geometry_msgs.msg import Pose, PoseStamped, TransformStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
+from nav_msgs.msg import OccupancyGrid
+from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile
 from rclpy.service import Service
+from rclpy.time import Time
+from sopias4_framework.tools.ros2 import costmap_tools
 from sopias4_framework.tools.ros2.costmap_tools import pycostmap2d_2_occupancygrid
+from tf2_geometry_msgs import Pose, PoseStamped, PoseWithCovarianceStamped
+from tf2_msgs.msg import TFMessage
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 from sopias4_msgs.srv import UpdateCosts
 
@@ -43,11 +55,45 @@ class LayerPyPlugin(Node):
         namespace: str | None = None,
     ) -> None:
         super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
-
+        self.get_logger().info(f"Initializing {plugin_name}")
         # Service
         self.__plugin_bridge_server: Service = self.create_service(
             UpdateCosts, f"{plugin_name}/update_costs", self.__update_costs_callback
         )
+
+        self.get_logger().info("Initializing tf buffer")
+
+        self.tf_buffer: Buffer = Buffer()
+        self.__tf_listener = TransformListener(self.tf_buffer, self)
+
+        # Transformlistener doesnt hear on namespaced tf topics => recreate subscriptions with namespaced topics
+        self.get_logger().info("Changing tf topics to namespaced ones")
+        self.__tf_listener.unregister()
+        qos = QoSProfile(
+            depth=100,
+            durability=DurabilityPolicy.VOLATILE,
+            history=HistoryPolicy.KEEP_LAST,
+        )
+        static_qos = QoSProfile(
+            depth=100,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL,
+            history=HistoryPolicy.KEEP_LAST,
+        )
+        self.__tf_listener.tf_sub = self.create_subscription(
+            TFMessage,
+            "tf",
+            self.__tf_listener.callback,
+            qos,
+            callback_group=self.__tf_listener.group,
+        )
+        self.__tf_listener.tf_static_sub = self.create_subscription(
+            TFMessage,
+            "tf_static",
+            self.__tf_listener.static_callback,
+            static_qos,
+            callback_group=self.__tf_listener.group,
+        )
+        self.get_logger().info(f"Started {plugin_name}")
 
     def __update_costs_callback(
         self, request: UpdateCosts.Request, response: UpdateCosts.Response
@@ -91,6 +137,52 @@ class LayerPyPlugin(Node):
         Returns:
             nav2_simplecommander.costmap_2d.PyCostmap2D: The updated costmap 
         """
+
+    def transform_pose(self, pose, target_frame: str, timeout_milliseconds: int = 100):
+        return self.tf_buffer.transform(
+            pose,
+            target_frame=target_frame,
+        )
+
+    def pose_with_covariance_stamped_to_costmap_framesafe(
+        self, pose: PoseWithCovarianceStamped, costmap: PyCostmap2D
+    ) -> Tuple[int, int]:
+        if pose.header.frame_id == costmap.getGlobalFrameID():
+            return costmap_tools.pose_2_costmap(pose.pose.pose, costmap)
+        else:
+            try:
+                transform = self.tf_buffer.lookup_transform(
+                    costmap.getGlobalFrameID(), pose.header.frame_id, Time()
+                )
+                pose_transformed = (
+                    tf2_geometry_msgs.do_transform_pose_with_covariance_stamped(
+                        pose, transform
+                    )
+                )
+                # pose_transformed = self.transform_pose(pose, costmap.getGlobalFrameID())
+                return costmap_tools.pose_2_costmap(
+                    pose_transformed.pose.pose, costmap  # type: ignore
+                )
+            except Exception as e:
+                raise e
+
+    def pose_to_costmap_framesafe(
+        self, pose: PoseStamped, costmap: PyCostmap2D
+    ) -> Tuple[int, int]:
+        if pose.header.frame_id == costmap.getGlobalFrameID():
+            return costmap_tools.pose_2_costmap(pose, costmap)
+        else:
+            try:
+                transform = self.tf_buffer.lookup_transform(
+                    costmap.getGlobalFrameID(), pose.header.frame_id, Time()
+                )
+                pose_transformed = tf2_geometry_msgs.do_transform_pose_stamped(
+                    pose, transform
+                )
+                # pose_transformed = self.transform_pose(pose, costmap.getGlobalFrameID())
+                return costmap_tools.pose_2_costmap(pose_transformed.pose, costmap)  # type: ignore
+            except Exception as e:
+                raise e
 
     def destroy_node(self):
         self.get_logger().info("Shutting down node")

@@ -50,7 +50,7 @@ class PathLayer(LayerPyPlugin):
                 namespace=namespace,
             )
         self.COST_PATH: np.uint8 = np.uint8(142)
-        self.ROBOT_RADIUS: float = 0.25
+        self.ROBOT_RADIUS: float = 0.15
 
         self.robot_paths: list[Path] = list()
 
@@ -87,7 +87,6 @@ class PathLayer(LayerPyPlugin):
         # Set cost of all pixels in costmap to zero, because only the costs calculated by this layer should be included in the map.
         # In the plugin bridge, all layers get combined so the cleared data doesn't get lost if it is up to date
         costmap.costmap.fill(np.uint8(0))
-        costmap.global_frame_id = "map"
 
         self.get_logger().debug(
             "Path layer is inserting planned paths of other robots as moderate costs",
@@ -105,12 +104,16 @@ class PathLayer(LayerPyPlugin):
             # Ignore if robot hasnt a planned path
             if len(path.poses) == 0:
                 continue
+            try:
+                last_node: Tuple[int, int] = self.pose_to_costmap_framesafe(path.poses[0], costmap)  # type: ignore
+            except Exception as e:
+                continue
 
-            last_node: Tuple[int, int] = costmap_tools.pose_2_costmap(
-                path.poses[0], costmap  # type: ignore
-            )
             for node in path.poses[1::]:  # type: ignore
-                current_node = costmap_tools.pose_2_costmap(node, costmap)
+                try:
+                    current_node = self.pose_to_costmap_framesafe(node, costmap)
+                except Exception as e:
+                    continue
                 # Basically a Bresenhams line algorithm implementation
                 rr, cc = draw.line(
                     last_node[0], last_node[1], current_node[0], current_node[1]
@@ -126,14 +129,14 @@ class PathLayer(LayerPyPlugin):
                             max(0, int(y) - inflation_distance_pxl),
                             min(
                                 costmap.getSizeInCellsY(),
-                                int(y) + inflation_distance_pxl + 1,
+                                int(y) + inflation_distance_pxl,
                             ),
                         ):
                             for x_infl in range(
                                 max(0, int(x) - inflation_distance_pxl),
                                 min(
                                     costmap.getSizeInCellsX(),
-                                    int(x) + inflation_distance_pxl + 1,
+                                    int(x) + inflation_distance_pxl,
                                 ),
                             ):
                                 if costmap.getIndex(x_infl, y_infl) < len(

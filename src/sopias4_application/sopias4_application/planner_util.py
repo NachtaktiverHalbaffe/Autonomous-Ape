@@ -458,4 +458,4 @@ class NeighborFinder:
         if type(goal) == int:
             goal = costmap_tools.index_2_costmap(goal, self.costmap)
 
-        return sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)  # type: ignore
+        return math.sqrt((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2)  # type: ignore
