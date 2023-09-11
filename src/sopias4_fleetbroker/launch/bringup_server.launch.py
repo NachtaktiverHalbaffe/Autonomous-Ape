@@ -32,19 +32,21 @@ from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Get the launch directory
-    sopias4_map_server_path = get_package_share_directory("sopias4_map_server")
+    sopias4_fleetbroker_path = get_package_share_directory("sopias4_fleetbroker")
 
     params_file = LaunchConfiguration("params_file")
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         "map",
-        default_value=os.path.join(sopias4_map_server_path, "maps", "default_map.yaml"),
+        default_value=os.path.join(
+            sopias4_fleetbroker_path, "maps", "default_map.yaml"
+        ),
         description="Full path to map yaml file to load",
     )
     declare_params_file_cmd = DeclareLaunchArgument(
         "params_file",
         default_value=os.path.join(
-            sopias4_map_server_path, "config", "map_server.yaml"
+            sopias4_fleetbroker_path, "config", "map_server.yaml"
         ),
         description="Full path to the ROS2 parameters file to use for all launched nodes",
     )
@@ -65,7 +67,7 @@ def generate_launch_description():
     map_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [sopias4_map_server_path, "launch", "map_server.launch.py"]
+                [sopias4_fleetbroker_path, "launch", "map_server.launch.py"]
             ),
         ),
         launch_arguments={
@@ -78,7 +80,7 @@ def generate_launch_description():
     )
 
     multi_robot_coordinator = Node(
-        package="sopias4_map_server",
+        package="sopias4_fleetbroker",
         executable="multi_robot_coordinator",
         name="multi_robot_coordinator",
     )

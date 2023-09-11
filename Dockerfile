@@ -103,7 +103,7 @@ RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >>  /home/${USERNAME}/.bashr
 RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
 # Setup some aliases
 RUN echo 'alias sopias4-application="ros2 run sopias4_application gui"' >>  /home/${USERNAME}/.bashrc
-RUN echo 'alias sopias4-mapserver="ros2 run sopias4_map_server gui.py"' >>  /home/${USERNAME}/.bashrc
+RUN echo 'alias sopias4-fleetbroker="ros2 run sopias4_fleetbroker gui.py"' >>  /home/${USERNAME}/.bashrc
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME

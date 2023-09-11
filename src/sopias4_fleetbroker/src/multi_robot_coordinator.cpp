@@ -73,7 +73,7 @@ private:
 			if (element->name_space == request->name_space)
 			{
 				response->robot = *element;
-				RCLCPP_DEBUG(logger, "Found state for T urtlebot with namespace %s", request->name_space.c_str());
+				RCLCPP_DEBUG(logger, "Found state for Turtlebot with namespace %s", request->name_space.c_str());
 				break;
 			}
 		}

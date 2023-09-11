@@ -1,0 +1,55 @@
+# Name of the domain bridge, used for node naming and logging
+name: <robot_namespace>.sopias4_domain_bridge_namespaceless
+from_domain: 1
+to_domain: 0
+topics:
+  # ------------------- From turtlebot ---------------------------
+  # Amcl pose topic
+  amcl_pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    from_domain: 1
+    to_domain: 0
+
+  # Slam pose topic
+  pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    from_domain: 1
+    to_domain: 0
+
+  # Global path topic
+  plan:
+    type: nav_msgs/msg/Path
+    from_domain: 1
+    to_domain: 0
+
+  # Is navigating topic
+  is_navigating:
+    type: std_msgs/msg/Bool
+    from_domain: 1
+    to_domain: 0
+
+  # ------------------ From Fleetbroker --------------------------
+  # States of robots topic
+  robot_states:
+    type: sopias4_msgs/msg/RobotStates
+    from_domain: 0
+    to_domain: 1
+  map:
+    type: nav_msgs/msg/OccupancyGrid
+    from_domain: 0
+    to_domain: 1
+
+services:
+  # Only services from fleetbroker need to be bridged
+  # Register service
+  register_namespace:
+    type: sopias4_msgs/srv/RegistryService
+    from_domain: 0
+    to_domain: 1
+  # Unregister service
+  unregister_namespace:
+    type: sopias4_msgs/srv/RegistryService
+    from_domain: 0
+    to_domain: 1
+  map_saver/save_map:
+    type: nav2_msgs/srv/SaveMap

@@ -1,4 +1,4 @@
-# Sopias4 Map Server  <!-- omit in toc -->
+# Sopias4 Fleetbroker  <!-- omit in toc -->
 This package provides a central map server and a central identity provider. It provides a static map to all connected robots, prohibits namespace conflicts and collects/provides the states of all robots. This package don't need to be modified an can be used as it is. Make sure only one instance is running on the whole network.
 
 ## Table of contents  <!-- omit in toc -->
@@ -20,6 +20,7 @@ Sopias4-Map-Server only provides the launch file `bringup_server.launch.py` whic
 - params_file (string): Full path to the ROS2 parameters file for map-server
 - use_respawn (bool): Whether to respawn if a node crashes
 - log_level (string): Log level which should be applied
+  
 # License
 Copyright 2023 Institute of Industrial Automation and Software Engineering, University of Stuttgart
 

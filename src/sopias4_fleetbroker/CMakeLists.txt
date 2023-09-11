@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(sopias4_map_server)
+project(sopias4_fleetbroker)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -41,7 +41,7 @@ install(TARGETS
 ament_python_install_package(${PROJECT_NAME})
 # Install executables
 install(PROGRAMS
-  sopias4_map_server/gui.py
+  sopias4_fleetbroker/gui.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -11,10 +11,10 @@ from nav2_msgs.srv import LoadMap, SaveMap
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QTableWidgetItem
 from rclpy.client import Client
+from sopias4_fleetbroker.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
 from sopias4_framework.tools.ros2 import node_tools
-from sopias4_map_server.ui_object import Ui_MainWindow
 
 from sopias4_msgs.msg import Robot, RobotStates
 from sopias4_msgs.srv import RegistryService, ShowDialog
@@ -25,20 +25,20 @@ class GUI(GUINode):
 
     def __init__(self) -> None:
         self.ui: Ui_MainWindow
-        super().__init__(Ui_MainWindow(), node_name="gui_sopias4_map_server")
+        super().__init__(Ui_MainWindow(), node_name="gui_sopias4_fleetbroker")
         self.__launch_service_system: node_tools.LaunchService = (
             node_tools.LaunchService(
-                ros2_package="sopias4_map_server",
+                ros2_package="sopias4_fleetbroker",
                 launch_file="bringup_server.launch.py",
             )
         )
         self.__launch_service_mapserver: node_tools.LaunchService = (
             node_tools.LaunchService(
-                ros2_package="sopias4_map_server", launch_file="map_server.launch.py"
+                ros2_package="sopias4_fleetbroker", launch_file="map_server.launch.py"
             )
         )
         self.__launch_service_mrc: node_tools.LaunchService = node_tools.LaunchService(
-            ros2_package="sopias4_map_server", executable="multi_robot_coordinator"
+            ros2_package="sopias4_fleetbroker", executable="multi_robot_coordinator"
         )
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
@@ -105,7 +105,7 @@ class GUI(GUINode):
         self.ui.lineEdit_path_params_file.setText(
             str(
                 os.path.join(
-                    get_package_share_directory("sopias4_map_server"),
+                    get_package_share_directory("sopias4_fleetbroker"),
                     "config",
                     "map_server.yaml",
                 )
@@ -114,7 +114,7 @@ class GUI(GUINode):
         self.ui.lineEdit.setText(
             str(
                 os.path.join(
-                    get_package_share_directory("sopias4_map_server"),
+                    get_package_share_directory("sopias4_fleetbroker"),
                     "maps",
                     "default_map.yaml",
                 )

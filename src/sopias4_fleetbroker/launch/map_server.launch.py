@@ -32,7 +32,7 @@ from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Get the launch directory
-    sopias4_map_server_path = get_package_share_directory("sopias4_map_server")
+    sopias4_fleetbroker_path = get_package_share_directory("sopias4_fleetbroker")
 
     map_yaml_file = LaunchConfiguration("map")
     params_file = LaunchConfiguration("params_file")
@@ -54,13 +54,15 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         "map",
-        default_value=os.path.join(sopias4_map_server_path, "maps", "default_map.yaml"),
+        default_value=os.path.join(
+            sopias4_fleetbroker_path, "maps", "default_map.yaml"
+        ),
         description="Full path to map yaml file to load",
     )
     declare_params_file_cmd = DeclareLaunchArgument(
         "params_file",
         default_value=os.path.join(
-            sopias4_map_server_path, "config", "map_server.yaml"
+            sopias4_fleetbroker_path, "config", "map_server.yaml"
         ),
         description="Full path to the ROS2 parameters file to use for all launched nodes",
     )

@@ -9,7 +9,7 @@
 #include "sopias4_msgs/msg/robot.hpp"
 
 
-namespace sopias4_map_server {
+namespace sopias4_fleetbroker {
     /**
      * @class Costmap2D
      * @brief A 2D costmap provides a mapping between points in the world and their associated "costs".
