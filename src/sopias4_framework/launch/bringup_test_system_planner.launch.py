@@ -26,6 +26,21 @@ ARGUMENTS = [
         default_value="",
         description="Full path to map yaml file to load",
     ),
+    DeclareLaunchArgument(
+        "plugin_name",
+        default_value="abstract_plugin",
+        description="The name of the planner plugin which should be tested",
+    ),
+    DeclareLaunchArgument(
+        "map",
+        default_value=os.path.join(
+            get_package_share_directory("sopias4_framework"),
+            "assets",
+            "global_costmap",
+            "global_costmap.yaml",
+        ),
+        description="Full path to map yaml file to load",
+    ),
 ]
 
 
@@ -33,6 +48,7 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     namespace = LaunchConfiguration("namespace")
+    plugin_name = LaunchConfiguration("plugin_name")
     log_level = LaunchConfiguration("log_level")
     map_yaml_file = LaunchConfiguration("map")
 
@@ -51,37 +67,40 @@ def generate_launch_description():
                     "global_costmaps",
                     "global_costmap.json",
                 ),
+                "plugin_name": plugin_name,
             }
         ],
     )
 
     map_server = GroupAction(
-        condition=LaunchConfigurationNotEquals("map", ""),
-        actions=[
-            Node(
-                package="nav2_map_server",
-                executable="map_server",
-                name="map_server",
-                output="screen",
-                respawn=True,
-                parameters=[
-                    {"yaml_filename": map_yaml_file},
-                    {"topic_name": "map"},
-                    {"frame_id": "map"},
-                ],
-                respawn_delay=2.0,
-                arguments=["--ros-args", "--log-level", log_level],
-                remappings=remappings,
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("sopias4_fleetbroker"),
+                            "launch",
+                            "map_server.launch.py",
+                        ]
+                    )
+                ),
+                launch_arguments={
+                    "map": os.path.join(
+                        get_package_share_directory("sopias4_fleetbroker"),
+                        "maps",
+                        "default_map.yaml",
+                    ),
+                    "params_file": os.path.join(
+                        get_package_share_directory("sopias4_fleetbroker"),
+                        "config",
+                        "map_server.yaml",
+                    ),
+                    "use_respawn": "false",
+                    "log_level": log_level,
+                    "autostart": "true",
+                }.items(),
             ),
-            Node(
-                package="nav2_lifecycle_manager",
-                executable="lifecycle_manager",
-                name="lifecycle_manager_map_server",
-                output="screen",
-                arguments=["--ros-args", "--log-level", log_level],
-                parameters=[{"autostart": "true"}, {"node_names": ["map_server"]}],
-            ),
-        ],
+        ]
     )
 
     rviz = GroupAction(
@@ -100,7 +119,7 @@ def generate_launch_description():
                     "params_file": os.path.join(
                         get_package_share_directory("sopias4_framework"),
                         "config",
-                        "rviz.rviz",
+                        "rviz_testsystem.rviz",
                     )
                 }.items(),
             ),

@@ -24,7 +24,8 @@ class GlobalPlannerTestServer(Node):
     the PlannerPyPlugin. If a response is received, it then publishes it to the `/<namespace>/global_plan` topic.
 
     Can be used together with the launch file `bringup_test_system_planner.launch.py` where also RViz is launched to visualize the planned path
-    and the map which is used for testing.
+    and the map which is used for testing. To send a test request, simple call `ros2 service call /send_test_request std_srvs/srv/Empty`from the terminal
+    or call the ROS2 service `/send_test_request` otherwise. You may call this service once to see the complete visualization in Rviz.
 
     It provides following services:
         - /<namespace>/send_test_request: Trigger to send a test request to the PlannerPyPlugin
@@ -36,11 +37,36 @@ class GlobalPlannerTestServer(Node):
     def __init__(
         self,
         node_name: str = "layer_pyplugin",
-        plugin_name: str = "abstract_plugin",
         namespace: str | None = None,
     ) -> None:
         # --- Setup ROS node ---
         super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
+
+        # -- Load map metadata ---
+        self.declare_parameter(
+            "test_data_path",
+            os.path.join(
+                get_package_share_directory("sopias4_framework"),
+                "assets",
+                "global_costmaps",
+                "global_costmap.json",
+            ),
+            ParameterDescriptor(description="Path to the JSON file where all data"),
+        )
+        self.declare_parameter(
+            "plugin_name",
+            "abstract_plugin",
+            ParameterDescriptor(
+                description="The plugin name of the planner plugin which should be tested"
+            ),
+        )
+        plugin_name: str = (
+            self.get_parameter("plugin_name").get_parameter_value().string_value
+        )
+        test_data_path: str = (
+            self.get_parameter("test_data_path").get_parameter_value().string_value
+        )
+
         # Service client which sends the request to the planner
         self.__service_client_node: Node = rclpy.create_node("_global_planner_testserver_service_clients")  # type: ignore
         self.__global_planner_sclient_createplan: Client = (
@@ -57,45 +83,36 @@ class GlobalPlannerTestServer(Node):
         )
         # Publisher which publishes the plan from the planner to a topic
         self.__path_pub: Publisher = self.create_publisher(Path, "global_plan", 10)
-
-        # -- Load map metadata ---
-        self.declare_parameter(
-            "test_data_path",
-            os.path.join(
-                get_package_share_directory("sopias4_framework"),
-                "assets",
-                "global_costmaps",
-                "global_costmap.json",
-            ),
-            ParameterDescriptor(description="Path to the JSON file where all data"),
-        )
-        self.test_data_path: str = (
-            self.get_parameter("test_data_path").get_parameter_value().string_value
+        self.__costmap_pub: Publisher = self.create_publisher(
+            OccupancyGrid, "global_costmap", 10
         )
 
         loaded_params: dict = dict()
-        with open(self.test_data_path) as json_data:
+        with open(test_data_path) as json_data:
             loaded_params = json.load(json_data)
 
-        occupany_grid: OccupancyGrid = OccupancyGrid()
-        occupany_grid.data = loaded_params["costmap"]["data"]
-        occupany_grid.header.frame_id = loaded_params["costmap"]["header"]["frame_id"]
-        occupany_grid.info.height = loaded_params["costmap"]["info"]["height"]
-        occupany_grid.info.width = loaded_params["costmap"]["info"]["width"]
-        occupany_grid.info.resolution = loaded_params["costmap"]["info"]["resolution"]
-        occupany_grid.info.origin.position.x = loaded_params["costmap"]["info"][
+        self.occupany_grid: OccupancyGrid = OccupancyGrid()
+        self.occupany_grid.data = loaded_params["costmap"]["data"]
+        self.occupany_grid.header.frame_id = loaded_params["costmap"]["header"][
+            "frame_id"
+        ]
+        self.occupany_grid.info.height = loaded_params["costmap"]["info"]["height"]
+        self.occupany_grid.info.width = loaded_params["costmap"]["info"]["width"]
+        self.occupany_grid.info.resolution = loaded_params["costmap"]["info"][
+            "resolution"
+        ]
+        self.occupany_grid.info.origin.position.x = loaded_params["costmap"]["info"][
             "origin"
         ]["position"]["x"]
-        occupany_grid.info.origin.position.y = loaded_params["costmap"]["info"][
+        self.occupany_grid.info.origin.position.y = loaded_params["costmap"]["info"][
             "origin"
         ]["position"]["y"]
-        occupany_grid.info.origin.orientation.y = loaded_params["costmap"]["info"][
+        self.occupany_grid.info.origin.orientation.y = loaded_params["costmap"]["info"][
             "origin"
         ]["orientation"]["y"]
-        occupany_grid.info.origin.orientation.w = loaded_params["costmap"]["info"][
+        self.occupany_grid.info.origin.orientation.w = loaded_params["costmap"]["info"][
             "origin"
         ]["orientation"]["w"]
-        self.costmap: PyCostmap2D = PyCostmap2D(occupany_grid)
 
         self.start: PoseStamped = PoseStamped()
         self.start.header.frame_id = loaded_params["start"]["header"]["frame_id"]
@@ -122,10 +139,11 @@ class GlobalPlannerTestServer(Node):
         _: Empty.Request = Empty.Request(),
         response_data: Empty.Response = Empty.Response(),
     ):
+        self.__costmap_pub.publish(self.occupany_grid)
         req = CreatePlan.Request()
         req.start = self.start
         req.goal = self.goal
-        req.costmap = self.costmap
+        req.costmap = self.occupany_grid
 
         response: CreatePlan.Response | None = node_tools.call_service(
             self.__global_planner_sclient_createplan,

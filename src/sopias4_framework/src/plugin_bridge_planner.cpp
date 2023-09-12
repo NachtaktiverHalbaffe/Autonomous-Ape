@@ -171,29 +171,29 @@ namespace plugin_bridges
     }
     
     // Save costmap as a map
-    {
-      costmap->saveMap(save_path + "global_costmap_" + oss.str() + ".pgm");
-      YAML::Emitter e;
-      e << YAML::Precision(3);
-      e << YAML::BeginMap;
-      e << YAML::Key << "image" << YAML::Value << save_path + "global_costmap_" + oss.str() + ".pgm";
-      e << YAML::Key << "mode" << YAML::Value << "trinary";
-      e << YAML::Key << "resolution" << YAML::Value << request->costmap.info.resolution;
-      geometry_msgs::msg::Quaternion orientation = request->costmap.info.origin.orientation;
-      tf2::Matrix3x3 mat(tf2::Quaternion(orientation.x, orientation.y, orientation.z, orientation.w));
-      double yaw, pitch, roll;
-      mat.getEulerYPR(yaw, pitch, roll);
-      e << YAML::Key << "origin" << YAML::Flow << YAML::BeginSeq << request->costmap.info.origin.position.x << request->costmap.info.origin.position.y << 0 << YAML::EndSeq;
-      e << YAML::Key << "negate" << YAML::Value << 0;
-      e << YAML::Key << "occupied_thresh" << YAML::Value << 0.65;
-      e << YAML::Key << "free_thresh" << YAML::Value << 0.2;
+    // {
+    //   costmap->saveMap(save_path + "global_costmap_" + oss.str() + ".pgm");
+    //   YAML::Emitter e;
+    //   e << YAML::Precision(3);
+    //   e << YAML::BeginMap;
+    //   e << YAML::Key << "image" << YAML::Value << save_path + "global_costmap_" + oss.str() + ".pgm";
+    //   e << YAML::Key << "mode" << YAML::Value << "trinary";
+    //   e << YAML::Key << "resolution" << YAML::Value << request->costmap.info.resolution;
+    //   geometry_msgs::msg::Quaternion orientation = request->costmap.info.origin.orientation;
+    //   tf2::Matrix3x3 mat(tf2::Quaternion(orientation.x, orientation.y, orientation.z, orientation.w));
+    //   double yaw, pitch, roll;
+    //   mat.getEulerYPR(yaw, pitch, roll);
+    //   e << YAML::Key << "origin" << YAML::Flow << YAML::BeginSeq << request->costmap.info.origin.position.x << request->costmap.info.origin.position.y << 0 << YAML::EndSeq;
+    //   e << YAML::Key << "negate" << YAML::Value << 0;
+    //   e << YAML::Key << "occupied_thresh" << YAML::Value << 0.65;
+    //   e << YAML::Key << "free_thresh" << YAML::Value << 0.2;
 
-      if (!e.good())
-      {
-        std::cout << "[WARN] [map_io]: YAML writer failed with an error " << e.GetLastError() << ". The map metadata may be invalid." << std::endl;
-      }
-      std::ofstream(save_path + "global_costmap_" + oss.str() + ".yaml") << e.c_str();
-    }
+    //   if (!e.good())
+    //   {
+    //     std::cout << "[WARN] [map_io]: YAML writer failed with an error " << e.GetLastError() << ". The map metadata may be invalid." << std::endl;
+    //   }
+    //   std::ofstream(save_path + "global_costmap_" + oss.str() + ".yaml") << e.c_str();
+    // }
   }
 
 } // namespace plugin_bridge

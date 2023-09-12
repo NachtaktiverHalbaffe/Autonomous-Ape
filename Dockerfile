@@ -104,6 +104,8 @@ RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
 # Setup some aliases
 RUN echo 'alias sopias4-application="ros2 run sopias4_application gui"' >>  /home/${USERNAME}/.bashrc
 RUN echo 'alias sopias4-fleetbroker="ros2 run sopias4_fleetbroker gui.py"' >>  /home/${USERNAME}/.bashrc
+RUN echo 'alias sopias4-testsystem-planner="ros2 launch sopias4_framework bringup_test_system_planner.launch.py"' >>  /home/${USERNAME}/.bashrc
+RUN echo 'alias sopias4-testrequest-planner="ros2 service call /send_test_request std_srvs/srv/Empty"' >>  /home/${USERNAME}/.bashrc
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
