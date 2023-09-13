@@ -13,3 +13,48 @@ This information should't be needed to develop Sopias4-Application. These sectio
 6. Connect the Create3 to the access point: [https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3](https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3)
 7. Update the firmware of the Create 3 over the webserver. If connected to Wifi, it will automatically download the latest image
 8. Change the NTP Configuration of the Create 3: [https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215](https://github.com/turtlebot/turtlebot4/issues/216#issue-1797043215)
+9. Change the NTP configuration of the Turtlebot itself:
+   1. SSH into the Turtlebot
+   2. Edit `/etc/chrony/chrony.conf` e.g. `sudo nano /etc/chrony/chrony.conf`
+   3. Change the content so it does look like this:
+      ```bash
+      # Welcome to the chrony configuration file. See chrony.conf(5) for more
+      # information about usuable directives.
+
+      server rustime01.rus.uni-stuttgart.de iburst
+      server rustime02.rus.uni-stuttgart.de iburst
+      server 192.168.178.28 iburst # This should be the IP adress of the host where Sopias4 Fleetbroker runs on
+      # Enable serving time to ntp clients on 192.168.186.0 subnet.
+      allow 192.168.186.0/24
+
+      # Allow local sync
+      local stratum 10
+
+      # This directive specify the location of the file containing ID/key pairs for
+      # NTP authentication.
+      keyfile /etc/chrony/chrony.keys
+
+      # This directive specify the file into which chronyd will store the rate
+      # information.
+      driftfile /var/lib/chrony/chrony.drift
+
+      # Uncomment the following line to turn logging on.
+      #log tracking measurements statistics
+
+      # Log files location.
+      logdir /var/log/chrony
+
+      # Stop bad estimates upsetting machine clock.
+      maxupdateskew 100.0
+
+      # This directive enables kernel synchronisation (every 11 minutes) of the
+      # real-time clock. Note that it can’t be used along with the 'rtcfile' directive.
+      rtcsync
+
+      # Step the system clock instead of slewing it if the adjustment is larger than
+      # one second, but only in the first three clock updates.
+      makestep 1 3
+      ```
+
+## Time synchronization
+It is important for the Turtlebots and all the clients that the time is synchronized. Otherwise you could run into problems. To achive this NTP is utilized. All the clients (especially the Turltebot) synchronizes with the host which runs the Sopias4-Fleetbroker. If the development container is used and the Turtlebots are setup like instructed then everything should be setup already. However, if you run into timesycning issues, then it is useful to check if the NTP configuration is still working and if chrony (used as NTP server and clients) is running fine.

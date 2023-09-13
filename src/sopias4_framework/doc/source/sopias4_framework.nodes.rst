@@ -12,6 +12,14 @@ sopias4\_framework.nodes.controller\_pyplugin module
    :undoc-members:
    :show-inheritance:
 
+sopias4\_framework.nodes.global\_planner\_testserver module
+-----------------------------------------------------------
+
+.. automodule:: sopias4_framework.nodes.global_planner_testserver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sopias4\_framework.nodes.gui\_node module
 -----------------------------------------
 
