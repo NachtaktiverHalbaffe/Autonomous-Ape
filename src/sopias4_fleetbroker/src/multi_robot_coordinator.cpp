@@ -14,6 +14,8 @@
 #include "sopias4_msgs/srv/get_robots.hpp"
 #include "sopias4_msgs/srv/get_robot_identity.hpp"
 #include "sopias4_msgs/srv/registry_service.hpp"
+#include "nav2_msgs/srv/save_map.hpp"
+#include "domain_bridge/domain_bridge.hpp"
 
 class MultiRobotCoordinator : public rclcpp::Node
 {
@@ -28,8 +30,10 @@ public:
 
 		publisher_ = this->create_publisher<sopias4_msgs::msg::Namespaces>("registered_namespaces", 10);
 		publisher_robot_states_ = this->create_publisher<sopias4_msgs::msg::RobotStates>("robot_states", 10);
-		RCLCPP_INFO(logger, "Started node");
 		logger.set_level(rclcpp::Logger::Level::Info);
+
+		RCLCPP_INFO(logger, "Started node");
+
 	}
 
 private:
@@ -45,7 +49,6 @@ private:
 	// logger
 	rclcpp::Logger logger = this->get_logger();
 	// logger.set_level(rclcpp::Logger::Level::DEBUG);
-
 	// Services
 	rclcpp::Service<sopias4_msgs::srv::GetNamespaces>::SharedPtr get_namespaces_service;
 	rclcpp::Service<sopias4_msgs::srv::GetRobotIdentity>::SharedPtr get_robot_identity_service;
@@ -260,14 +263,52 @@ private:
 int main(int argc, char **argv)
 {
 	rclcpp::init(argc, argv);
+	rclcpp::executors::MultiThreadedExecutor executor=  rclcpp::executors::MultiThreadedExecutor();
 
 	// Create node
-	auto node = std::make_shared<MultiRobotCoordinator>("multi_robot_coordinator");
+	MultiRobotCoordinator::SharedPtr node = std::make_shared<MultiRobotCoordinator>("multi_robot_coordinator");
+
+	// --- Bridge topics ---
+	domain_bridge::DomainBridge domain_bridge;
+	// map from fleetbroker
+	domain_bridge.bridge_topic("/map","nav_msgs/msg/OccupancyGrid",0,1);
+	domain_bridge.bridge_topic("/map","nav_msgs/msg/OccupancyGrid",0,2);
+	domain_bridge.bridge_topic("/map","nav_msgs/msg/OccupancyGrid",0,3);
+	// States of robots
+	domain_bridge.bridge_topic("/robot_states","sopias4_msgs/msg/RobotStates",0,1);
+	domain_bridge.bridge_topic("/robot_states","sopias4_msgs/msg/RobotStates",0,2);
+	domain_bridge.bridge_topic("/robot_states","sopias4_msgs/msg/RobotStates",0,3);
+	// amcl_pose
+	domain_bridge.bridge_topic("/turtle1/amcl_pose","geometry_msgs/msg/PoseWithCovarianceStamped",1,0);
+	domain_bridge.bridge_topic("/turtle2/amcl_pose","geometry_msgs/msg/PoseWithCovarianceStamped",2,0);
+	domain_bridge.bridge_topic("/turtle3/amcl_pose","geometry_msgs/msg/PoseWithCovarianceStamped",3,0);
+	// slam pose
+	domain_bridge.bridge_topic("/turtle1/pose","geometry_msgs/msg/PoseWithCovarianceStamped",1,0);
+	domain_bridge.bridge_topic("/turtle2/pose","geometry_msgs/msg/PoseWithCovarianceStamped",2,0);
+	domain_bridge.bridge_topic("/turtle3/pose","geometry_msgs/msg/PoseWithCovarianceStamped",3,0);
+	// planned global path
+	domain_bridge.bridge_topic("/turtle1/plan","nav_msgs/msg/Path",1,0);
+	domain_bridge.bridge_topic("/turtle2/plan","nav_msgs/msg/Path",2,0);
+	domain_bridge.bridge_topic("/turtle3/plan","nav_msgs/msg/Path",3,0);
+	// Is navigating topic
+	domain_bridge.bridge_topic("/turtle1/is_navigation","std_msgs/msg/Bool",1,0);
+	domain_bridge.bridge_topic("/turtle2/is_navigation","std_msgs/msg/Bool",2,0);
+	domain_bridge.bridge_topic("/turtle3/is_navigation","std_msgs/msg/Bool",3,0);
+	// Map from slam
+	domain_bridge.bridge_topic("/turtle1/map","nav_msgs/msg/OccupancyGrid",1,0);
+	domain_bridge.bridge_topic("/turtle2/map","nav_msgs/msg/OccupancyGrid",2,0);
+	domain_bridge.bridge_topic("/turtle3/map","nav_msgs/msg/OccupancyGrid",3,0);
+	// Services
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/register_namespace",0,1);
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/unregister_namespace",0,1);
+	domain_bridge.bridge_service<nav2_msgs::srv::SaveMap>("/map_saver/save_map",0,1);
+	domain_bridge.add_to_executor(executor);
 
 	// Run node
-	rclcpp::spin(node);
+	executor.add_node(node);
+	executor.spin();
 
-	// Shutdown node
+	// Shutdown node	
 	rclcpp::shutdown();
 
 	return 0;

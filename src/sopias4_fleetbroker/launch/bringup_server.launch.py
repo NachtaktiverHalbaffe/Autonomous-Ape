@@ -79,13 +79,13 @@ def generate_launch_description():
         }.items(),
     )
 
-    domain_bridges = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [sopias4_fleetbroker_path, "launch", "domain_bridges.launch.py"]
-            ),
-        ),
-    )
+    # domain_bridges = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(
+    #         PathJoinSubstitution(
+    #             [sopias4_fleetbroker_path, "launch", "domain_bridges.launch.py"]
+    #         ),
+    #     ),
+    # )
 
     multi_robot_coordinator = Node(
         package="sopias4_fleetbroker",
@@ -104,6 +104,5 @@ def generate_launch_description():
 
     ld.add_action(multi_robot_coordinator)
     ld.add_action(map_server)
-    ld.add_action(domain_bridges)
 
     return ld

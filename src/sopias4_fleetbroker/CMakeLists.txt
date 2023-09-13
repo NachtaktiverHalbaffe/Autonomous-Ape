@@ -14,6 +14,8 @@ find_package(rclpy REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sopias4_msgs REQUIRED)
+find_package(domain_bridge REQUIRED)
+find_package(nav2_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -29,6 +31,8 @@ add_executable(multi_robot_coordinator src/multi_robot_coordinator.cpp)
 ament_target_dependencies(multi_robot_coordinator
   sopias4_msgs
   geometry_msgs
+  domain_bridge
+  nav2_msgs
   rclcpp)
 # Install C++ executables. For this purpose, add 
 # following line for each node:
