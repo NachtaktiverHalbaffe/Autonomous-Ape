@@ -300,8 +300,14 @@ int main(int argc, char **argv)
 	domain_bridge.bridge_topic("/turtle3/map","nav_msgs/msg/OccupancyGrid",3,0);
 	// Services
 	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/register_namespace",0,1);
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/register_namespace",0,2);
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/register_namespace",0,3);
 	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/unregister_namespace",0,1);
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/unregister_namespace",0,2);
+	domain_bridge.bridge_service<sopias4_msgs::srv::RegistryService>("/unregister_namespace",0,3);
 	domain_bridge.bridge_service<nav2_msgs::srv::SaveMap>("/map_saver/save_map",0,1);
+	domain_bridge.bridge_service<nav2_msgs::srv::SaveMap>("/map_saver/save_map",0,2);
+	domain_bridge.bridge_service<nav2_msgs::srv::SaveMap>("/map_saver/save_map",0,3);
 	domain_bridge.add_to_executor(executor);
 
 	// Run node
