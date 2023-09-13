@@ -50,9 +50,10 @@ RUN sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable
 	ros-${ROS_DISTRO}-turtlebot4-navigation \ 
 	ros-${ROS_DISTRO}-teleop-twist-keyboard \
 	ros-${ROS_DISTRO}-turtlebot4-simulator\ 
+	ros-${ROS_DISTRO}-domain-bridge \
 	ignition-fortress \
 	gazebo \
-	ros-dev-tools 
+	ros-dev-tools
 
 # Install rosdoc2
 RUN cd /home && git clone https://github.com/ros-infrastructure/rosdoc2 

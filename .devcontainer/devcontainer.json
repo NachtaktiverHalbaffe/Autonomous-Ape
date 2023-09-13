@@ -49,7 +49,7 @@
         "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
         "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
         "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
-        "ROS_DOMAIN_ID": "0"
+        "ROS_DOMAIN_ID": "1"
         // "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
     "runArgs": [
