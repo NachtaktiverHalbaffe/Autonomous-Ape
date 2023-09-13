@@ -31,7 +31,8 @@ RUN sudo apt-get update && apt-get upgrade -y --with-new-pkgs \
 	python3-mock \ 
 	libgl1-mesa-glx \
 	libgl1-mesa-dri \
-	mesa-utils 
+	mesa-utils  \
+	chrony
 
 # Install ROS2 dependencies 
 ARG RTI_NC_LICENSE_ACCEPTED=yes
@@ -101,6 +102,9 @@ RUN echo 'figlet "Linux is great" ' >> /home/${USERNAME}/.bashrc
 # Automatic sourcing of ROS2
 RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >>  /home/${USERNAME}/.bashrc
 RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
+# Setup ntp server as source for time synchronization
+COPY ./chrony.conf /etc/chrony/chrony.conf
+EXPOSE 123/udp
 # Setup some aliases
 RUN echo 'alias sopias4-application="ros2 run sopias4_application gui"' >>  /home/${USERNAME}/.bashrc
 RUN echo 'alias sopias4-fleetbroker="ros2 run sopias4_fleetbroker gui.py"' >>  /home/${USERNAME}/.bashrc

@@ -70,6 +70,6 @@
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "sudo chown -R ${env:USER} ${containerWorkspaceFolder}",
+    "postCreateCommand": "sudo chown -R ${env:USER} ${containerWorkspaceFolder} && sudo chronyd",
     "initializeCommand": "xhost +local:root"
 }
