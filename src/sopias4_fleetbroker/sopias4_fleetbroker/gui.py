@@ -40,6 +40,11 @@ class GUI(GUINode):
         self.__launch_service_mrc: node_tools.LaunchService = node_tools.LaunchService(
             ros2_package="sopias4_fleetbroker", executable="multi_robot_coordinator"
         )
+        self.__launch_service_domain_bridge: node_tools.LaunchService = (
+            node_tools.LaunchService(
+                ros2_package="sopias4_fleetbroker", executable="sopias4_domain_bridge"
+            )
+        )
 
         self.robot_states_signal.connect(self.__fill_tableview_robotstates)
         self.__sclient_load_map: Client = self.node.service_client_node.create_client(
@@ -76,6 +81,9 @@ class GUI(GUINode):
         )
         self.ui.pushButton_launch_mrv.clicked.connect(
             lambda: Thread(target=self.__launch_mrc).start()
+        )
+        self.ui.pushButton_domain_bridge.clicked.connect(
+            lambda: Thread(target=self.__launch_domain_bridge).start()
         )
         self.ui.pushButton_unregister.clicked.connect(
             lambda: Thread(target=self.__unregister_namespace).start()
@@ -124,6 +132,7 @@ class GUI(GUINode):
     def set_initial_disabled_elements(self):
         self.ui.checkBox_use_autostart.setChecked(True)
         self.ui.checkBox_use_respawn.setChecked(False)
+        self.ui.checkBox_domain_bridge.setChecked(True)
         self.ui.pushButton_stop_map_server.setEnabled(False)
 
     def __start_map_server(self):
@@ -140,6 +149,9 @@ class GUI(GUINode):
         if self.ui.checkBox_use_respawn.isChecked():
             self.node.get_logger().debug("Use respawning nodes if they crash")
             launch_args_list.append("use_respawn:=true")
+        if not self.ui.checkBox_domain_bridge.isChecked():
+            self.node.get_logger().debug("Use Sopias4 Domain Bridge")
+            launch_args_list.append("use_domain_bridge:=false")
 
         # Launch launchfile in own subprocess
         launch_args: str = " ".join(launch_args_list)
@@ -150,23 +162,28 @@ class GUI(GUINode):
         self.ui.pushButton_bringup_server.setEnabled(False)
         self.ui.pushButton_launch_mrv.setEnabled(False)
         self.ui.pushButton_launch_map_server.setEnabled(False)
+        self.ui.pushButton_domain_bridge.setEnabled(False)
 
-        self.node.get_logger().info("Successfully started Sopias4 Map-Server nodes")
+        self.node.get_logger().info("Successfully started Sopias4 Fleetbroker nodes")
 
     def __stop_map_server(self):
         """
         Stops the nodes itself. It is done by sending a SIG-INT signal (STRG+C) to the shell process which runs the nodes
         """
-        self.node.get_logger().info("Stopping Sopias4 Mp-Server nodes")
+        self.node.get_logger().info("Stopping Sopias4 Fleetbroker nodes")
         self.__launch_service_system.shutdown()
+        self.__launch_service_domain_bridge.shutdown()
+        self.__launch_service_mrc.shutdown()
+        self.__launch_service_mapserver.shutdown()
 
         # Enable buttons which are only useable when map server isn't running
         self.ui.pushButton_stop_map_server.setEnabled(False)
         self.ui.pushButton_bringup_server.setEnabled(True)
         self.ui.pushButton_launch_mrv.setEnabled(True)
         self.ui.pushButton_launch_map_server.setEnabled(True)
+        self.ui.pushButton_domain_bridge.setEnabled(True)
 
-        self.node.get_logger().info("Successfully stopped Sopias4 Map-Server nodes")
+        self.node.get_logger().info("Successfully stopped Sopias4 Fleetbroker nodes")
 
     def __launch_mrc(self):
         self.__launch_service_mrc.run()
@@ -175,6 +192,10 @@ class GUI(GUINode):
     def __launch_mapserver(self):
         self.__launch_service_mapserver.run()
         self.ui.pushButton_launch_map_server.setEnabled(False)
+
+    def __launch_domain_bridge(self):
+        self.__launch_service_domain_bridge.run()
+        self.ui.pushButton_domain_bridge.setEnabled(False)
 
     def __load_map(self):
         """
@@ -355,6 +376,7 @@ class GUI(GUINode):
         self.__launch_service_mapserver.shutdown()
         self.__launch_service_mrc.shutdown()
         self.__launch_service_system.shutdown()
+        self.__launch_service_domain_bridge.shutdown()
         super().closeEvent(event)
 
     def destroy_node(self):
@@ -362,6 +384,7 @@ class GUI(GUINode):
         self.__launch_service_mapserver.shutdown()
         self.__launch_service_mrc.shutdown()
         self.__launch_service_system.shutdown()
+        self.__launch_service_domain_bridge.shutdown()
         super().destroy_node()
 
 

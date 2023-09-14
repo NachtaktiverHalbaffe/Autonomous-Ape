@@ -34,10 +34,20 @@ ament_target_dependencies(multi_robot_coordinator
   domain_bridge
   nav2_msgs
   rclcpp)
+
+add_executable(sopias4_domain_bridge src/sopias4_domain_bridge.cpp)
+ament_target_dependencies(sopias4_domain_bridge
+  sopias4_msgs
+  geometry_msgs
+  domain_bridge
+  nav2_msgs
+  rclcpp)
+  
 # Install C++ executables. For this purpose, add 
 # following line for each node:
 install(TARGETS
     multi_robot_coordinator
+    sopias4_domain_bridge
     DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'src/sopias4_map_server/assets/frontend/gui.ui'
+# Form implementation generated from reading ui file 'src/sopias4_fleetbroker/assets/frontend/gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -46,6 +46,9 @@ class Ui_MainWindow(object):
         self.checkBox_use_autostart = QtWidgets.QCheckBox(self.tab_conf_init)
         self.checkBox_use_autostart.setObjectName("checkBox_use_autostart")
         self.horizontalLayout_4.addWidget(self.checkBox_use_autostart)
+        self.checkBox_domain_bridge = QtWidgets.QCheckBox(self.tab_conf_init)
+        self.checkBox_domain_bridge.setObjectName("checkBox_domain_bridge")
+        self.horizontalLayout_4.addWidget(self.checkBox_domain_bridge)
         self.horizontalLayout.addLayout(self.horizontalLayout_4)
         self.verticalLayout_4.addLayout(self.horizontalLayout)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -84,6 +87,9 @@ class Ui_MainWindow(object):
         self.pushButton_launch_mrv = QtWidgets.QPushButton(self.tab_conf_init)
         self.pushButton_launch_mrv.setObjectName("pushButton_launch_mrv")
         self.gridLayout_6.addWidget(self.pushButton_launch_mrv, 1, 0, 1, 1)
+        self.pushButton_domain_bridge = QtWidgets.QPushButton(self.tab_conf_init)
+        self.pushButton_domain_bridge.setObjectName("pushButton_domain_bridge")
+        self.gridLayout_6.addWidget(self.pushButton_domain_bridge, 1, 2, 1, 1)
         self.verticalLayout_4.addLayout(self.gridLayout_6)
         self.verticalLayout_2.addLayout(self.verticalLayout_4)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -253,6 +259,7 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "## Manage Turtlebot"))
         self.checkBox_use_respawn.setText(_translate("MainWindow", "Use respawn"))
         self.checkBox_use_autostart.setText(_translate("MainWindow", "Autostart components"))
+        self.checkBox_domain_bridge.setText(_translate("MainWindow", "Use Sopias4 domain bridge"))
         self.pushButton_pick_params_file.setText(_translate("MainWindow", "Change configuration parameter file"))
         self.label_8.setText(_translate("MainWindow", "Before launching the Turtlebot, make sure the name space is registered. If using the simulation, then make sure to set the namespace also inside gazebo"))
         self.pushButton_bringup_server.setText(_translate("MainWindow", "Launch Sopias4 Map-Server"))
@@ -261,6 +268,7 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "By launching sub-components individually, the \"Stop Sopias4 Map-Server\" button doesn\'t work as intended."))
         self.pushButton_launch_map_server.setText(_translate("MainWindow", "Launch Map-Server"))
         self.pushButton_launch_mrv.setText(_translate("MainWindow", "Launch Multi Robot Coordinator"))
+        self.pushButton_domain_bridge.setText(_translate("MainWindow", "Launch Sopias4 Domain Bridge"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_conf_init), _translate("MainWindow", "Initialization/Configuration"))
         self.label_14.setText(_translate("MainWindow", "# Monitoring"))
         self.label_10.setText(_translate("MainWindow", "## Registered Turtlebots"))
