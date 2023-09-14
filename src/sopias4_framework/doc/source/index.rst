@@ -20,6 +20,7 @@ Welcome to Sopias4 Framework's documentation!
    :caption: Guides
 
    things_to_consider
+   running_link
 
 API documentation
 =================

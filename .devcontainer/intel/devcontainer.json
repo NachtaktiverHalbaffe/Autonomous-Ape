@@ -4,7 +4,7 @@
     "build": {
         "dockerfile": "../../Dockerfile",
         "args": {
-            "USERNAME": "nachtaktiverhalbaffe",
+            "USERNAME": "${env:USER}",
             "WORKSPACE": "${containerWorkspaceFolder}"
         }
     },
@@ -67,6 +67,6 @@
         "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "sudo chown -R ${env:USER} ${containerWorkspaceFolder} && sudo chronyd",
+    "postCreateCommand": "sudo chown -R ${env:USER}  ${containerWorkspaceFolder} && sudo chronyd",
     "initializeCommand": "xhost +local:root"
 }

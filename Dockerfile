@@ -63,16 +63,6 @@ COPY ./requirements.txt /tmp/pip-tmp/requirements.txt
 RUN pip3 install  -r /tmp/pip-tmp/requirements.txt \
 	&& rm -rf /tmp/pip-tmp
 
-# Copy workspace into container
-WORKDIR ${WORKSPACE}/src
-COPY ./ ./src
-# Install ros dependencies
-WORKDIR ${WORKSPACE}
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
-	&& apt-get update -y \
-	&& rosdep update \
-	&& rosdep install --from-paths src --ignore-src  -y 
-
 ######################################################################
 # ------------------------------- Setup Environment ---------------------------------- 
 ######################################################################
@@ -112,6 +102,18 @@ RUN echo 'alias sopias4-fleetbroker="ros2 run sopias4_fleetbroker gui.py"' >>  /
 RUN echo 'alias sopias4-testsystem-planner="ros2 launch sopias4_framework bringup_test_system_planner.launch.py"' >>  /home/${USERNAME}/.bashrc
 RUN echo 'alias sopias4-testrequest-planner="ros2 service call /send_test_request std_srvs/srv/Empty"' >>  /home/${USERNAME}/.bashrc
 
+######################################################################
+# ------------------Install external deps of ROS2 packages --------------------------
+######################################################################
+# Copy workspace into container
+WORKDIR ${WORKSPACE}/src
+COPY ./ ./src
+# Install ros dependencies
+WORKDIR ${WORKSPACE}
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
+	&& apt-get update -y \
+	&& rosdep update \
+	&& rosdep install --from-paths src --ignore-src  -y 
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
 

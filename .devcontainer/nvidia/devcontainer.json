@@ -5,7 +5,7 @@
     "build": {
         "dockerfile": "../../Dockerfile",
         "args": {
-            "USERNAME": "nachtaktiverhalbaffe",
+            "USERNAME": "${env:USER}",
             "WORKSPACE": "${containerWorkspaceFolder}"
         }
     },

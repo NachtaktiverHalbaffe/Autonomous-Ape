@@ -29,7 +29,7 @@ class GUI(GUINode):
         self.__launch_service_system: node_tools.LaunchService = (
             node_tools.LaunchService(
                 ros2_package="sopias4_fleetbroker",
-                launch_file="bringup_server.launch.py",
+                launch_file="bringup_fleetbroker.launch.py",
             )
         )
         self.__launch_service_mapserver: node_tools.LaunchService = (

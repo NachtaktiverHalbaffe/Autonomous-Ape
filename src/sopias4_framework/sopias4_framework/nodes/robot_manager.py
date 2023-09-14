@@ -185,7 +185,7 @@ class RobotManager(Node):
         self.__nav2_stack_launch_service: node_tools.LaunchService = (
             node_tools.LaunchService(
                 ros2_package="sopias4_framework",
-                launch_file="bringup_turtlebot.launch.py",
+                launch_file="bringup_nav2_stack.launch.py",
             )
         )
         self.__mapping_launch_service: node_tools.LaunchService = (
