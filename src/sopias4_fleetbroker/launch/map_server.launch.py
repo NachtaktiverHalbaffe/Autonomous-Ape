@@ -1,38 +1,45 @@
-# Copyright (c) 2018 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument,
-    GroupAction,
-    IncludeLaunchDescription,
-    SetEnvironmentVariable,
-)
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 from launch.conditions import LaunchConfigurationEquals, LaunchConfigurationNotEquals
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 from nav2_common.launch import RewrittenYaml
+
+SOPIAS4_FLEETBROKER_PATH = get_package_share_directory("sopias4_fleetbroker")
+ARGUMENTS = [
+    DeclareLaunchArgument(
+        "map",
+        default_value=os.path.join(
+            SOPIAS4_FLEETBROKER_PATH, "maps", "default_map.yaml"
+        ),
+        description="Full path to map yaml file to load",
+    ),
+    DeclareLaunchArgument(
+        "params_file",
+        default_value=os.path.join(
+            SOPIAS4_FLEETBROKER_PATH, "config", "map_server.yaml"
+        ),
+        description="Full path to the ROS2 parameters file to use for all launched nodes",
+    ),
+    DeclareLaunchArgument(
+        "use_respawn",
+        default_value="false",
+        description="Whether to respawn if a node crashes",
+    ),
+    DeclareLaunchArgument("log_level", default_value="info", description="log level"),
+    DeclareLaunchArgument(
+        "autostart",
+        default_value="true",
+        description="Automatically startup the nav2 stack",
+    ),
+]
 
 
 def generate_launch_description():
     # Get the launch directory
-    sopias4_fleetbroker_path = get_package_share_directory("sopias4_fleetbroker")
 
     map_yaml_file = LaunchConfiguration("map")
     params_file = LaunchConfiguration("params_file")
@@ -52,34 +59,6 @@ def generate_launch_description():
         "RCUTILS_LOGGING_BUFFERED_STREAM", "1"
     )
 
-    declare_map_yaml_cmd = DeclareLaunchArgument(
-        "map",
-        default_value=os.path.join(
-            sopias4_fleetbroker_path, "maps", "default_map.yaml"
-        ),
-        description="Full path to map yaml file to load",
-    )
-    declare_params_file_cmd = DeclareLaunchArgument(
-        "params_file",
-        default_value=os.path.join(
-            sopias4_fleetbroker_path, "config", "map_server.yaml"
-        ),
-        description="Full path to the ROS2 parameters file to use for all launched nodes",
-    )
-    declare_use_respawn_cmd = DeclareLaunchArgument(
-        "use_respawn",
-        default_value="false",
-        description="Whether to respawn if a node crashes",
-    )
-    declare_log_level_cmd = DeclareLaunchArgument(
-        "log_level", default_value="info", description="log level"
-    )
-    declare_autostart_cmd = DeclareLaunchArgument(
-        "autostart",
-        default_value="true",
-        description="Automatically startup the nav2 stack",
-    )
-
     map_server_empty = Node(
         condition=LaunchConfigurationEquals("map", ""),
         package="nav2_map_server",
@@ -96,6 +75,7 @@ def generate_launch_description():
         arguments=["--ros-args", "--log-level", log_level],
         remappings=remappings,
     )
+
     map_server_map_loaded = Node(
         condition=LaunchConfigurationNotEquals("map", ""),
         package="nav2_map_server",
@@ -113,21 +93,7 @@ def generate_launch_description():
         arguments=["--ros-args", "--log-level", log_level],
         remappings=remappings,
     )
-    # map_saver = GroupAction(
-    #     [
-    #         IncludeLaunchDescription(
-    #             PythonLaunchDescriptionSource(
-    #                 PathJoinSubstitution(
-    #                     [
-    #                         FindPackageShare("nav2_map_server"),
-    #                         "launch",
-    #                         "map_saver_server.launch.py",
-    #                     ]
-    #                 )
-    #             ),
-    #         ),
-    #     ]
-    # )
+
     map_saver = Node(
         package="nav2_map_server",
         executable="map_saver_server",
@@ -143,7 +109,7 @@ def generate_launch_description():
     lifecycle_manager = Node(
         package="nav2_lifecycle_manager",
         executable="lifecycle_manager",
-        name="lifecycle_manager_map_server",
+        name="lifecycle_manager_fleetbroker",
         output="screen",
         arguments=["--ros-args", "--log-level", log_level],
         parameters=[{"autostart": autostart}, {"node_names": lifecycle_nodes}],
@@ -154,13 +120,6 @@ def generate_launch_description():
 
     # Set environment variables
     ld.add_action(stdout_linebuf_envvar)
-
-    # Declare the launch options
-    ld.add_action(declare_map_yaml_cmd)
-    ld.add_action(declare_use_respawn_cmd)
-    ld.add_action(declare_log_level_cmd)
-    ld.add_action(declare_params_file_cmd)
-    ld.add_action(declare_autostart_cmd)
 
     # Add the actions to launch all of the localiztion nodes
     ld.add_action(map_server_empty)

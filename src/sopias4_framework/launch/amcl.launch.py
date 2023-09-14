@@ -7,7 +7,6 @@ from launch.conditions import (
     LaunchConfigurationNotEquals,
 )
 from launch.substitutions import (
-    AndSubstitution,
     LaunchConfiguration,
     PathJoinSubstitution,
     PythonExpression,
@@ -45,13 +44,7 @@ ARGUMENTS = [
         default_value="amcl_container",
         description="the name of conatiner that nodes will load in if use composition",
     ),
-]
-
-
-def generate_launch_description():
-    lifecycle_nodes = ["amcl"]
-
-    amcl_params_arg = DeclareLaunchArgument(
+    DeclareLaunchArgument(
         "params_file",
         default_value=PathJoinSubstitution(
             [
@@ -61,8 +54,11 @@ def generate_launch_description():
             ]
         ),
         description="AMCL parameters",
-    )
+    ),
+]
 
+
+def generate_launch_description():
     namespace = LaunchConfiguration("namespace")
     params_file = LaunchConfiguration("params_file")
     use_composition = LaunchConfiguration("use_composition")
@@ -80,8 +76,6 @@ def generate_launch_description():
         param_rewrites={},
         convert_types=True,
     )
-
-    # Python expression: '\"'+ namespace + ".acml:=" if namespace!="" else "amcl:="
 
     amcl_container = GroupAction(
         condition=IfCondition(use_composition),
@@ -147,7 +141,7 @@ def generate_launch_description():
                 arguments=["--ros-args", "--log-level", log_level],
                 parameters=[
                     {"autostart": autostart},
-                    {"node_names": lifecycle_nodes},
+                    {"node_names": ["amcl"]},
                 ],
             ),
         ],
@@ -172,9 +166,7 @@ def generate_launch_description():
                         plugin="nav2_lifecycle_manager::LifecycleManager",
                         name="lifecycle_manager_localization",
                         namespace=namespace,
-                        parameters=[
-                            {"autostart": autostart, "node_names": lifecycle_nodes}
-                        ],
+                        parameters=[{"autostart": autostart, "node_names": ["amcl"]}],
                     ),
                 ],
             ),
@@ -182,7 +174,6 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(amcl_params_arg)
     ld.add_action(amcl_container)
     ld.add_action(amcl)
     ld.add_action(amcl_composable)

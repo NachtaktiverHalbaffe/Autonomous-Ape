@@ -4,9 +4,8 @@ from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDesc
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node, PushRosNamespace, SetParameter
-from launch_ros.descriptions import ParameterFile
-from nav2_common.launch import HasNodeParams, RewrittenYaml
+from launch_ros.actions import Node, PushRosNamespace
+from nav2_common.launch import RewrittenYaml
 
 ARGUMENTS = [
     DeclareLaunchArgument(
@@ -22,22 +21,19 @@ ARGUMENTS = [
         description="Use synchronous SLAM",
     ),
     DeclareLaunchArgument("namespace", default_value="", description="Robot namespace"),
-]
-
-
-def generate_launch_description():
-    pkg_turtlebot4_navigation = get_package_share_directory("turtlebot4_navigation")
-
-    namespace = LaunchConfiguration("namespace")
-    sync = LaunchConfiguration("sync")
-    slam_params_arg = DeclareLaunchArgument(
+    DeclareLaunchArgument(
         "params",
         default_value=PathJoinSubstitution(
             [get_package_share_directory("sopias4_framework"), "config", "slam.yaml"]
         ),
         description="Robot namespace",
-    )
+    ),
+]
 
+
+def generate_launch_description():
+    namespace = LaunchConfiguration("namespace")
+    sync = LaunchConfiguration("sync")
     slam_params = RewrittenYaml(
         source_file=LaunchConfiguration("params"),
         root_key=namespace,
@@ -98,7 +94,6 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(slam_params_arg)
     ld.add_action(slam)
     ld.add_action(rviz2)
 

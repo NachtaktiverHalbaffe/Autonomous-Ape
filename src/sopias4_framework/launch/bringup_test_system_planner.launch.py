@@ -2,17 +2,7 @@ import os
 
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument,
-    GroupAction,
-    IncludeLaunchDescription,
-    TimerAction,
-)
-from launch.conditions import (
-    IfCondition,
-    LaunchConfigurationEquals,
-    LaunchConfigurationNotEquals,
-)
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, PushRosNamespace
@@ -50,15 +40,13 @@ def generate_launch_description():
     namespace = LaunchConfiguration("namespace")
     plugin_name = LaunchConfiguration("plugin_name")
     log_level = LaunchConfiguration("log_level")
-    map_yaml_file = LaunchConfiguration("map")
-
-    remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
     test_system = Node(
         package="sopias4_framework",
         executable="global_planner_testserver.py",
         name="test_node",
         output="screen",
+        namespace=namespace,
         parameters=[
             {
                 "test_data_path": os.path.join(
@@ -74,6 +62,7 @@ def generate_launch_description():
 
     map_server = GroupAction(
         [
+            PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -98,6 +87,7 @@ def generate_launch_description():
                     "use_respawn": "false",
                     "log_level": log_level,
                     "autostart": "true",
+                    "namespace": "namespace",
                 }.items(),
             ),
         ]
@@ -105,6 +95,7 @@ def generate_launch_description():
 
     rviz = GroupAction(
         [
+            PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(

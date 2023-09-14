@@ -33,6 +33,13 @@ ARGUMENTS = [
         default_value="nav2_container",
         description="the name of conatiner that nodes will load in if use composition",
     ),
+    DeclareLaunchArgument(
+        "params_file",
+        default_value=os.path.join(
+            get_package_share_directory("sopias4_application"), "config", "nav2.yaml"
+        ),
+        description="Nav2 parameters",
+    ),
 ]
 
 
@@ -45,15 +52,6 @@ def generate_launch_description():
     log_level = LaunchConfiguration("log_level")
     autostart = LaunchConfiguration("autostart")
     container_name = LaunchConfiguration("container_name")
-    container_name_full = (namespace, "/", container_name)
-
-    nav2_params_arg = DeclareLaunchArgument(
-        "params_file",
-        default_value=os.path.join(
-            get_package_share_directory("sopias4_application"), "config", "nav2.yaml"
-        ),
-        description="Nav2 parameters",
-    )
 
     # '<robot_namespace>' keyword shall be replaced by 'namespace' launch argument
     # User defined config file should contain '<robot_namespace>' keyword for the replacements.
@@ -76,7 +74,6 @@ def generate_launch_description():
                 condition=IfCondition(use_composition),
                 name=container_name,
                 package="rclcpp_components",
-                # TODO change to non-isolated container if communication is strange
                 executable="component_container_isolated",
                 parameters=[{"autostart": autostart}],
                 # arguments=["--ros-args", "--log-level", log_level],
@@ -97,12 +94,12 @@ def generate_launch_description():
                     "autostart": autostart,
                     "container_name": container_name,
                     "namespace": namespace,
+                    "log_level": log_level,
                 }.items(),
             ),
         ]
     )
 
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(nav2_params_arg)
     ld.add_action(nav2)
     return ld
