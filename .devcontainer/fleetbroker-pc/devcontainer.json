@@ -2,7 +2,7 @@
     "name": "ROS 2 Development Container",
     "privileged": true,
     "build": {
-        "dockerfile": "../Dockerfile",
+        "dockerfile": "../../Dockerfile",
         "args": {
             "USERNAME": "nachtaktiverhalbaffe",
             "WORKSPACE": "${containerWorkspaceFolder}"
@@ -64,7 +64,6 @@
     ],
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
     "postCreateCommand": "sudo chown -R ${env:USER} ${containerWorkspaceFolder} && sudo chronyd",

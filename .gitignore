@@ -3,8 +3,6 @@
 output/
 cross_reference/
 generated/
-# nav2.yaml
-devcontainer.json
 src/sopias4_framework/assets/global_costmaps/*
 !global_costmap.json
 !global_costmap_kurz.json 

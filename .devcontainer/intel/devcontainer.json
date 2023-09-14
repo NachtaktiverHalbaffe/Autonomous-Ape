@@ -2,7 +2,7 @@
     "name": "ROS 2 Development Container",
     "privileged": true,
     "build": {
-        "dockerfile": "../Dockerfile",
+        "dockerfile": "../../Dockerfile",
         "args": {
             "USERNAME": "nachtaktiverhalbaffe",
             "WORKSPACE": "${containerWorkspaceFolder}"
@@ -49,7 +49,7 @@
         "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
         "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
         "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
-        "ROS_DOMAIN_ID": "0"
+        "ROS_DOMAIN_ID": "1"
         // "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
     "runArgs": [
@@ -64,6 +64,7 @@
     ],
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
     "postCreateCommand": "sudo chown -R ${env:USER} ${containerWorkspaceFolder} && sudo chronyd",
