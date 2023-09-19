@@ -752,12 +752,12 @@ class GrapficalNode(Node):
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
         self.__rm_sclient_launch: Client = self.service_client_node.create_client(
-            LaunchTurtlebot, f"{self.get_namespace()}/connect"
+            LaunchTurtlebot, f"{self.get_namespace()}/launch_nav2_stack"
         )
         # This service stops the running nodes of Sopias4 Application
         # so that the system isn't connected anymore to the physical robot
         self.__rm_sclient_stop_robot: Client = self.service_client_node.create_client(
-            EmptyWithStatuscode, f"{self.get_namespace()}/disconnect"
+            EmptyWithStatuscode, f"{self.get_namespace()}/stop_nav2_stack"
         )
         # This service starts the mapping process
         self.__rm_sclient_start_mapping: Client = (

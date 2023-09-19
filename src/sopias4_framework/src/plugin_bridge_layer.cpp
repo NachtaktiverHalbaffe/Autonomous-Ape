@@ -48,10 +48,15 @@ namespace plugin_bridges
     // and updated independently on its value.
     void
     LayerBridge::updateBounds(
-        double /*robot_x*/, double /*robot_y*/, double /*robot_yaw*/, double *min_x,
+        double robot_x, double robot_y, double /*robot_yaw*/, double *min_x,
         double *min_y, double *max_x, double *max_y)
     {
         std::lock_guard<Costmap2D::mutex_t> guard(*getMutex());
+        if (layered_costmap_->isRolling())
+        {
+            updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
+        }
+
         if (need_recalculation_)
         {
             last_min_x_ = *min_x;
@@ -96,8 +101,6 @@ namespace plugin_bridges
 
     // The method is called when costmap recalculation is required.
     // It updates the costmap within its window bounds.
-    // Inside this method the costmap gradient is generated and is writing directly
-    // to the resulting costmap master_grid without any merging with previous layers.
     void
     LayerBridge::updateCosts(
         nav2_costmap_2d::Costmap2D &master_grid, int min_i, int min_j,
@@ -126,18 +129,6 @@ namespace plugin_bridges
         // - updateWithTrueOverwrite()
         // In this case using master_array pointer is equal to modifying local costmap_
         // pointer and then calling updateWithTrueOverwrite():
-        unsigned char *master_array = master_grid.getCharMap();
-        unsigned int size_x = master_grid.getSizeInCellsX(), size_y = master_grid.getSizeInCellsY();
-
-        // {min_i, min_j} - {max_i, max_j} - are update-window coordinates.
-        // These variables are used to update the costmap only within this window
-        // avoiding the updates of whole area.
-        //
-        // Fixing window coordinates with map size if necessary.
-        min_i = std::max(0, min_i);
-        min_j = std::max(0, min_j);
-        max_i = std::min(static_cast<int>(size_x), max_i);
-        max_j = std::min(static_cast<int>(size_y), max_j);
 
         // Create the service message
         auto request = std::make_shared<sopias4_msgs::srv::UpdateCosts::Request>();
@@ -154,9 +145,9 @@ namespace plugin_bridges
         if (return_code == rclcpp::FutureReturnCode::SUCCESS)
         {
             nav_msgs::msg::OccupancyGrid received_map = future.get()->updated_costmap;
-            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&received_map, master_array, min_i, min_j, max_i, max_j);
-            
+            sopias4_framework::tools::update_costmap_with_msg_within_bounds(&received_map, master_grid.getCharMap(), min_i, min_j, max_i, max_j);
         }
+
         current_ = true;
     }
     void LayerBridge::reset()

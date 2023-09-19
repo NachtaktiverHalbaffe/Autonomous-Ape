@@ -66,10 +66,10 @@ class RobotManager(Node):
             Drive, "drive", self.__drive_callback
         )
         self.launch_service: Service = self.create_service(
-            LaunchTurtlebot, "connect", self.__launch_nav_stack
+            LaunchTurtlebot, "launch_nav2_stack", self.__launch_nav_stack
         )
         self.stop_service: Service = self.create_service(
-            EmptyWithStatuscode, "disconnect", self.__stop_nav_stack
+            EmptyWithStatuscode, "stop_nav2_stack", self.__stop_nav_stack
         )
         self.start_mapping_service: Service = self.create_service(
             EmptyWithStatuscode, "start_mapping", self.__start_mapping
