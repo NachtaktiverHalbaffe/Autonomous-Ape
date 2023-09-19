@@ -38,9 +38,9 @@ int main(int argc, char **argv)
 	domain_bridge.bridge_topic("/turtle2/plan","nav_msgs/msg/Path",2,0);
 	domain_bridge.bridge_topic("/turtle3/plan","nav_msgs/msg/Path",3,0);
 	// Is navigating topic
-	domain_bridge.bridge_topic("/turtle1/is_navigation","std_msgs/msg/Bool",1,0);
-	domain_bridge.bridge_topic("/turtle2/is_navigation","std_msgs/msg/Bool",2,0);
-	domain_bridge.bridge_topic("/turtle3/is_navigation","std_msgs/msg/Bool",3,0);
+	domain_bridge.bridge_topic("/turtle1/is_navigating","std_msgs/msg/Bool",1,0);
+	domain_bridge.bridge_topic("/turtle2/is_navigating","std_msgs/msg/Bool",2,0);
+	domain_bridge.bridge_topic("/turtle3/is_navigating","std_msgs/msg/Bool",3,0);
 	// Map from slam
 	domain_bridge.bridge_topic("/turtle1/map","nav_msgs/msg/OccupancyGrid",1,0);
 	domain_bridge.bridge_topic("/turtle2/map","nav_msgs/msg/OccupancyGrid",2,0);
