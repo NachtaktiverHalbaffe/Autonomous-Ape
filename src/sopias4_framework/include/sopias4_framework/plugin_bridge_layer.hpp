@@ -100,7 +100,7 @@ namespace plugin_bridges
         virtual bool isClearable() { return true; }
 
     private:
-        double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
+        double last_min_x_, last_min_y_, last_max_x_, last_max_y_, origin_x, origin_y;
 
         /**
          * Indicates that the entire layer should be recalculated next time.

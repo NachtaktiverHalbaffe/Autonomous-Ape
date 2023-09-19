@@ -106,6 +106,15 @@ class PathLayer(LayerPyPlugin):
                 continue
             try:
                 last_node: Tuple[int, int] = self.pose_to_costmap_framesafe(path.poses[0], costmap)  # type: ignore
+                # Check if central point is in the costmap itselfs
+                x_out_of_bounds: bool = (
+                    last_node[0] >= costmap.getSizeInCellsX() or last_node[0] < 0
+                )
+                y_out_of_bounds: bool = (
+                    last_node[1] >= costmap.getSizeInCellsY() or last_node[1] < 0
+                )
+                if y_out_of_bounds or x_out_of_bounds:
+                    continue
             except Exception as e:
                 continue
 

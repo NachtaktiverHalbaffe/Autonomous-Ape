@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-import time
 
 import numpy as np
 import rclpy
-import tf2_ros
-from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
-from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from sopias4_framework.nodes.layer_pyplugin import LayerPyPlugin
 from sopias4_framework.tools.ros2 import costmap_tools
 
-from sopias4_msgs.msg import Robot, RobotStates
+from sopias4_msgs.msg import RobotStates
 
 
 class RobotLayer(LayerPyPlugin):
@@ -104,6 +101,17 @@ class RobotLayer(LayerPyPlugin):
                 central_point = self.pose_with_covariance_stamped_to_costmap_framesafe(
                     position, costmap
                 )
+                # Check if central point is in the costmap itselfs
+                x_out_of_bounds: bool = (
+                    central_point[0] >= costmap.getSizeInCellsX()
+                    or central_point[0] < 0
+                )
+                y_out_of_bounds: bool = (
+                    central_point[1] >= costmap.getSizeInCellsY()
+                    or central_point[1] < 0
+                )
+                if y_out_of_bounds or x_out_of_bounds:
+                    continue
             except Exception as e:
                 continue
 
@@ -120,17 +128,6 @@ class RobotLayer(LayerPyPlugin):
                         )
                         < self.ROBOT_RADIUS
                     ):
-                        if (
-                            costmap.getIndex(
-                                central_point[0] + x_offset, central_point[1] + y_offset
-                            )
-                            >= len(costmap.costmap)
-                            or costmap.getIndex(
-                                central_point[0] + x_offset, central_point[1] + y_offset
-                            )
-                            <= 0
-                        ):
-                            continue
                         # Update costs in all 4 quadrants if pixel is within robot radius
                         # Upper right quadrant
                         costmap.setCost(
@@ -170,7 +167,7 @@ class RobotLayer(LayerPyPlugin):
     ) -> PyCostmap2D:
         tmp_costmap = costmap
         # Getting a generic circle
-        y_indices, x_indices = np.ogrid[
+        x_indices, y_indices = np.ogrid[
             -radius_pixel : radius_pixel + 1, -radius_pixel : radius_pixel + 1
         ]
         # Convert it to indices in a 1d array which the costmap uses in the background
