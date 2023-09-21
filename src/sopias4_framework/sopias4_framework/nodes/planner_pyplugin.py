@@ -155,12 +155,14 @@ class PlannerPyPlugin(Node):
         server wants it to regenerated on a regular basis 
         """
         self.__caching_enabled = True
+        self.get_logger().info("Caching of planned paths enabled")
 
     def disable_caching(self):
         """
         Disables the caching of generated paths. If disabled, every path is generated from scratch on every service request
         """
         self.__caching_enabled = False
+        self.get_logger().info("Caching of planned paths disabled")
 
     def is_caching_enabled(self) -> bool:
         """

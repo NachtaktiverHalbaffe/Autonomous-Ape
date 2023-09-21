@@ -137,7 +137,7 @@ controller_server:
       yaw_goal_tolerance: 0.2
 
       # Obstacles
-      min_obstacle_dist: 0.05
+      min_obstacle_dist: 0.08
       inflation_dist: 0.6
 
       include_costmap_obstacles: True
@@ -270,7 +270,7 @@ local_costmap:
       height: 3
       resolution: 0.06
       robot_radius: 0.15
-      plugins: [static_layer, voxel_layer, inflation_layer, robot_layer]
+      plugins: [static_layer, voxel_layer, robot_layer, inflation_layer]
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 4.0
@@ -316,7 +316,14 @@ global_costmap:
       resolution: 0.06
       track_unknown_space: True
       plugins:
-        [static_layer, obstacle_layer, robot_layer, path_layer, inflation_layer]
+        [
+          static_layer,
+          obstacle_layer,
+          inflation_layer,
+          robot_layer,
+          path_layer,
+          inflation_layer,
+        ]
       obstacle_layer:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: True
