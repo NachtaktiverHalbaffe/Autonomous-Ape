@@ -43,15 +43,15 @@ class RobotManager(Node):
     this node acts as an interface between the system and the user or GUI. Running tasks is done with the help of services, so this node entirely communicates via ROS2 services.
 
     Attributes:
-        drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action "drive_to_pos" (remember to add the namespace) and\
+        drive_to_pos_action (ActionServer): An action to let the Turtlebot drive to an Position. It is accessed via the action "/<namespace>/drive_to_pos" (remember to add the namespace) and\
                                                                         takes a Navigation2 Goal. It's basically a wrapper to pass the action to the Nav2 stack
-        drive_service (Service):  A service to send a drive command to the Turtlebot. The service can be accessed via the service "<namespace>/drive"
-        launch_service (Service): A service to start/connect to the Turtlebot. The service can be accessed via the service "<namespace>/launch"
-        stop_service (Service): A service to stop/disconnect from the Turtlebot. The service can be accessed via the service "<namespace>/stop"
-        start_mapping_service (Service): A service to start the mapping. The service can be accessed via the service "<namespace>/start_mapping". It uses the lifecycles in the background to set the slam node into an active state
-        stop_mapping_service (Service): A service to stop the mapping. The service can be accessed via the service "<namespace>/stop_mapping". It uses the lifecycles in the background to set the slam node into an inactive state
-        dock_service (Service): A service to let the turtlebot dock to its charging station. The service can be accessed via the service "<namespace>/dock"
-        undock_service (Service): A service to let the turtlebot dock from its charging station. The service can be accessed via the service "<namespace>/undock"
+        drive_service (Service):  A service to send a drive command to the Turtlebot. The service can be accessed via the service "/<namespace>/drive"
+        launch_service (Service): A service to start/connect to the Turtlebot. The service can be accessed via the service "/<namespace>/launch_nav2_stack"
+        stop_service (Service): A service to stop/disconnect from the Turtlebot. The service can be accessed via the service "/<namespace>/stop_nav2_stack"
+        start_mapping_service (Service): A service to start the mapping. The service can be accessed via the service "/<namespace>/start_mapping". It uses the lifecycles in the background to set the slam node into an active state
+        stop_mapping_service (Service): A service to stop the mapping. The service can be accessed via the service "/<namespace>/stop_mapping". It uses the lifecycles in the background to set the slam node into an inactive state
+        dock_service (Service): A service to let the turtlebot dock to its charging station. The service can be accessed via the service "/<namespace>/dock"
+        undock_service (Service): A service to let the turtlebot dock from its charging station. The service can be accessed via the service "/<namespace>/undock"
     """
 
     def __init__(self, node_name="robot_manager", namespace: str | None = None) -> None:
@@ -749,6 +749,7 @@ class RobotManager(Node):
 def main(args=None):
     """
     Start the node. It basically initializes the ROS2 context and creates a instance of RobotManager
+
     :meta private:
     """
     # Initialize node context

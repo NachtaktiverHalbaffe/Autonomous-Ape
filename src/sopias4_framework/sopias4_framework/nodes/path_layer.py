@@ -120,7 +120,7 @@ class PathLayer(LayerPyPlugin):
 
             for node in path.poses[1::]:  # type: ignore
                 try:
-                    current_node = self.pose_to_costmap_framesafe(node, costmap)
+                    current_node = self.pose_stamped_to_costmap_framesafe(node, costmap)
                 except Exception as e:
                     continue
                 # Basically a Bresenhams line algorithm implementation
@@ -178,7 +178,6 @@ class PathLayer(LayerPyPlugin):
 
 def main(args=None):
     """
-    Start the node. It basically initializes the ROS2 context and creates a instance of Astar planner
     :meta private:
     """
     # Initialize node context

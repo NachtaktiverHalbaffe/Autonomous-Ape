@@ -34,7 +34,7 @@ class GuiLogger(QObject):
                     GuiLogger(widget=self.ui.textEdit, node=self.node)
     """
 
-    value_signal = pyqtSignal(Log)
+    __value_signal: pyqtSignal = pyqtSignal(Log)
 
     def __init__(
         self,
@@ -55,7 +55,7 @@ class GuiLogger(QObject):
         """
         super().__init__()
         self.widget = widget
-        self.value_signal.connect(self.__add_log_msg)
+        self.__value_signal.connect(self.__add_log_msg)
         self.namespace_filter: str | None = namespace_filter
         if self.namespace_filter is not None:
             if self.namespace_filter[0] == "/":
@@ -76,7 +76,7 @@ class GuiLogger(QObject):
         self.sub.destroy()
 
     def __emit_msg(self, msg: Log):
-        self.value_signal.emit(msg)
+        self.__value_signal.emit(msg)
 
     def __add_log_msg(self, msg: Log):
         """

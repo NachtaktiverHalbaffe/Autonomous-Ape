@@ -36,7 +36,7 @@ If it takes longer or something seems wrong, you could try the following:
         /turtle1/turtlebot4_diagnostics
         /turtle1/turtlebot4_node
     ```
-    If not, then you can use `restart_turtlebot_nodes.py` in the Python package `sopias4_framework.tools.scripts` to restart the nodes remotely until they show up. Note: After restarting it can take up to approx. 30 seconds until are nodes are shown
+    If not, see [Turtlebot4 nodes doesnt show up](#turtlebot4-nodes-doesnt-show-up)
 
 
 ## The LED ring of the Turtlebot is showing red
@@ -45,7 +45,11 @@ If its pulsing red, then the Turtlebot needs to be charged.
 If the robot is rebooting/starting, then this could temporary be normal. Just wait if it fixes itself. Usually after 3-5 minutes the Turtlebot should have been started and the red LED ring disappeared.
 
 If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regulary because the Create3 has very limited CPU power 
-an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completly locked. In longterm this can be fixed by new firmware which optimizes load on the CPU, but 
-until then you can try doing following:
-- See if you updated the NTP configuration like mentioned in the Turtlebot4 installation guide in this documentation
-- If you're implementation allows it: Start the components one after another instead all at once e.g first AMCL, then Rviz2 and then Navigation2
+an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completly locked. In longterm this can be fixed by new firmware which optimizes load on the CPU, in shortterm you can look into the fixes which are described in the advanced informations.
+
+## Turtlebot4 nodes doesnt show up
+Often this is due to some networking quirks. It can be fixed by either running the `restart_turtlebot()` utility inside `sopias4_framework.tools.scripts.turtlebot_ssh_scripts.py` (can sometimes fail) or by:
+1. SSH into terminal: `ssh ubuntu@<ip address of Raspberry Pi of Turtlebot>` (default password is turtlebot4)
+2. Run `turtlebot4-service-restart` in the terminal
+3. Wait some time and wait
+4. Run `exit` to close the SSH connection

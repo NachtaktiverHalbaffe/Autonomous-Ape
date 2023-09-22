@@ -18,6 +18,7 @@ class RobotLayer(LayerPyPlugin):
 
     .. highlight:: yaml
     .. code-block:: yaml
+
         local_costmap:
             local_costmap:
                 ros__parameters:
@@ -218,6 +219,7 @@ class RobotLayer(LayerPyPlugin):
 def main(args=None):
     """
     Start the node. It basically initializes the ROS2 context and creates a instance of Astar planner
+
     :meta private:
     """
     # Initialize node context

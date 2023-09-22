@@ -77,7 +77,7 @@ html_theme_options = {
 }
 html_static_path = ["_static"]
 # hmtl_css_files = ["hide_toctree_caption.css"]
-html_logo = "assets/ias_logo.jpeg"
+html_logo = "assets/ias_logo.png"
 # html_favicon = 'images/nav2_48x48.png'
 
 # -- Options for rosdoc2 -----------------------------------------------------

@@ -139,6 +139,10 @@ class GlobalPlannerTestServer(Node):
         _: Empty.Request = Empty.Request(),
         response_data: Empty.Response = Empty.Response(),
     ):
+        """
+        Send a test request to the PlannerPyPlugin. When it finished, it publishes the planned path to\
+        the topic /global_plan
+        """
         self.__costmap_pub.publish(self.occupany_grid)
         req = CreatePlan.Request()
         req.start = self.start
@@ -161,6 +165,9 @@ class GlobalPlannerTestServer(Node):
 
 
 def main(args=None):
+    """
+    :meta private:
+    """
     # Initialize node context
     rclpy.init(args=args)
     # Create ROS2 Node

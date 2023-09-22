@@ -1,12 +1,20 @@
 # ROS2 messages & services
 Here. a overview of each type of interfaces is given. Also, the standard ROS2 message and action definitions are used. A overview for the standard ROS2 interfaces is given in this [Github repository](https://github.com/ros2/common_interfaces).  Note that the services specific to the Python bridges are missing here because you dont need to use them.
 
-## Messages
+## Message types
 The message definitions are located in `msgs/` in the `sopias4_msgs` package. There you can read the details of each implementation. 
 
-| **Message type** | **Recommended topic name** | **Brief description**                                                                  |
-| ---------------- | -------------------------- | -------------------------------------------------------------------------------------- |
-| Robot            | -                          | The virtual identity of the Turtlebot which are necessary/helpful for the other robots |
+| **Message type** | **Brief description**                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Robot            | The virtual identity of the Turtlebot which are necessary/helpful for the other robots |
+| RobotStates      | A list of Robot                                                                        |
+
+## Overview of most important topics
+| **Topic**                    | **Message type** | **Description**                                                                                                                                                          |
+| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| /robot_states                | RobotStates      | The state of all registered robots in the system e.g. position                                                                                                           |
+| /<*namespace*>/is_navigating | Bool             | If the Turltebot is currently navigating. Its not precise, it only checks if the turtlebot has a global plan published and if the turtlebot is near the end of this path |
+
 
 ## Services
 The service definitions are located in `srv/` in the `sopias4_msgs` package. There you can read the details of each implementation. Note that the services specific to the Python bridges are missing here because you dont need to use them.
@@ -32,14 +40,8 @@ This is only needed if you want to create your own clients for your PluginBridge
 When using the plugin bridge, it is important to provide an parameter file which gives the corresponding implementation name space. This is important if you operate more than one plugin of the same type at the same time, because then the implementation name space is important to correctly identifiy each bridge.
 
 ### Services
-| **Service**                                              | **Service type**        | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**                                                                                                 |
-| -------------------------------------------------------- | ----------------------- | -------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| /<*namespace*>/<*plugin_name*>/update_costs              | UpdateCosts             | Layer Plugin PyBridge      | update_costs()              | Implementation pending                                                                                          |
-| /<*namespace*>/<*plugin_name*>/create_plan               | CreatePlan              | Planner Plugin PyBridge    | create_plan()               | Implementation pending                                                                                          |
-| /<*namespace*>/<*plugin_name*>/compute_velocity_commands | ComputeVelocityCommands | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending                                                                                          |
-| -                                                        | -                       | Navigator Plugin PyBridge  | get_default_bt_filepath()   | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
-| -                                                        | -                       | Navigator Plugin PyBridge  | goal_received()             | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
-| -                                                        | -                       | Navigator Plugin PyBridge  | goal_completed()            | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
-| -                                                        | -                       | Navigator Plugin PyBridge  | get_name()                  | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
-| -                                                        | -                       | BT Plugin PyBridge         | provide_ports()             | Implementation not useful, because behaviour plugin not implemented                                             |
-| -                                                        | -                       | Behavior Plugin PyBridge   | on_run()                    | Implementation not useful, because every bridge needs own Action definition which cant be dynamically loaded in |
+| **Service**                                              | **Service type**        | **Plugin Bridge**          | **Overrides Method**        | **Descriptiom**        |
+| -------------------------------------------------------- | ----------------------- | -------------------------- | --------------------------- | ---------------------- |
+| /<*namespace*>/<*plugin_name*>/update_costs              | UpdateCosts             | Layer Plugin PyBridge      | update_costs()              | Implementation pending |
+| /<*namespace*>/<*plugin_name*>/create_plan               | CreatePlan              | Planner Plugin PyBridge    | create_plan()               | Implementation pending |
+| /<*namespace*>/<*plugin_name*>/compute_velocity_commands | ComputeVelocityCommands | Controller Plugin PyBridge | compute_velocity_commands() | Implementation Pending |

@@ -10,17 +10,17 @@ Welcome to Sopias4 Framework's documentation!
    :maxdepth: 3
    :caption: Setup
 
-   installation_link 
-   troubleshooting
-   advanced_infos
+   installation_link.rst 
+   troubleshooting_link.rst
+   advanced_infos_link.rst
 
 .. Heading is displayed via toctree
 .. toctree::
    :maxdepth: 3
    :caption: Guides
 
-   things_to_consider
-   running_link
+   things_to_consider_link.rst
+   running_link.rst
 
 API documentation
 =================
@@ -48,28 +48,28 @@ If you want to implement your plugin in native C++, then you can follow the tuto
    :maxdepth: 3
    :caption: Interfaces
 
-   message_def_link
+   message_def_link.rst
    
 .. Heading is displayed via toctree
 .. toctree::
    :maxdepth: 3
    :caption: Python Documentation
 
-   Nodes <sopias4_framework.nodes>
+   Nodes <sopias4_framework.nodes.rst>
 
 .. toctree::
    :maxdepth: 5
 
-   Tools <sopias4_framework.tools>
+   Tools <sopias4_framework.tools.rst>
 
 .. Heading is displayed via toctree
 .. toctree::
    :maxdepth: 3
    :caption: C++ Documentation
 
-   ../generated/class_view_hierarchy
-   ../generated/file_view_hierarchy  
-   ../generated/unabridged_api
+   ../generated/class_view_hierarchy.rst
+   ../generated/file_view_hierarchy.rst 
+   ../generated/unabridged_api.rst
 
 Indices and tables
 ==================

@@ -55,6 +55,121 @@ This information should't be needed to develop Sopias4-Application. These sectio
       # one second, but only in the first three clock updates.
       makestep 1 3
       ```
+## Workarounds for Turtlebot4 to improve performance
+Like mentioned in the troubleshooting-guide, the Turtlebot has some stability issues sometimes leading to a crash which is indicated by a red light on the power button. However there are workarounds which can be applied to improve this situation a providing a more stable experience. In the future these can become obsolete due to updates from Turtlebot4 or the Create3 base, so check if these are still needed.
+
+### Disable Turtlebot4 Diagnostics
+The Turtlebot4 has some nodes running for diagnostic purpose. These can be disabled to reduce the CPU load on the Create3 base significantly. For this, do following:
+1. SSH into the Turtlebot: `ssh ubuntu@<Ip adress of raspberry pi>` (default password is turtlebot4)
+2. Run `turtlebot4-setup`
+3. Go under ROS Setup -> Bash Setup -> Select TURTLEBOT4_DIAGNOSTICS -> Disabled -> Save
+4. Back out to the main menu and apply settings
+5. The nodes should restart and diagnostic node should disappear
+
+### Apply custom RMW profiles
+The ROS Middleware settings can be customized both on the Turtlebot4 and the Create3.
+
+For the Create3 follow following guide: [https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/](https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/). Use the following profile  (replace XXX.XXX.XXX.XXX with IP-Adress of Create3 base):
+```bash
+<?xml version="1.0" encoding="UTF-8"?>
+<dds xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <profiles>
+        <!-- UDPv4 Transport profile -->
+        <transport_descriptors>
+            <transport_descriptor>
+                <transport_id>udp_transport</transport_id>
+                <type>UDPv4</type>
+                <!-- Reduce socket buffer size -->
+                <sendBufferSize>4096</sendBufferSize>
+                <receiveBufferSize>4096</receiveBufferSize>
+                <!-- Reduce max message size, otherwise the participant creation fails -->
+                <maxMessageSize>4096</maxMessageSize>
+                <interfaceWhiteList>
+                    <address>XXX.XXX.XXX.XXX</address>
+                    <address>127.0.0.1</address>
+                </interfaceWhiteList>
+            </transport_descriptor>
+        </transport_descriptors>
+
+        <!-- Domain Participant Profile -->
+        <participant profile_name="domainparticipant_profile_name" is_default_profile="true">
+            <rtps>
+                <!-- Use user defined UDPv4 transport -->
+                <userTransports>
+                    <transport_id>udp_transport</transport_id>
+                </userTransports>
+                <!-- Disable builtin transports -->
+                <useBuiltinTransports>false</useBuiltinTransports>
+            </rtps>
+        </participant>
+
+        <!-- Default publisher profile -->
+        <data_writer profile_name="default_publisher_profile" is_default_profile="true">
+            <topic>
+                <!-- Tune initial allocations -->
+                <resourceLimitsQos>
+                    <max_samples>0</max_samples>
+                    <allocated_samples>0</allocated_samples>
+                </resourceLimitsQos>
+            </topic>
+        </data_writer>
+
+        <!-- Default subscriber profile -->
+        <data_reader profile_name="default_subscriber_profile" is_default_profile="true">
+            <topic>
+                <!-- Tune initial allocations -->
+                <resourceLimitsQos>
+                    <max_samples>0</max_samples>
+                    <allocated_samples>0</allocated_samples>
+                </resourceLimitsQos>
+            </topic>
+        </data_reader>
+    </profiles>
+</dds>
+```
+
+For the Turtlebot4, do the following:
+1. SSH into the Turtlebot: `ssh ubuntu@<Ip adress of raspberry pi>` (default password is turtlebot4)
+2. Either modify `/etc/turtlebot4/fastdds_rpi.xml` (may get overridden with future Turtlebot4 updated) or create a new file (more configuration nedded) and insert following configuration (replace XXX.XXX.XXX.XXX with IP-Adress of Raspberry Pi):
+```bash
+<?xml version="1.0" encoding="UTF-8" ?>
+<dds>
+    <profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+        <!-- UDPv4 Transport profile -->
+        <transport_descriptors>
+            <transport_descriptor>
+                <transport_id>udp_transport</transport_id>
+                <type>UDPv4</type>
+                <interfaceWhiteList>
+                    <address>XXX.XXX.XXX.XXX</address>
+                    <address>127.0.0.1</address>
+                </interfaceWhiteList>
+            </transport_descriptor>
+        </transport_descriptors>
+        
+        <!-- Domain Participant Profile -->
+        <participant profile_name="turtlebot4_default_profile" is_default_profile="true">
+            <rtps>
+                <!-- Use user defined UDPv4 transport -->
+                <userTransports>
+                    <transport_id>udp_transport</transport_id>
+                </userTransports>
+                <!-- Disable builtin transports -->
+                <useBuiltinTransports>false</useBuiltinTransports>
+            </rtps>
+        </participant>
+    </profiles>
+</dds>
+```
+3. *Only if you created this as a new configuration*: 
+   1. Go under ROS Setup -> Bash Setup -> Select RMW-Profile-fastrtps
+   2. Insert full path to your created configuration file and save
+   3. Back out to the main menu and apply settings
+
+### Other untestes, but possible solutions
+1. Change RMW to CycloneDDS
+2. Reduce the number of nodes which are visible in the network
+3. Launch nodes sequentially
 
 ## Time synchronization
 It is important for the Turtlebots and all the clients that the time is synchronized. Otherwise you could run into problems. To achive this NTP is utilized. All the clients (especially the Turltebot) synchronizes with the host which runs the Sopias4-Fleetbroker. If the development container is used and the Turtlebots are setup like instructed then everything should be setup already. However, if you run into timesycning issues, then it is useful to check if the NTP configuration is still working and if chrony (used as NTP server and clients) is running fine.

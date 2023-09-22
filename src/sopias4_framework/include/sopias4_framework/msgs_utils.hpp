@@ -31,7 +31,7 @@ namespace sopias4_framework::tools
     /**
      * @brief Updates a costmap with the new cost values from a costmap message within a given bound
      * @param costmap_msg A pointer to the costmap message from which the updated values will be taken
-     * @param costmap A pointer to the costmap which costs should be updated
+     * @param costmap_array A pointer to the costmap which costs should be updated
      * @param min_i Lower bound in first dimension of costmap
      * @param min_i Lower bound in second dimension of costmap
      * @param max_i Upper bound in first dimension of costmap

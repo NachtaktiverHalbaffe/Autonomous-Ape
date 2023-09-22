@@ -3,12 +3,9 @@ import abc
 from threading import Thread
 from typing import Tuple
 
-import rclpy
-import sopias4_framework.tools.ros2
 import tf2_geometry_msgs
 from geometry_msgs.msg import Pose, PoseStamped, TransformStamped
 from nav2_simple_commander.costmap_2d import PyCostmap2D
-from nav_msgs.msg import OccupancyGrid
 from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile
@@ -125,7 +122,9 @@ class LayerPyPlugin(Node):
     ) -> PyCostmap2D:
         """
         Here the costmap should be updated. Only update the region inside the window, specified by the min_* and max_* \
-        arguments, to save computational time.
+        arguments, to save computational time. Also, make sure to work in the right transformation frame. There also framesafe\
+        conversions between poses in the map domain [m] to coordinates in the costmap [cells] in this class which can be used\
+        for this purpose
 
         Args:
             min_i (int): The minimum x-index of the update window
@@ -138,15 +137,38 @@ class LayerPyPlugin(Node):
             nav2_simplecommander.costmap_2d.PyCostmap2D: The updated costmap 
         """
 
-    def transform_pose(self, pose, target_frame: str, timeout_milliseconds: int = 100):
+    def transform_pose(self, pose, target_frame: str, timeout_milliseconds: int = 0):
+        """
+        Transform a pose into a source frame
+
+        Args:
+            pose: The position that should be transformed
+            target_frame (str): The frame into which the pose should be transformed
+            timeout_milliseconds (int, optional): The time after which the transformation should time out
+
+        Returns:
+            Same type as pose: The transformed pose
+        """
         return self.tf_buffer.transform(
             pose,
             target_frame=target_frame,
+            timeout=Duration(nanoseconds=timeout_milliseconds * 1000),
         )
 
     def pose_with_covariance_stamped_to_costmap_framesafe(
         self, pose: PoseWithCovarianceStamped, costmap: PyCostmap2D
     ) -> Tuple[int, int]:
+        """
+        Converts a PoseWithCovarianceStamped into x,y-coordinates from the costmap and applies a transformation if\
+        the pose and the costmap are in a different transformation frame
+
+        Args:
+            pose (PoseWithCovarianceStamped): The pose which should be converted into coordinates
+            costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in where the x,y-coordinates should be
+        
+        Returns:
+            Tuple(int,int): The converted x,y-coordinate in the right frame
+        """
         if pose.header.frame_id == costmap.getGlobalFrameID():
             return costmap_tools.pose_2_costmap(pose.pose.pose, costmap)
         else:
@@ -167,8 +189,47 @@ class LayerPyPlugin(Node):
                 raise e
 
     def pose_to_costmap_framesafe(
+        self, pose: Pose, costmap: PyCostmap2D, source_frame: str
+    ) -> Tuple[int, int]:
+        """
+        Converts a pose into x,y-coordinates from the costmap and applies a transformation if\
+        the pose and the costmap are in a different transformation frame
+
+        Args:
+            pose (Pose): The pose which should be converted into coordinates
+            costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in where the x,y-coordinates should be
+            source_frame (str): The transformation frame in which the pose is
+        
+        Returns:
+            Tuple(int,int): The converted x,y-coordinate in the right frame
+        """
+        if source_frame == costmap.getGlobalFrameID():
+            return costmap_tools.pose_2_costmap(pose, costmap)
+        else:
+            try:
+                transform = self.tf_buffer.lookup_transform(
+                    costmap.getGlobalFrameID(), source_frame, Time()
+                )
+                pose_transformed = tf2_geometry_msgs.do_transform_pose(pose, transform)
+                # pose_transformed = self.transform_pose(pose, costmap.getGlobalFrameID())
+                return costmap_tools.pose_2_costmap(pose_transformed.pose, costmap)  # type: ignore
+            except Exception as e:
+                raise e
+
+    def pose_stamped_to_costmap_framesafe(
         self, pose: PoseStamped, costmap: PyCostmap2D
     ) -> Tuple[int, int]:
+        """
+        Converts a PoseStamped into x,y-coordinates from the costmap and applies a transformation if\
+        the pose and the costmap are in a different transformation frame
+
+        Args:
+            pose (PoseStamped): The pose which should be converted into coordinates
+            costmap (nav2_simplecommander.costmap_2d.PyCostmap2D): The costmap in where the x,y-coordinates should be
+        
+        Returns:
+            Tuple(int,int): The converted x,y-coordinate in the right frame
+        """
         if pose.header.frame_id == costmap.getGlobalFrameID():
             return costmap_tools.pose_2_costmap(pose, costmap)
         else:

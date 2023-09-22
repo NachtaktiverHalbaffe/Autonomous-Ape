@@ -26,7 +26,6 @@ find_package(rclcpp REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
       # Framework
       "msg/Robot.msg"
-      "msg/Namespaces.msg"
       "msg/RobotStates.msg"
       "srv/ShowDialog.srv"
       "srv/RegistryService.srv"
