@@ -51,6 +51,10 @@ install(TARGETS
     DESTINATION lib/${PROJECT_NAME}
 )
 
+install(DIRECTORY include/
+  DESTINATION include/
+)
+
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
 # Install executables
@@ -76,4 +80,5 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_include_directories(include)
 ament_package()
