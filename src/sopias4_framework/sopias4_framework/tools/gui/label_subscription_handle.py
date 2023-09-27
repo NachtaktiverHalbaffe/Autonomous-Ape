@@ -24,7 +24,7 @@ class LabelSubscriptionHandler(QObject):
                     self.ui: Ui_MainWindow
                     super().__init__(Ui_MainWindow())
 
-                def connect_labels_to_subscriptions(self):
+                def connect_ui_callbacks(self):
                     # reference the desired QLabel element, the gui node and the message type here
                     LabelSubscriptionHandler(
                         widget=self.ui.label_battery, node=self.node, message_type=BatteryState

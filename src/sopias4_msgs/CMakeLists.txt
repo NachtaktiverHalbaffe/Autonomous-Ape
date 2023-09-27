@@ -34,7 +34,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
       "srv/GetRobotIdentity.srv"
       "srv/GetNamespaces.srv"
       "srv/DriveToPos.srv"
-      "srv/LaunchTurtlebot.srv"
+      "srv/LaunchNav2Stack.srv"
       "srv/Drive.srv"
       "srv/StopMapping.srv"
       # Plugin Bridges

@@ -16,7 +16,7 @@ class GuiLogger(QObject):
     This class takes a QTextEdit element as a widget and displays the ros_messages in this element. For this\
     purpose, it internally creates a subscription to the /rosout topic where all log messages are sent to.\
     For this purpose, it is neccessary that the gui node is running. As a best practise, instantiate this logger\
-    inside the `connect_labels_to_subscriptions()` method. 
+    inside the `connect_labels_ui_callbacks()` method. 
 
     Example:
     
@@ -29,7 +29,7 @@ class GuiLogger(QObject):
                     super().__init__(Ui_MainWindow())
 
 
-                def connect_labels_to_subscriptions(self):
+                def connect_ui_callbacks(self):
                     # reference the desired QTextEdit element and the gui node here
                     GuiLogger(widget=self.ui.textEdit, node=self.node)
     """

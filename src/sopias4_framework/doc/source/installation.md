@@ -16,7 +16,7 @@ cd <path to your workspace>
 colcon build
 ```
 
-## Installing ROS2 and necesary applications 
+## Installing ROS2 and necessary applications 
 ### Recommended: Running in Docker using Dev Containers (Visual Studio Code)
 Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
 
@@ -50,9 +50,9 @@ If you want to use the pre-configured Dev Container, then the configuration is f
     sudo usermod -aG docker $USER
     newgrp docker
     ```
-3. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested)
+3. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
 4. Optional: Replace `nachtaktiverhalbaffe` inside `devcontainer.json` with your preferred username under which the container runs
-5. Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform (GPU, remember that often the iGPU of the processor is configured to be used in Linux)
+5. Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
 6. Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
 
 ### Run directly on host (deprecated)
