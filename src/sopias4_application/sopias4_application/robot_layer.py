@@ -40,8 +40,6 @@ class RobotLayer(LayerPyPlugin):
             plugin_name="robot_layer",
             namespace=namespace,
         )
-
-        self.COST_ROBOTS: np.uint8 = np.uint8(254)
         self.ROBOT_RADIUS: float = 0.20
 
         self.robot_positions: list[PoseWithCovarianceStamped] = list()
@@ -134,25 +132,25 @@ class RobotLayer(LayerPyPlugin):
                         costmap.setCost(
                             central_point[0] + x_offset,
                             central_point[1] + y_offset,
-                            self.COST_ROBOTS,
+                            self.COST_LETHAL_OBSTALE,
                         )
                         # Upper left quadrant
                         costmap.setCost(
                             central_point[0] - x_offset,
                             central_point[1] + y_offset,
-                            self.COST_ROBOTS,
+                            self.COST_LETHAL_OBSTALE,
                         )
                         #  Lower right quadrant
                         costmap.setCost(
                             central_point[0] + x_offset,
                             central_point[1] - y_offset,
-                            self.COST_ROBOTS,
+                            self.COST_LETHAL_OBSTALE,
                         )
                         # Lower left quadrant
                         costmap.setCost(
                             central_point[0] - x_offset,
                             central_point[1] - y_offset,
-                            self.COST_ROBOTS,
+                            self.COST_LETHAL_OBSTALE,
                         )
 
         return costmap
@@ -199,7 +197,7 @@ class RobotLayer(LayerPyPlugin):
             indices_in_1d_in_bound = np.delete(
                 indices_in_1d, np.argwhere(indices_in_1d >= len(tmp_costmap.costmap))
             )
-            tmp_costmap.costmap[indices_in_1d_in_bound] = self.COST_ROBOTS
+            tmp_costmap.costmap[indices_in_1d_in_bound] = self.COST_LETHAL_OBSTALE
 
         return tmp_costmap
 

@@ -29,7 +29,7 @@ from sopias4_msgs.srv import (
     Drive,
     DriveToPos,
     EmptyWithStatuscode,
-    LaunchTurtlebot,
+    LaunchNav2Stack,
     RegistryService,
     ShowDialog,
     StopMapping,
@@ -66,7 +66,7 @@ class RobotManager(Node):
             Drive, "drive", self.__drive_callback
         )
         self.launch_service: Service = self.create_service(
-            LaunchTurtlebot, "launch_nav2_stack", self.__launch_nav_stack
+            LaunchNav2Stack, "launch_nav2_stack", self.__launch_nav_stack
         )
         self.stop_service: Service = self.create_service(
             EmptyWithStatuscode, "stop_nav2_stack", self.__stop_nav_stack
@@ -291,9 +291,9 @@ class RobotManager(Node):
 
     def __launch_nav_stack(
         self,
-        request_data: LaunchTurtlebot.Request,
-        response_data: LaunchTurtlebot.Response,
-    ) -> LaunchTurtlebot.Response:
+        request_data: LaunchNav2Stack.Request,
+        response_data: LaunchNav2Stack.Response,
+    ) -> LaunchNav2Stack.Response:
         """
         Callback function for a service which launches all nodes related to the robot itself. It basically launches AMCL, Turtlebot4, Rviz2 \
         and Navigation 2 node. If the usage of simulation is specified, the a launch description is generated which runs everything inside \
@@ -313,7 +313,6 @@ class RobotManager(Node):
             "Got service request to launch necessary turtlebot nodes"
         )
         # Add launchfile argument
-        1
         if self.get_namespace() != "/":
             self.__nav2_stack_launch_service.add_launchfile_arguments(
                 f'namespace:={self.get_namespace()} use_simulation:={"true" if request_data.use_simulation  else "false"}'

@@ -26,6 +26,8 @@ setup(
         "console_scripts": [
             f"gui = {package_name}.gui:main",
             f"astar = {package_name}.astar:main",
+            f"path_layer = {package_name}.path_layer:main"
+            f"robot_layer = {package_name}.path_layer:main",
         ],
     },
 )

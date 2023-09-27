@@ -91,26 +91,22 @@ class GlobalPlannerTestServer(Node):
         with open(test_data_path) as json_data:
             loaded_params = json.load(json_data)
 
-        self.occupany_grid: OccupancyGrid = OccupancyGrid()
-        self.occupany_grid.data = loaded_params["costmap"]["data"]
-        self.occupany_grid.header.frame_id = loaded_params["costmap"]["header"][
-            "frame_id"
-        ]
-        self.occupany_grid.info.height = loaded_params["costmap"]["info"]["height"]
-        self.occupany_grid.info.width = loaded_params["costmap"]["info"]["width"]
-        self.occupany_grid.info.resolution = loaded_params["costmap"]["info"][
-            "resolution"
-        ]
-        self.occupany_grid.info.origin.position.x = loaded_params["costmap"]["info"][
+        self.costmap: OccupancyGrid = OccupancyGrid()
+        self.costmap.data = loaded_params["costmap"]["data"]
+        self.costmap.header.frame_id = loaded_params["costmap"]["header"]["frame_id"]
+        self.costmap.info.height = loaded_params["costmap"]["info"]["height"]
+        self.costmap.info.width = loaded_params["costmap"]["info"]["width"]
+        self.costmap.info.resolution = loaded_params["costmap"]["info"]["resolution"]
+        self.costmap.info.origin.position.x = loaded_params["costmap"]["info"][
             "origin"
         ]["position"]["x"]
-        self.occupany_grid.info.origin.position.y = loaded_params["costmap"]["info"][
+        self.costmap.info.origin.position.y = loaded_params["costmap"]["info"][
             "origin"
         ]["position"]["y"]
-        self.occupany_grid.info.origin.orientation.y = loaded_params["costmap"]["info"][
+        self.costmap.info.origin.orientation.y = loaded_params["costmap"]["info"][
             "origin"
         ]["orientation"]["y"]
-        self.occupany_grid.info.origin.orientation.w = loaded_params["costmap"]["info"][
+        self.costmap.info.origin.orientation.w = loaded_params["costmap"]["info"][
             "origin"
         ]["orientation"]["w"]
 
@@ -143,11 +139,11 @@ class GlobalPlannerTestServer(Node):
         Send a test request to the PlannerPyPlugin. When it finished, it publishes the planned path to\
         the topic /global_plan
         """
-        self.__costmap_pub.publish(self.occupany_grid)
+        self.__costmap_pub.publish(self.costmap)
         req = CreatePlan.Request()
         req.start = self.start
         req.goal = self.goal
-        req.costmap = self.occupany_grid
+        req.costmap = self.costmap
 
         response: CreatePlan.Response | None = node_tools.call_service(
             self.__global_planner_sclient_createplan,

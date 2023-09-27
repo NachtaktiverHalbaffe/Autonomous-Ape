@@ -10,8 +10,6 @@ from irobot_create_msgs.msg import DockStatus, KidnapStatus, WheelVels
 from PyQt5.QtWidgets import QApplication
 from sensor_msgs.msg import BatteryState
 from sopias4_framework.nodes.gui_node import GUINode
-from sopias4_framework.nodes.path_layer import PathLayer
-from sopias4_framework.nodes.robot_layer import RobotLayer
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
 from sopias4_framework.tools.gui.label_subscription_handle import (
     LabelSubscriptionHandler,
@@ -20,6 +18,8 @@ from sopias4_framework.tools.ros2 import node_tools
 from std_msgs.msg import Bool
 
 from sopias4_application.astar import Astar
+from sopias4_application.path_layer import PathLayer
+from sopias4_application.robot_layer import RobotLayer
 from sopias4_application.ui_object import Ui_MainWindow
 
 

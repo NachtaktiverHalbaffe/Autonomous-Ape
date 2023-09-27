@@ -20,13 +20,14 @@ from sopias4_framework.tools.ros2 import drive_tools, node_tools
 from sopias4_msgs.srv import (
     Drive,
     EmptyWithStatuscode,
-    LaunchTurtlebot,
+    LaunchNav2Stack,
     RegistryService,
     ShowDialog,
     StopMapping,
 )
 
 
+# TODO Disable services when robot isnt registered
 class GUINode(QMainWindow):
     """
     This class is a Base GUI class which can be used to building a own GUI in the Sopias4 project. This class handles the QT GUI portion of the Node, the ROS2 Node itself 
@@ -93,8 +94,8 @@ class GUINode(QMainWindow):
         - unload_ros2_node(): Unloads and stops a Ptyhon ROS2 node from the executor
         - register_namespace(): Register namespace in Sopias4 Map-Server
         - unregister_namespace(): Unregisters a namespace in Sopias4 Fleetbroker
-        - launch_robot(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
-        - stop_robot(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot
+        - launch_nav2_stack(): Start all the nodes in Sopias4 Application which are interacting with the Turtlebot
+        - stop_nav2_stack(): Stops all the nodes in Sopias4 Application which are interacting with the Turtlebot
         - start_mapping(): Starts the mapping process
         - stop_mapping(): Stops the mapping process and saves the map on the Sopias4 Map-Server
         - drive(): Let the robot execute a specific drive command
@@ -752,7 +753,7 @@ class GrapficalNode(Node):
         # This service launches/connects to the corresponding Turtlebot
         # by launching the nodes of Sopias4 Application
         self.__rm_sclient_launch: Client = self.service_client_node.create_client(
-            LaunchTurtlebot, f"{self.get_namespace()}/launch_nav2_stack"
+            LaunchNav2Stack, f"{self.get_namespace()}/launch_nav2_stack"
         )
         # This service stops the running nodes of Sopias4 Application
         # so that the system isn't connected anymore to the physical robot
@@ -912,9 +913,9 @@ class GrapficalNode(Node):
             bool: If operation was successful
         """
         self.get_logger().debug("Sending service request to launch Turtlebot")
-        request = LaunchTurtlebot.Request()
+        request = LaunchNav2Stack.Request()
         request.use_simulation = use_simulation
-        response: LaunchTurtlebot.Response | None = node_tools.call_service(
+        response: LaunchNav2Stack.Response | None = node_tools.call_service(
             client=self.__rm_sclient_launch,
             service_req=request,
             calling_node=self.service_client_node,
@@ -922,7 +923,7 @@ class GrapficalNode(Node):
         )
         if response is None:
             return False
-        elif response.statuscode == LaunchTurtlebot.Response.SUCCESS:
+        elif response.statuscode == LaunchNav2Stack.Response.SUCCESS:
             return True
         else:
             return False
