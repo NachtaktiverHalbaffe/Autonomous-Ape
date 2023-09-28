@@ -29,8 +29,8 @@ namespace plugin_bridges
                         ros__parameters:
                             controller_plugins: ["FollowPath"]
                             FollowPath:
-                            plugin:  "plugin_bridges/ControllerBridge"
-                            plugin_name: "Example"
+                                plugin:  "plugin_bridges/ControllerBridge"
+                                plugin_name: "Example"
      *             \endcode
      *      2. Implement a ROS2 service which has to fulfill following things:
      *          - The service name must be /<namespace>/<plugin_name>/compute_velocity_commands (Reminder: ROS applies namespace automatically to service name if node is launched in corresponding namespace)

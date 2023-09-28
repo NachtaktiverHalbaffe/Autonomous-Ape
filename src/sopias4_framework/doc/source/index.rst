@@ -21,6 +21,8 @@ Welcome to Sopias4 Framework's documentation!
 
    things_to_consider_link.rst
    running_link.rst
+   plugin_bridges_link.rst
+.. TODO Guide for gui, configuring the nav2 stack and general architecure
 
 API documentation
 =================

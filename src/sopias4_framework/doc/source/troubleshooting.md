@@ -36,7 +36,7 @@ If it takes longer or something seems wrong, you could try the following:
         /turtle1/turtlebot4_diagnostics
         /turtle1/turtlebot4_node
     ```
-    If not, see [Turtlebot4 nodes doesnt show up](#turtlebot4-nodes-doesnt-show-up)
+    If not, see [Turtlebot4 nodes doesnt show up](#heading-target)
 
 
 ## The LED ring of the Turtlebot is showing red
@@ -47,6 +47,7 @@ If the robot is rebooting/starting, then this could temporary be normal. Just wa
 If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regulary because the Create3 has very limited CPU power 
 an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completly locked. In longterm this can be fixed by new firmware which optimizes load on the CPU, in shortterm you can look into the fixes which are described in the advanced informations.
 
+(heading-target)=
 ## Turtlebot4 nodes doesnt show up
 Often this is due to some networking quirks. It can be fixed by either running the `restart_turtlebot()` utility inside `sopias4_framework.tools.scripts.turtlebot_ssh_scripts.py` (can sometimes fail) or by:
 1. SSH into terminal: `ssh ubuntu@<ip address of Raspberry Pi of Turtlebot>` (default password is turtlebot4)
