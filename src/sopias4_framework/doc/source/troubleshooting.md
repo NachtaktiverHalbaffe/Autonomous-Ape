@@ -4,11 +4,11 @@ There a some known problems that can occur time to time. Following a overview of
 ## Startup of Navigation stack takes long or isn't starting
 This is completly normal due to technical restrictions on the robot side. Long term this could get better with updates to the Turtlebot4 and Create3 platform. 
 
-Until then, it could take sometimes 2-3 minutes. You can determine if the startup failed or some problem occured when it deviates significantly from this behaviour:
+Until then, it could take sometimes 2-3 minutes. You can determine if the startup failed or some problem occurred when it deviates significantly from this behavior:
 1. The localization (AMCL) and the navigation (Navigation) should be started. This should be visible. Also Rviz is launched for visualization
 2. After that the Turtlebot locates itself after some time. If it has itself located, then a cluster of green little arrows occur in Rviz
 3. After that, the costmaps comes online:
-   - It waites until all TF buffers received all the needed transformations. During this process, the following could be seen in the logs: 
+   - It waits until all TF buffers received all the needed transformations. During this process, the following could be seen in the logs: 
    ```bash
    [controller_server-3] [INFO] [turtle1.local_costmap.local_costmap]: Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
    ```
@@ -21,7 +21,7 @@ Until then, it could take sometimes 2-3 minutes. You can determine if the startu
     ```
 
 If it takes longer or something seems wrong, you could try the following:
-- Check if Turtlebot is running correctly. You can see it in the LED ring on the powerbutton. It should normally be steady white. You can see the color coding at [https://iroboteducation.github.io/create3_docs/hw/face/](https://iroboteducation.github.io/create3_docs/hw/face/). A red light is usually a sign that the Turtlebot need to be powercycled
+- Check if Turtlebot is running correctly. You can see it in the LED ring on the power button. It should normally be steady white. You can see the color coding at [https://iroboteducation.github.io/create3_docs/hw/face/](https://iroboteducation.github.io/create3_docs/hw/face/). A red light is usually a sign that the Turtlebot need to be powercycled
 - Run `ros2 node list` and see if the nodes from the Robot show up. It should look like the following (namespaces can vary):
     ```Bash
         /turtle1/analyzers
@@ -36,7 +36,7 @@ If it takes longer or something seems wrong, you could try the following:
         /turtle1/turtlebot4_diagnostics
         /turtle1/turtlebot4_node
     ```
-    If not, see [Turtlebot4 nodes doesnt show up](#heading-target)
+    If not, see [Turtlebot4 nodes doesn't show up](#heading-target)
 
 
 ## The LED ring of the Turtlebot is showing red
@@ -44,11 +44,11 @@ If its pulsing red, then the Turtlebot needs to be charged.
 
 If the robot is rebooting/starting, then this could temporary be normal. Just wait if it fixes itself. Usually after 3-5 minutes the Turtlebot should have been started and the red LED ring disappeared.
 
-If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regulary because the Create3 has very limited CPU power 
-an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completly locked. In longterm this can be fixed by new firmware which optimizes load on the CPU, in shortterm you can look into the fixes which are described in the advanced informations.
+If it's showing solid/static red, then the Create 3 hang up and needs to be powercycled (complete shutdown and reboot). This can happen regularly because the Create3 has very limited CPU power 
+an running Navigation2 the event communication could be enough to max out the processor and after some times the Create 3 can be unresponsive or be completely locked. In long term this can be fixed by new firmware which optimizes load on the CPU, in short term you can look into the fixes which are described in the advanced information.
 
 (heading-target)=
-## Turtlebot4 nodes doesnt show up
+## Turtlebot4 nodes doesn't show up
 Often this is due to some networking quirks. It can be fixed by either running the `restart_turtlebot()` utility inside `sopias4_framework.tools.scripts.turtlebot_ssh_scripts.py` (can sometimes fail) or by:
 1. SSH into terminal: `ssh ubuntu@<ip address of Raspberry Pi of Turtlebot>` (default password is turtlebot4)
 2. Run `turtlebot4-service-restart` in the terminal

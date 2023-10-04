@@ -56,7 +56,7 @@ If you want to use the pre-configured Dev Container, then the configuration is f
 6. Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
 
 ### Run directly on host (deprecated)
-Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands. Additionally, all tools are tailored to the dev containers and thus some rare things arent supported on bare metal out of the box. Finally, all other guides are assuming you are using the dev containers, so you may have to modify some stuff by yourself if following the guides of this documentation.
+Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands. Additionally, all tools are tailored to the dev containers and thus some rare things aren't supported on bare metal out of the box. Finally, all other guides are assuming you are using the dev containers, so you may have to modify some stuff by yourself if following the guides of this documentation.
 
 In general you can setup your environment by "running" the `DOCKERFILE`  after line 16 by hand:
 - Execute every `RUN` command in your terminal
@@ -66,7 +66,7 @@ In general you can setup your environment by "running" the `DOCKERFILE`  after l
   - Replace `${WORKSPACE}` with the (absolute) path to your workspace
   - Replace `${USERNAME}` with your linux username
 
- You have to source ROS2 and the workspace everytime you open a terminal and your IDE needs to be started from a sourced terminal so you get all linter and syntax highlighting capabilities. For this you have to run these commands in the opened terminal:
+ You have to source ROS2 and the workspace every time you open a terminal and your IDE needs to be started from a sourced terminal so you get all linter and syntax highlighting capabilities. For this you have to run these commands in the opened terminal:
 ```bash
 source /opt/ros/humble/setup.bash
 source source <path to ros workspace>/install/setup.bash

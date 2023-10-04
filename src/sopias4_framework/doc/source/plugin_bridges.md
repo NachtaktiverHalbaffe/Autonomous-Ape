@@ -1,5 +1,5 @@
 # Using the PluginBridges
-In Navigation 2 the plugins must be written in C++ because it utilizes the pluginlib which is specific for that language. However, in some usecases you want to write your plugins in another language. For this purpose the PluginBriges are provided.
+In Navigation 2 the plugins must be written in C++ because it utilizes the pluginlib which is specific for that language. However, in some usecases you want to write your plugins in another language. For this purpose the PluginBridges are provided.
 
 It provides a plugin which you can configure into Navigation2 and utilizes ROS2 services which calls an external service which runs a implementation of the desired algorithm. This service can be run from another node with the programming language for your choice. However, these can only be utilized where the PluginBridge can be written in a general matter which is only possible for a costmap layer, the planner and the controller. All other plugins would require different C++ code for each PluginBridge for each different external plugin implementation.
 
@@ -12,7 +12,7 @@ For Python, there is already abstract classes called PyPlugins given in this fra
 
 For a plugin implementation in your specific language there are following conditions which needs to be met:
 - There must be a ROS2 client library available, installed and running
-- The ROS2 client library must be able to do: Running a node, running a service, generate service classes from service definitons
+- The ROS2 client library must be able to do: Running a node, running a service, generate service classes from service definitions
 - https://docs.ros.org/en/rolling/Concepts/Basic/About-Client-Libraries.html lists a set of known client libraries and languages
 
 If your programming language fulfill these conditions, then you have to implement the service for the corresponding service which runs under the right service name. In order to fulfill this, the services must be named the same on the PluginBridge and the plugin implementation. This is done by utilizing the plugin_name because the name is constructed after the following scheme: `/<namespace>/<plugin_name>/<service type in snake case>`.  You can look into the documentation of these PluginsBridge to get the specific naming convention for each specific bridge.
@@ -20,7 +20,7 @@ If your programming language fulfill these conditions, then you have to implemen
 ## PlannerBridge
 The planner is responsible for planning the global path. Thus a path finding algorithm must be implemented.
 
-For using the Pluginbridge for this, it can be configured by adding following to your Navigation 2 configuration:
+For using the PluginBridge for this, it can be configured by adding following to your Navigation 2 configuration:
 ```YAML
 planner_server:
     ros__parameters:
@@ -54,7 +54,7 @@ class Astar(PlannerPyPlugin):
         costmap: PyCostmap2D,
         goal_tolerance: float = 0.2,
     ) -> list[Tuple[int, int]]:
-    # The algortihm here
+    # The algorithm here
 
 def main(args=None):
     # Initialize node context
@@ -71,21 +71,22 @@ def main(args=None):
 if __name__ == "__main__":
     main()
 ```
+As you can see, the PlannerPyPlugin has additionally a caching feature which returns a sliced version of the last planned path if it's suitable for the requested start and goal. This reduces oscillation in the planned paths and reduces computation time because the planning algorithm must only run when a complete new route is requested. It is enabled by default, but can be disabled. For further details, look into the documentation of the PlannerPyPlugin.
 
 If you want to create your own plugin implementation, the service must be named under the following scheme: `/<namespace>/<plugin_name>/create_plan`. The corresponding service definition can be found in `sopias4_msgs/srv/CreatePlan.srv`.
 
 (heading-target)=
-### GlobalPlannerTestserver
+### GlobalPlannerTestServer
 This node enabled the offline testing of the planner implementation without a need of running the actual robot or the whole Navigation2 stack. For this purpose recorded service requests are loaded from a JSON file and then can be send by the ROS2 service `/send_test_request`.
 
-The launch file `bringup_test_system_planner.launch.py` can be used to launch this testsystem and a RViz visualization. The only needed launch-argument is `plugin_name:=<name of the tested plugin>`. The launch command could look like the following: `ros2 launch sopias4_framework bringup_test_system_planner.launch.py plugin_name:=astar`. In the development container this could also be launched with the shortcut `sopias4-testsystem-planner plugin_name:=astar`. The node to be tested still need to be started manually.  
+The launch file `bringup_test_system_planner.launch.py` can be used to launch this test-system and a RViz visualization. The only needed launch-argument is `plugin_name:=<name of the tested plugin>`. The launch command could look like the following: `ros2 launch sopias4_framework bringup_test_system_planner.launch.py plugin_name:=astar`. In the development container this could also be launched with the shortcut `sopias4-testsystem-planner plugin_name:=astar`. The node to be tested still need to be started manually.  
 
-To send a test request simply call the service  with `ros2 service call /send_test_request std_srvs/srv/Empty`. In the development container this is also shortcutted with `sopias4-testrequest-planner`.
+To send a test request simply call the service  with `ros2 service call /send_test_request std_srvs/srv/Empty`. In the development container this is also shortcut with `sopias4-testrequest-planner`.
 
 ## LayerBridge
 A costmap layer provide one layer to the costmap. In the background, all layers are merged together by choosing the maximum value from all layers for a specific cell. Thus, only high costs of the layer have the potential to be represented in the final costmap and low costs are tending to get discarded when other layers have higher costs there. 
 
-For using the Pluginbridge for this, it can be configured by adding following to your Navigation 2 configuration (for global costmap simply change `local_costmap` to `global_costmap`):
+For using the PluginBridge for this, it can be configured by adding following to your Navigation 2 configuration (for global costmap simply change `local_costmap` to `global_costmap`):
 ```YAML
 local_costmap:
     local_costmap:
@@ -133,9 +134,9 @@ if __name__ == "__main__":
 If you want to create your own plugin implementation, the service must be named under the following scheme: `/<namespace>/<plugin_name>/update_costs`. The corresponding service definition can be found in `sopias4_msgs/srv/UpdateCosts.srv`.
 
 ## ControllerBridge
-The contoller is responsible for generating the actual steering commands so the robot follows the planned path from the planner.
+The controller is responsible for generating the actual steering commands so the robot follows the planned path from the planner.
 
-For using the Pluginbridge for this, it can be configured by adding following to your Navigation 2 configuration:
+For using the PluginBridge for this, it can be configured by adding following to your Navigation 2 configuration:
 ```YAML
 controller_server:
     ros__parameters:

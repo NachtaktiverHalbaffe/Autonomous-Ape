@@ -89,5 +89,30 @@
         "typeinfo": "cpp",
         "variant": "cpp"
     },
-    "esbonio.sphinx.confDir": ""
+    "esbonio.sphinx.confDir": "",
+    "cSpell.words": [
+        "Balena",
+        "buildx",
+        "centralwidget",
+        "chrony",
+        "colcon",
+        "containerd",
+        "dearmor",
+        "DISTRO",
+        "Domainbridge",
+        "dpkg",
+        "Fleetbroker",
+        "genindex",
+        "iburst",
+        "newgrp",
+        "oakd",
+        "rclpy",
+        "rplidar",
+        "schematypens",
+        "setuptools",
+        "srvs",
+        "testrequest",
+        "Unregisters",
+        "usermod"
+    ]
 }

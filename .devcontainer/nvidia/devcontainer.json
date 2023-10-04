@@ -15,7 +15,6 @@
         "vscode": {
             "settings": {
                 "telemetry.telemetryLevel": "off",
-                "python.linting.lintOnSave": true,
                 "source.organizeImports": true,
                 "[python]": {
                     "editor.formatOnSave": true,
@@ -40,7 +39,8 @@
                 "streetsidesoftware.code-spell-checker",
                 "gruntfuggly.todo-tree",
                 "ms-iot.vscode-ros",
-                "smilerobotics.urdf"
+                "smilerobotics.urdf",
+                "usernamehw.errorlens"
             ]
         }
     },

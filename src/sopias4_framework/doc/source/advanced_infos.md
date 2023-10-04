@@ -1,14 +1,14 @@
 # Advanced information (mainly for supervisors)
-This information should't be needed to develop Sopias4-Application. These sections provide additional informations, hints and guides if some errors occur which arent covered in the troubleshooting guide or if some central systems or parts must be reinstalled or completly setup from scratch.
+This information should't be needed to develop Sopias4-Application. These sections provide additional information, hints and guides if some errors occur which aren't covered in the troubleshooting guide or if some central systems or parts must be reinstalled or completly setup from scratch.
 
-## Setting up Turtlebots
+## Setting up Turtlebot's
 1. Download the latest ISO at [http://download.ros.org/downloads/turtlebot4/](http://download.ros.org/downloads/turtlebot4/)
 2. Install a disk flashing application e.g. [Balena Etcher](https://etcher.balena.io)
 3. Remove the SD-Cart from the Raspberry Pi in the Turtlebot:
    1. Screw of the top plate and the long standoffs
    2. Lift of the plate where the LIDAR is mounted on
    3. The SD card is on the bottom side of the Raspberry Pi. Removing it is a little bit tricky
-4. Connect the SD cart with your PC and use your flashing programm to flash the downloaded ISO onto the SD cart
+4. Connect the SD cart with your PC and use your flashing application to flash the downloaded ISO onto the SD cart
 5. Follow the setup instruction: [https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot](https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html#robot)
 6. Connect the Create3 to the access point: [https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3](https://turtlebot.github.io/turtlebot4-user-manual/setup/simple_discovery.html#create-3)
 7. Update the firmware of the Create 3 over the webserver. If connected to Wifi, it will automatically download the latest image
@@ -19,7 +19,7 @@ This information should't be needed to develop Sopias4-Application. These sectio
    3. Change the content so it does look like this:
       ```bash
       # Welcome to the chrony configuration file. See chrony.conf(5) for more
-      # information about usuable directives.
+      # information about usable directives.
 
       server rustime01.rus.uni-stuttgart.de iburst
       server rustime02.rus.uni-stuttgart.de iburst
@@ -47,7 +47,7 @@ This information should't be needed to develop Sopias4-Application. These sectio
       # Stop bad estimates upsetting machine clock.
       maxupdateskew 100.0
 
-      # This directive enables kernel synchronisation (every 11 minutes) of the
+      # This directive enables kernel synchronization (every 11 minutes) of the
       # real-time clock. Note that it can’t be used along with the 'rtcfile' directive.
       rtcsync
 
@@ -60,7 +60,7 @@ Like mentioned in the troubleshooting-guide, the Turtlebot has some stability is
 
 ### Disable Turtlebot4 Diagnostics
 The Turtlebot4 has some nodes running for diagnostic purpose. These can be disabled to reduce the CPU load on the Create3 base significantly. For this, do following:
-1. SSH into the Turtlebot: `ssh ubuntu@<Ip adress of raspberry pi>` (default password is turtlebot4)
+1. SSH into the Turtlebot: `ssh ubuntu@<Ip address of raspberry pi>` (default password is turtlebot4)
 2. Run `turtlebot4-setup`
 3. Go under ROS Setup -> Bash Setup -> Select TURTLEBOT4_DIAGNOSTICS -> Disabled -> Save
 4. Back out to the main menu and apply settings
@@ -69,7 +69,7 @@ The Turtlebot4 has some nodes running for diagnostic purpose. These can be disab
 ### Apply custom RMW profiles
 The ROS Middleware settings can be customized both on the Turtlebot4 and the Create3.
 
-For the Create3 follow following guide: [https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/](https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/). Use the following profile  (replace XXX.XXX.XXX.XXX with IP-Adress of Create3 base):
+For the Create3 follow following guide: [https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/](https://iroboteducation.github.io/create3_docs/webserver/rmw-profile-override/). Use the following profile  (replace XXX.XXX.XXX.XXX with IP-address of Create3 base):
 ```bash
 <?xml version="1.0" encoding="UTF-8"?>
 <dds xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
@@ -129,8 +129,8 @@ For the Create3 follow following guide: [https://iroboteducation.github.io/creat
 ```
 
 For the Turtlebot4, do the following:
-1. SSH into the Turtlebot: `ssh ubuntu@<Ip adress of raspberry pi>` (default password is turtlebot4)
-2. Either modify `/etc/turtlebot4/fastdds_rpi.xml` (may get overridden with future Turtlebot4 updated) or create a new file (more configuration nedded) and insert following configuration (replace XXX.XXX.XXX.XXX with IP-Adress of Raspberry Pi):
+1. SSH into the Turtlebot: `ssh ubuntu@<Ip address of raspberry pi>` (default password is turtlebot4)
+2. Either modify `/etc/turtlebot4/fastdds_rpi.xml` (may get overridden with future Turtlebot4 updated) or create a new file (more configuration needed) and insert following configuration (replace XXX.XXX.XXX.XXX with IP-address of Raspberry Pi):
 ```bash
 <?xml version="1.0" encoding="UTF-8" ?>
 <dds>
@@ -166,10 +166,10 @@ For the Turtlebot4, do the following:
    2. Insert full path to your created configuration file and save
    3. Back out to the main menu and apply settings
 
-### Other untestes, but possible solutions
+### Other untested, but possible solutions
 1. Change RMW to CycloneDDS
 2. Reduce the number of nodes which are visible in the network
 3. Launch nodes sequentially
 
 ## Time synchronization
-It is important for the Turtlebots and all the clients that the time is synchronized. Otherwise you could run into problems. To achive this NTP is utilized. All the clients (especially the Turltebot) synchronizes with the host which runs the Sopias4-Fleetbroker. If the development container is used and the Turtlebots are setup like instructed then everything should be setup already. However, if you run into timesycning issues, then it is useful to check if the NTP configuration is still working and if chrony (used as NTP server and clients) is running fine.
+It is important for the Turtlebot's and all the clients that the time is synchronized. Otherwise you could run into problems. To achieve this NTP is utilized. All the clients (especially the Turtlebot) synchronizes with the host which runs the Sopias4-Fleetbroker. If the development container is used and the Turtlebot's are setup like instructed then everything should be setup already. However, if you run into time syncing issues, then it is useful to check if the NTP configuration is still working and if chrony (used as NTP server and clients) is running fine.

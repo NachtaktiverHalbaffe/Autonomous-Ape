@@ -6,7 +6,7 @@ optimized for usage with this specific package.
 However, it can be used outside the Sopias4 Framework Package, but in this case you have to make a 
 few adjustments to your ROS2 package:
     - Create a folder `doc/` in your package and cd into it in the terminal
-    - Run `sphinx-quickstart` and follow the steps. Make sure to select the option to seperate source and build directories
+    - Run `sphinx-quickstart` and follow the steps. Make sure to select the option to separate source and build directories
     - Copy the content of the `conf.py` in the Sopias4 Framework, located under `doc/build`: \
             You can keep the meta-data specific to the package. If during the building an error occurs that\
             some specific module was not found, then place them in `MOCK_MODULES` inside of `conf.py`
@@ -36,7 +36,7 @@ def generate_docs(pkg_path: str | None = None):
         PKG_PATH = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../..", "")
         )
-        # Generatie Sphinx files (Python)
+        # Generate Sphinx files (Python)
         subprocess.call(
             [
                 "sphinx-apidoc",
@@ -62,7 +62,7 @@ def generate_docs(pkg_path: str | None = None):
             ]
         )
     else:
-        # Generatie Sphinx files (Python)
+        # Generate Sphinx files (Python)
         subprocess.call(
             ["sphinx-apidoc", "-f", "-o", f"{pkg_path}/doc/source", f"{pkg_path}"]
         )

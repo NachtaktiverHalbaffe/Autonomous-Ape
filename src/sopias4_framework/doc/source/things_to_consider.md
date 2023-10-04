@@ -43,7 +43,7 @@ If you want to use the `sopias4-application` shortcut inside your terminal inste
 
 ## Configuring Navigation2 stack
 Navigation 2 is configured via a YAML-file. Sopias4-Framework provides launchfiles for launching the stack and loading the configuration. For this purpose, the YAML configuration file must be named right and located in the right location like the following:
-- Name: It must be named `nav2.yaml`. You can also have other configurations with other names, but these arent loaded automatically out of the box
+- Name: It must be named `nav2.yaml`. You can also have other configurations with other names, but these aren't loaded automatically out of the box
 - Location: It must be located in `config` inside your Sopias4-Application package. Make sure to export these files into the shared resources when you create this directory. For this, add this to your build configuration:
   -  Python package (`ament_python`): Insert inside `setup.py`
         ```python

@@ -14,7 +14,6 @@
         "vscode": {
             "settings": {
                 "telemetry.telemetryLevel": "off",
-                "python.linting.lintOnSave": true,
                 "source.organizeImports": true,
                 "[python]": {
                     "editor.formatOnSave": true,
@@ -24,24 +23,26 @@
                 }
             },
             "extensions": [
-                "althack.ament-task-provider",
-                "DotJoshJohnson.xml",
-                "ms-azuretools.vscode-docker",
-                "ms-python.python",
-                "ms-python.black-formatter",
-                "ms-python.isort",
-                "ms-vscode.cpptools",
-                "twxs.cmake",
-                "eamodio.gitlens",
-                "leonhard-s.python-sphinx-highlight",
-                "redhat.vscode-yaml",
-                "yzhang.markdown-all-in-one",
-                "zachflower.uncrustify",
-                "streetsidesoftware.code-spell-checker",
-                "gruntfuggly.todo-tree",
-                "ms-iot.vscode-ros",
-                "smilerobotics.urdf"
-            ]
+				"althack.ament-task-provider",
+				"DotJoshJohnson.xml",
+				"ms-azuretools.vscode-docker",
+				"ms-python.python",
+				"ms-python.black-formatter",
+				"ms-python.isort",
+				"ms-vscode.cpptools",
+				"twxs.cmake",
+				"eamodio.gitlens",
+				"leonhard-s.python-sphinx-highlight",
+				"redhat.vscode-yaml",
+				"yzhang.markdown-all-in-one",
+				"zachflower.uncrustify",
+				"streetsidesoftware.code-spell-checker",
+				"gruntfuggly.todo-tree",
+				"ms-iot.vscode-ros",
+				"smilerobotics.urdf",
+				"usernamehw.errorlens",
+				"TakumiI.markdowntable"
+			]
         }
     },
     "containerEnv": {
