@@ -1,5 +1,5 @@
 # Troubleshooting
-There a some known problems that can occur time to time. Following a overview of them and possible solutions are given.
+There are some known problems that can occur time to time. Following a overview of them and possible solutions are given.
 
 ## Startup of Navigation stack takes long or isn't starting
 This is completly normal due to technical restrictions on the robot side. Long term this could get better with updates to the Turtlebot4 and Create3 platform. 

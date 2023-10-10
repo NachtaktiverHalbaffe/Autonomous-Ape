@@ -48,7 +48,7 @@ class LayerPyPlugin(Node):
 
     COST_NO_INFORMATION: np.uint8 = np.uint8(255)
     """We treat unknown space as space which we dont want drive to. So these have the highest cost, even higher than lethal obstacles"""
-    COST_LETHAL_OBSTALE: np.uint8 = np.uint8(254)
+    COST_LETHAL_OBSTACLE: np.uint8 = np.uint8(254)
     """"Lethal" cost means that there is an actual (workspace) obstacle in a cell. So if the robot's center were in that cell, the robot would obviously be in collision"""
     COST_INSCRIBED_INFLATED_OBSTACLE: np.uint8 = np.uint8(253)
     """"Inscribed" cost means that a cell is less than the robot's inscribed radius away from an actual obstacle. So the robot is certainly in collision with some obstacle if the robot center is in a cell that is at or above the inscribed cost."""
@@ -64,11 +64,6 @@ class LayerPyPlugin(Node):
         namespace: str | None = None,
     ) -> None:
         super().__init__(node_name) if namespace is None else super().__init__(node_name, namespace=namespace)  # type: ignore
-        # self.COST_NO_INFORMATION: np.uint8 = np.uint8(255)
-        # self.COST_LETHAL_OBSTALE: np.uint8 = np.uint8(254)
-        # self.COST_INSCRIBED_INFLATED_OBSTACLE: np.uint8 = np.uint8(253)
-        # self.COST_MAX_NON_OBSTACLE: np.uint8 = np.uint8(252)
-        # self.COST_FREE_SPACE: np.uint8 = np.uint8(0)
         self.get_logger().info(f"Initializing {plugin_name}")
         # Service
         self.__plugin_bridge_server: Service = self.create_service(

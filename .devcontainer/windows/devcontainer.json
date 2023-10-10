@@ -1,5 +1,4 @@
 {
-    // Note that this conf file is untested
     "name": "ROS 2 Development Container",
     "privileged": true,
     "build": {
@@ -10,7 +9,7 @@
         }
     },
     "workspaceFolder": "/home/ws",
-    "workspaceMount": "src=${localWorkspaceFolder},dst=/home/ws,type=bind",
+    "workspaceMount": "src=${localWorkspaceFolder},dst=${containerWorkspaceFolder},type=bind",
     "customizations": {
         "vscode": {
             "settings": {
@@ -25,13 +24,14 @@
             },
             "extensions": [
                 "althack.ament-task-provider",
-                "betwo.b2-catkin-tools",
                 "DotJoshJohnson.xml",
                 "ms-azuretools.vscode-docker",
                 "ms-python.python",
                 "ms-python.black-formatter",
+                "ms-python.isort",
                 "ms-vscode.cpptools",
-                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "eamodio.gitlens",
                 "leonhard-s.python-sphinx-highlight",
                 "redhat.vscode-yaml",
                 "yzhang.markdown-all-in-one",
@@ -40,7 +40,8 @@
                 "gruntfuggly.todo-tree",
                 "ms-iot.vscode-ros",
                 "smilerobotics.urdf",
-                "usernamehw.errorlens"
+                "usernamehw.errorlens",
+                "TakumiI.markdowntable"
             ]
         }
     },
@@ -54,23 +55,18 @@
     },
     "runArgs": [
         "--net=host", // network access to host interfaces, e.g. eth0
+        "--ipc=host",
+        // "--pid=host", // DDS discovery with host, without --network=host
         "-e",
         "DISPLAY=${env:DISPLAY}",
         "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",
         "--cap-add=SYS_PTRACE", // enable debugging, e.g. gdb
-        "--security-opt", // enable debugging, e.g. gdb
-        "seccomp=unconfined", // enable debugging, e.g. gdb
-        "-v",
-        "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh",
-        "--privileged",
-        "-e",
-        "NVIDIA_VISIBLE_DEVICES=all",
-        "-e",
-        "NVIDIA_DRIVER_CAPABILITIES=all"
+        "--security-opt=seccomp=unconfined" // enable debugging, e.g. gdb
     ],
     "mounts": [
-        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+        "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "sudo chown -R ros2 ${containerWorkspaceFolder} && sudo chronyd",
-    "initializeCommand": "xhost +local:root"
+    "postCreateCommand": "sudo chown -R ros2  ${containerWorkspaceFolder} && sudo chronyd"
+    // "initializeCommand": "xhost +local:root"
 }

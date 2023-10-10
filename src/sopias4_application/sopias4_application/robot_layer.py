@@ -132,25 +132,25 @@ class RobotLayer(LayerPyPlugin):
                         costmap.setCost(
                             central_point[0] + x_offset,
                             central_point[1] + y_offset,
-                            self.COST_LETHAL_OBSTALE,
+                            self.COST_LETHAL_OBSTACLE,
                         )
                         # Upper left quadrant
                         costmap.setCost(
                             central_point[0] - x_offset,
                             central_point[1] + y_offset,
-                            self.COST_LETHAL_OBSTALE,
+                            self.COST_LETHAL_OBSTACLE,
                         )
                         #  Lower right quadrant
                         costmap.setCost(
                             central_point[0] + x_offset,
                             central_point[1] - y_offset,
-                            self.COST_LETHAL_OBSTALE,
+                            self.COST_LETHAL_OBSTACLE,
                         )
                         # Lower left quadrant
                         costmap.setCost(
                             central_point[0] - x_offset,
                             central_point[1] - y_offset,
-                            self.COST_LETHAL_OBSTALE,
+                            self.COST_LETHAL_OBSTACLE,
                         )
 
         return costmap
@@ -197,7 +197,7 @@ class RobotLayer(LayerPyPlugin):
             indices_in_1d_in_bound = np.delete(
                 indices_in_1d, np.argwhere(indices_in_1d >= len(tmp_costmap.costmap))
             )
-            tmp_costmap.costmap[indices_in_1d_in_bound] = self.COST_LETHAL_OBSTALE
+            tmp_costmap.costmap[indices_in_1d_in_bound] = self.COST_LETHAL_OBSTACLE
 
         return tmp_costmap
 
