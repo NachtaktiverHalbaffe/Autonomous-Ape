@@ -1,7 +1,7 @@
 ARG ROS_DISTRO=humble
 
 FROM ros:${ROS_DISTRO}
-ARG USERNAME= ros
+ARG USERNAME=ros2
 ARG WORKSPACE
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -96,6 +96,8 @@ RUN echo "source ${WORKSPACE}/install/setup.bash" >>  /home/${USERNAME}/.bashrc
 # Setup ntp server as source for time synchronization
 COPY ./chrony.conf /etc/chrony/chrony.conf
 EXPOSE 123/udp
+COPY postCreate.sh /bin/postCreate.sh 
+COPY postStart.sh /bin/postStart.sh
 # Setup some aliases
 RUN echo 'alias sopias4-application="ros2 run sopias4_application gui"' >>  /home/${USERNAME}/.bashrc
 RUN echo 'alias sopias4-fleetbroker="ros2 run sopias4_fleetbroker gui.py"' >>  /home/${USERNAME}/.bashrc

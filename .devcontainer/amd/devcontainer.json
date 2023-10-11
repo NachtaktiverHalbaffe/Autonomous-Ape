@@ -4,7 +4,6 @@
     "build": {
         "dockerfile": "../../Dockerfile",
         "args": {
-            "USERNAME": "ros2",
             "WORKSPACE": "${containerWorkspaceFolder}"
         }
     },
@@ -66,6 +65,7 @@
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "sudo chown -R ros2 ${containerWorkspaceFolder} && sudo chronyd",
+    "postCreateCommand": "sudo bash /bin/postCreate.sh",
+    "postStartCommand": "sudo bash /bin/postStart.sh",
     "initializeCommand": "xhost +local:root"
 }
