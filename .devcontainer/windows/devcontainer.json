@@ -45,8 +45,8 @@
         }
     },
     "containerEnv": {
-        "DISPLAY": "${localEnv:DISPLAY}",
-        // "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "DISPLAY": ":0",
+        "PULSE_SERVER": "/tmp/PulseServer",
         "ROS_DOMAIN_ID": "1",
         "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
@@ -54,11 +54,11 @@
         "--net=host", // network access to host interfaces, e.g. eth0
         "--ipc=host",
         // "--pid=host", // DDS discovery with host, without --network=host
-        "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",
         "--cap-add=SYS_PTRACE", // enable debugging, e.g. gdb
         "--security-opt=seccomp=unconfined" // enable debugging, e.g. gdb
     ],
     "mounts": [
+        "source=\\\\wsl.localhost\\Ubuntu\\mnt\\wslg\\.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached", // Using wsl2 x11 server, change if wsl varys
         "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],

@@ -45,15 +45,8 @@ If you want to use the pre-configured Dev Container, then the configuration is f
         - Run command `wsl --install`. This installs a Ubuntu-Subsystem
         - In pure Windows fashion, restart your computer
         - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
-        - Open "Ubuntu" (could be found over the windows search). It should open a terminal in the Ubuntu Subsystem
-        - Run following commands:
-          ```Bash
-          echo "export DISPLAY=\$(ip route|awk '/^default/{print \$3}'):0.0" >>  ~/.bashrc
-          echo "export LIBGL_ALWAYS_INDIRECT=1" >>  ~/.bashrc
-          ```
       - Install drivers for graphical applications:
           - Download driver from [https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps). Note that these could be already installed. In this case you can skip the installation
-          - Download and install [X-Server for windows](https://sourceforge.net/projects/vcxsrv/).
       - Install Docker
         - Download from [https://docs.docker.com/desktop/install/windows-install/](https://docs.docker.com/desktop/install/windows-install/)
         - Execute
@@ -65,16 +58,10 @@ If you want to use the pre-configured Dev Container, then the configuration is f
     sudo usermod -aG docker $USER
     newgrp docker
     ```
-3. Only Windows:
-   1. Make sure Docker (inluding WSL2) is running
-   2. Run XLaunch:
-      1. On the first step, select "Multiple Windows"
-      2. Leave everything as it is on the second step
-      3. Additional check "Disable access control" on the third step
-      4. When a Windows Firewall dialog shows up, grant access
+3. Only Windows: Make sure Docker (inluding WSL2) is running
 4. Open the workspace
-5. Download and install Visual Studio Code:
-6. In Visual Studio COde: Go to the extensions tab an
+5. Download and install Visual Studio Code
+6. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers and WSL(Windows only)
 7. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
 8. Optional: Replace `ros2` inside `devcontainer.json` with your preferred username under which the container runs
 9.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
