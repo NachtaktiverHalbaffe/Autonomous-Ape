@@ -40,8 +40,23 @@ If you want to use the pre-configured Dev Container, then the configuration is f
         ```
     - For Windows
       - Open powershell as administrator
-      - Run `wsl --install`
-      - Download and run Docker installer
+      - Install WSL2 
+        - Open Powershell (or Terminal) as administrator
+        - Run command `wsl --install`. This installs a Ubuntu-Subsystem
+        - In pure Windows fashion, restart your computer
+        - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
+        - Open "Ubuntu" (could be found over the windows search). It should open a terminal in the Ubuntu Subsystem
+        - Run following commands:
+          ```Bash
+          echo "export DISPLAY=\$(ip route|awk '/^default/{print \$3}'):0.0" >>  ~/.bashrc
+          echo "export LIBGL_ALWAYS_INDIRECT=1" >>  ~/.bashrc
+          ```
+      - Install drivers for graphical applications:
+          - Download driver from [https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps)
+      - Install Docker
+        - Download from [https://docs.docker.com/desktop/install/windows-install/](https://docs.docker.com/desktop/install/windows-install/)
+        - Execute
+      - In pure Windows fashion, restart your computer
     <!-- - TODO Add windows stuff -->
 2. Only Linux: Add your current linux user which is used inside the container to the docker group:
     ```bash

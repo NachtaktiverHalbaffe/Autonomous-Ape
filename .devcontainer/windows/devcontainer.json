@@ -46,18 +46,14 @@
     },
     "containerEnv": {
         "DISPLAY": "${localEnv:DISPLAY}",
-        "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
-        "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
-        "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
-        "ROS_DOMAIN_ID": "1"
-        // "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
+        // "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "ROS_DOMAIN_ID": "1",
+        "LIBGL_ALWAYS_SOFTWARE": "1" // Needed for software rendering of opengl
     },
     "runArgs": [
         "--net=host", // network access to host interfaces, e.g. eth0
         "--ipc=host",
         // "--pid=host", // DDS discovery with host, without --network=host
-        "-e",
-        "DISPLAY=${env:DISPLAY}",
         "--volume=${env:HOME}/.Xauthority:/root/.Xauthority:rw",
         "--cap-add=SYS_PTRACE", // enable debugging, e.g. gdb
         "--security-opt=seccomp=unconfined" // enable debugging, e.g. gdb
