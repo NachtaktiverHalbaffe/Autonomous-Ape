@@ -67,7 +67,7 @@ Navigation 2 is configured via a YAML-file. Sopias4-Framework provides launchfil
             # Other stuff after that can be left at it is
         )
         ```
-     - Python & C++ combined package (`ament_cmake`): Insert inside `CMakeLists.txt`:
-        ```Cmake
-        install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
-        ```
+  - Python & C++ combined package (`ament_cmake`): Insert inside `CMakeLists.txt`:
+     ```Cmake
+     install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+     ```

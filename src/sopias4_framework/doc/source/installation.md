@@ -38,7 +38,7 @@ If you want to use the pre-configured Dev Container, then the configuration is f
         ```bash
         sudo docker run hello-world
         ```
-    - For Windows
+    - For Windows: Install Linux or if your
       - Open powershell as administrator
       - Install WSL2 
         - Open Powershell (or Terminal) as administrator
