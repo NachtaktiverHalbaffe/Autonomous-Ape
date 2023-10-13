@@ -2,50 +2,18 @@
 This splits up into setting up a ROS2 workspace for the Sopias4 project and installing ROS2. It's recommended to first setup the workspace and then setting up ROS2, because the workspace contains necessary configuration files if you want to use the Dev Containers and Docker for easy setup. 
 
 ## Setting up ROS2 workspace
-Clone this repository. When using Linux, it is recommended to clone it into the home directory of your linux user so it matches with the commands in this guide.
+Clone this repository. When using Linux, it is recommended to clone it into the home directory of your linux user so it matches with the commands in this guide. If you use Windows and WSL2, then it is recommended to install WSL2 first and then clone it also under the home path inside your WSL2. This improves performance by a lot. You can follow the exact command, but inside of WSL2:
 ```Bash
-# If git isn't installed
+# If git isn't installed,
 sudo apt update && apt install git
 
 cd /home/<your linux user>
-git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right, can vary 
+git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right can vary 
 ```
-After you have installed ROS2, you can follow the installation of the development container.
+After you have installed ROS2, you can follow the installation guide depending on your host operating system.
+
 ## Installing ROS2 and necessary applications 
-### Recommended: Running in Docker using Dev Containers (Visual Studio Code)
-#### Windows
-1. Install WSL2:
-      - Open Powershell (or Terminal) as administrator
-      - Run command `wsl --install`. This installs a Ubuntu-Subsystem
-      - In pure Windows fashion, restart your computer
-      - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
-2. Enable Hyper-V: 
-  - Run `enabele_hyperv.bat` as an administrator by right clicking on it and choosing "run as administrator"
-  - Restart computer
-3. Bridge the network inside to WSL2:
-  - Open Hyper-V Manager as administrator
-  - On the right hand under "Actions" choose "Manager for virtual switches"
-  - Select the `wsl` adapter
-  - Choose "External network" and choose the network adapter you want to use e.g. your wifi adapter. Hit apply. A error can appear, often this can be fixed by clicking abort and retrying the whole operation
-4. Configure network inside WSL2:
-  - Open WSL2: Usually you can find it if you search for Ubuntu in the windows search and open it
-  - Run following commands inside of it:
-    ```Bash
-    sudo ip addr flush dev eth0
-    sudo dhclient eth0
-    ```
-  - From step 3. until now you have to repeat every time you restart your computer and/or WSL2
-  - Run `sudo nano /etc/resolv.conf` and replace the nameserver with following IP-Adress: `129.69.252.252`
-  - Run `sudo nano /etc/wsl.conf` and change the file so it looks like the following:
-    ```Bash
-    [boot]
-    systemd=true
-
-    [network]
-    generateResolvConf=false
-    ```
-
-#### Linux
+### Recommended for Linux: Running in Docker using Dev Containers (Visual Studio Code)
 Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: [https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html](https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html)
 
 If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
@@ -71,54 +39,80 @@ If you want to use the pre-configured Dev Container, then the configuration is f
         ```bash
         sudo docker run hello-world
         ```
-    - For Windows: Install Linux or if your
-      - Open powershell as administrator
-      - Install WSL2 
-        - Open Powershell (or Terminal) as administrator
-        - Run command `wsl --install`. This installs a Ubuntu-Subsystem
-        - In pure Windows fashion, restart your computer
-        - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
-      - Install drivers for graphical applications:
-          - Download driver from [https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps). Note that these could be already installed. In this case you can skip the installation
-      - Install Docker
-        - Download from [https://docs.docker.com/desktop/install/windows-install/](https://docs.docker.com/desktop/install/windows-install/)
-        - Execute
-      - In pure Windows fashion, restart your computer
-    <!-- - TODO Add windows stuff -->
-2. Only Linux: Add your current linux user which is used inside the container to the docker group:
+2. Add your current linux user which is used inside the container to the docker group:
     ```bash
     sudo groupadd docker
     sudo usermod -aG docker $USER
     newgrp docker
     ```
-3. Only Windows: Make sure Docker (inluding WSL2) is running
-4. Open the workspace
-5. Download and install Visual Studio Code
-6. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers and WSL(Windows only)
-7. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
-8. Optional: Replace `ros2` inside `devcontainer.json` with your preferred username under which the container runs
-9.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
-10. Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
+3. Open the workspace
+4. Download and install Visual Studio Code
+5. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers and WSL(Windows only)
+6. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
+7. Optional: Replace `ros2` inside `devcontainer.json` with your preferred username under which the container runs
+8.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
+9.  Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
 
-### Run directly on host (deprecated)
-Follow [https://docs.ros.org/en/iron/Installation.html](https://docs.ros.org/en/iron/Installation.html) and use the humble release. Remind that the guides in this repository where written for Linux (Ubuntu), so if you are using another OS you may need to adapt a few commands. Additionally, all tools are tailored to the dev containers and thus some rare things aren't supported on bare metal out of the box. Finally, all other guides are assuming you are using the dev containers, so you may have to modify some stuff by yourself if following the guides of this documentation.
+### Linux: Run directly on host (deprecated)
+It is assumed that you use Ubuntu or another Ubuntu-based distribution. If you use another one, you have to adjust the `apt`-commands to the package manager of your distribution. 
 
-In general you can setup your environment by "running" the `DOCKERFILE`  after line 16 by hand:
-- Execute every `RUN` command in your terminal
-- Set the environment variables which are set with the `ENV` command. Simply enter `export <variable extracted from dockerfile>` in your terminal. Note: you have to do this every time you open a new terminal. To make this permanent, then use the command `echo "export <variable extracted from dockerfile>" >>/home/<your linux user>/.bashrc`
-- Replace all variables like the following:
-  - Replace `${ROS-DISTRO}` with `humble`
-  - Replace `${WORKSPACE}` with the (absolute) path to your workspace
-  - Replace `${USERNAME}` with your linux username
+Follow these steps:
+1. Check if the variables inside of `install_sopias4_env.sh` are set right:
+   - `USERNAME` must be the username of your Linux user 
+   - `WORKSPACE` must be the absolute path to your Sopias4 workspace. Usually this is the place where you cloned this repository
+   - Check if `ROS_DOMAIN_ID` is the one you plan to use. This can be changed afterwards manually, but this is the standard chosen one. The ROS Domain IDs are mapped to the namespaces e.g. /turtle1 is in ID 1
+  2. After that, run that script with `sudo bash install_sopias4_env.sh`
+  3. Install the recommended Visual Studio Code extensions by running following script with the command `bash install_extensions.sh` 
+  4. Open a new Visual Studio Code instance and/or terminal session so the last changes are applied
 
- You have to source ROS2 and the workspace every time you open a terminal and your IDE needs to be started from a sourced terminal so you get all linter and syntax highlighting capabilities. For this you have to run these commands in the opened terminal:
-```bash
-source /opt/ros/humble/setup.bash
-source source <path to ros workspace>/install/setup.bash
-```
-If you want this done automatically each time, when run this commands once:
-```bash
-echo "source /opt/ros/humble/setup.bash" >>/home/<your linux user>/.bashrc
-echo "if [ -f <path to ros workspace>/install/setup.bash ]; then source <path to ros workspace>/install/setup.bash; fi" >> /home/<your linux user>/.bashrc
-```
+#### Windows
+Its recommend to use Linux instead. If you have the opportunity to install Linux e.g. Dual Booting or inside a VM (don't forget to directly bridge the network directly to the VM), then you will have less pain. 
+
+If you stay in Windows, then you are basically using a worse version of Linux and run everything inside of that. This way often says that you have to run command `xy` inside WSL2. This means that you either:
+- Run inside a terminal which is run from your WSL2:
+  - Open Windows search
+  - Enter Ubuntu (standard) or how you named your WSL2 instance
+  - A terminal opens where you can run commands inside your WSL2
+- Run it from the integrated terminal when Visual Studio Code is connected with WSL:
+  - Either type `code` inside your WSL2 terminal or open Visual Studio Code, press `CTRL+SHIFT+P` and  type `> WSL: Open Folder inside Container` (there select your workspace)
+  - If everything went successful. them on the icon on bottom left should appear "WSL" (or similar)
+
+To setup the environment, follow these steps:
+1. Download & Install Visual Studio Code and the WSL extension inside of it 
+2. Install WSL2:
+      - Open Powershell (or Terminal) as administrator
+      - Run command `wsl --install`. This installs a Ubuntu-Subsystem
+      - In pure Windows fashion, restart your computer
+      - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesn't matter, but you should remember the password and if you choose ros2 as the username, then you have to make less adjustments later
+3. Install Hyper-V:
+  - If running Windows 10/11 Home:
+    - Run `enable_hyperv.bat` as an administrator by right clicking on it and choosing "run as administrator"
+  - If running Windows 10/11 Pro:
+    - Enter `Activate or deactivate Windows features`
+    - Select Hyper-V
+    - If Hyper-V is not shown, then follow the steps from Windows 10/11 Home
+  - Restart computer
+4. Configure network inside WSL2:
+  - Open WSL2: Usually you can find it if you search for Ubuntu in the windows search and open it
+  - From step 3. until now you have to repeat every time you restart your computer and/or WSL2
+  - Run `sudo nano /etc/resolv.conf` and replace the nameserver with following IP-address: `129.69.252.252`
+  - Run `sudo nano /etc/wsl.conf` and change the file so it looks like the following:
+    ```Bash
+    [boot]
+    systemd=true
+
+    [network]
+    generateResolvConf=false
+    ```
+5. You have to repeat this step everytime you reboot your system or restart WSL2: Bridge the network inside to WSL2
+  - Open Hyper-V Manager as administrator
+  - On the right hand under "Actions" choose "Manager for virtual switches"
+  - Select the `wsl` adapter
+  - Choose "External network" and choose the network adapter you want to use e.g. your WIFI adapter. Hit apply. A error can appear, often this can be fixed by clicking abort and retrying the whole operation
+  - Inside of WSL2: Run following commands inside of it:
+    ```Bash
+    sudo ip addr flush dev eth0
+    sudo dhclient eth0
+    ```
+6. Run the steps from [the baremetal installation](#linux-run-directly-on-host-deprecated). Make sure that you do everything inside of WSL2
 
