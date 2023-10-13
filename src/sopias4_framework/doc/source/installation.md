@@ -13,6 +13,39 @@ git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL
 After you have installed ROS2, you can follow the installation of the development container.
 ## Installing ROS2 and necessary applications 
 ### Recommended: Running in Docker using Dev Containers (Visual Studio Code)
+#### Windows
+1. Install WSL2:
+      - Open Powershell (or Terminal) as administrator
+      - Run command `wsl --install`. This installs a Ubuntu-Subsystem
+      - In pure Windows fashion, restart your computer
+      - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
+2. Enable Hyper-V: 
+  - Run `enabele_hyperv.bat` as an administrator by right clicking on it and choosing "run as administrator"
+  - Restart computer
+3. Bridge the network inside to WSL2:
+  - Open Hyper-V Manager as administrator
+  - On the right hand under "Actions" choose "Manager for virtual switches"
+  - Select the `wsl` adapter
+  - Choose "External network" and choose the network adapter you want to use e.g. your wifi adapter. Hit apply. A error can appear, often this can be fixed by clicking abort and retrying the whole operation
+4. Configure network inside WSL2:
+  - Open WSL2: Usually you can find it if you search for Ubuntu in the windows search and open it
+  - Run following commands inside of it:
+    ```Bash
+    sudo ip addr flush dev eth0
+    sudo dhclient eth0
+    ```
+  - From step 3. until now you have to repeat every time you restart your computer and/or WSL2
+  - Run `sudo nano /etc/resolv.conf` and replace the nameserver with following IP-Adress: `129.69.252.252`
+  - Run `sudo nano /etc/wsl.conf` and change the file so it looks like the following:
+    ```Bash
+    [boot]
+    systemd=true
+
+    [network]
+    generateResolvConf=false
+    ```
+
+#### Linux
 Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: [https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html](https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html)
 
 If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
