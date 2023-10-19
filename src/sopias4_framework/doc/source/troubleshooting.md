@@ -1,6 +1,11 @@
 # Troubleshooting
 There are some known problems that can occur time to time. Following a overview of them and possible solutions are given.
 
+## WSL2 doesnt connect to Turtlebot
+First check if you have followed each step of the installation command correctly. 
+
+After that, make sure that you repeat step 4 from the Windows installation guide everytime when you restart your Windows/WSL2 and not only one time at the installation.
+
 ## Startup of Navigation stack takes long or isn't starting
 This is completly normal due to technical restrictions on the robot side. Long term this could get better with updates to the Turtlebot4 and Create3 platform. 
 

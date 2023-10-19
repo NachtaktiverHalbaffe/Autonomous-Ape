@@ -55,3 +55,6 @@ For loading nodes into the path, there is one restriction: The node class must b
 
 ### Using the LaunchService
 This class is provided by the Sopias4-Framework which can run each node and launch file which is installed on the system. It basically runs the corresponding terminal commands in a own shell process.
+
+## Run nodes from a specific ROS Domain ID
+Sometimes you want to run your ROS systems in another ROS Domain ID which isnt set by default. For this purpose, you can run `export ROS_DOMAIN_ID=<your desired id>` inside the terminal and all following nodes which are launched from that terminal session are run inside this domain. Note: The change only applies to the used terminal session. If you open a new terminal session, then you have to rerun this step.

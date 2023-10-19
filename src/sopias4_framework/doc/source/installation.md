@@ -1,8 +1,8 @@
 # Installation
-This splits up into setting up a ROS2 workspace for the Sopias4 project and installing ROS2. It's recommended to first setup the workspace and then setting up ROS2, because the workspace contains necessary configuration files if you want to use the Dev Containers and Docker for easy setup. 
+This splits up into setting up a ROS2 workspace for the Sopias4 project and installing ROS2. It's recommended to first setup the workspace and then setting up ROS2, because the workspace contains necessary configuration files and installation scripts if you want to use the Dev Containers and Docker for easy setup or the WSL scripts for Windows.
 
 ## Setting up ROS2 workspace
-Clone this repository. When using Linux, it is recommended to clone it into the home directory of your linux user so it matches with the commands in this guide. If you use Windows and WSL2, then it is recommended to install WSL2 first and then clone it also under the home path inside your WSL2. This improves performance by a lot. You can follow the exact command, but inside of WSL2:
+Clone this repository. When using Linux, it is recommended to clone it into the home directory of your linux user so it matches with the commands in this guide. For this command, execute this commands:
 ```Bash
 # If git isn't installed,
 sudo apt update && apt install git
@@ -10,12 +10,13 @@ sudo apt update && apt install git
 cd /home/<your linux user>
 git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right can vary 
 ```
+If you use Windows and WSL2, then it is recommended to install WSL2 first and then clone it also under the home path inside your WSL2. This improves performance by a lot. However, you can also clone it directly on Windows first, install then WSL2 and copy it later inside WSL2. Your WSL2 instance is shown as `Linux` inside Windows File Explorer (choose your installed WSL2 distro which is Ubuntu by default).
+
 After you have installed ROS2, you can follow the installation guide depending on your host operating system.
 
 ## Installing ROS2 and necessary applications 
 ### Recommended for Linux: Running in Docker using Dev Containers (Visual Studio Code)
-Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine. This workspace provides a nearly finished configuration, but if you want to replicate it by your own (with a little different configuration) a tutorial can be found here: [https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html](https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html)
-
+Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine.
 If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
 1. Install `docker`   
     - For Ubuntu:
@@ -47,11 +48,11 @@ If you want to use the pre-configured Dev Container, then the configuration is f
     ```
 3. Open the workspace
 4. Download and install Visual Studio Code
-5. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers and WSL(Windows only)
+5. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers
 6. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
-7. Optional: Replace `ros2` inside `devcontainer.json` with your preferred username under which the container runs
-8.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
-9.  Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
+7.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
+8.  Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
+9.  If you want to start the dev container in the future, simply open the workspace inside of Visual Studio code and then run the command from step 7
 
 ### Linux: Run directly on host (deprecated)
 It is assumed that you use Ubuntu or another Ubuntu-based distribution. If you use another one, you have to adjust the `apt`-commands to the package manager of your distribution. 
@@ -65,54 +66,61 @@ Follow these steps:
   3. Install the recommended Visual Studio Code extensions by running following script with the command `bash install_extensions.sh` 
   4. Open a new Visual Studio Code instance and/or terminal session so the last changes are applied
 
-#### Windows
+
+### Windows
 Its recommend to use Linux instead. If you have the opportunity to install Linux e.g. Dual Booting or inside a VM (don't forget to directly bridge the network directly to the VM), then you will have less pain. 
 
-If you stay in Windows, then you are basically using a worse version of Linux and run everything inside of that. This way often says that you have to run command `xy` inside WSL2. This means that you either:
+If you stay in Windows, then you are basically using a worse version of Linux and run everything inside of that. For following this installation guide, it is often said that you have to run command `xy` inside WSL2. This means that you either:
 - Run inside a terminal which is run from your WSL2:
   - Open Windows search
   - Enter Ubuntu (standard) or how you named your WSL2 instance
   - A terminal opens where you can run commands inside your WSL2
 - Run it from the integrated terminal when Visual Studio Code is connected with WSL:
-  - Either type `code` inside your WSL2 terminal or open Visual Studio Code, press `CTRL+SHIFT+P` and  type `> WSL: Open Folder inside Container` (there select your workspace)
-  - If everything went successful. them on the icon on bottom left should appear "WSL" (or similar)
+  - Either type `code` inside your WSL2 terminal or open Visual Studio Code, press `CTRL+SHIFT+P` and  type `> WSL: Open Folder in WSL` (there select your workspace which should be located inside your WSL2 instance)
+  - If everything went successful, then on the icon on bottom left should appear "WSL" (or similar)
 
 To setup the environment, follow these steps:
-1. Download & Install Visual Studio Code and the WSL extension inside of it 
+1. [Download & Install Visual Studio Code](https://code.visualstudio.com/docs/setup/windows) and the WSL extension inside of it 
 2. Install WSL2:
       - Open Powershell (or Terminal) as administrator
       - Run command `wsl --install`. This installs a Ubuntu-Subsystem
       - In pure Windows fashion, restart your computer
-      - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesn't matter, but you should remember the password and if you choose ros2 as the username, then you have to make less adjustments later
-3. Install Hyper-V:
-  - If running Windows 10/11 Home:
-    - Run `enable_hyperv.bat` as an administrator by right clicking on it and choosing "run as administrator"
-  - If running Windows 10/11 Pro:
-    - Enter `Activate or deactivate Windows features`
-    - Select Hyper-V
-    - If Hyper-V is not shown, then follow the steps from Windows 10/11 Home
-  - Restart computer
-4. Configure network inside WSL2:
-  - Open WSL2: Usually you can find it if you search for Ubuntu in the windows search and open it
-  - From step 3. until now you have to repeat every time you restart your computer and/or WSL2
-  - Run `sudo nano /etc/resolv.conf` and replace the nameserver with following IP-address: `129.69.252.252`
-  - Run `sudo nano /etc/wsl.conf` and change the file so it looks like the following:
-    ```Bash
-    [boot]
-    systemd=true
+      - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesnt matter, but make sure you can remember them as you can need them in the future
+3. Enable Hyper-V: 
+     - If running Windows 10/11 Home:
+       - Run `enable_hyperv.bat` from this repository as an administrator by right clicking on it and choosing "run as administrator"
+     - If running Windows 10/11 Pro:
+       - Enter `Activate or deactivate Windows features`
+       - Select Hyper-V
+       - If Hyper-V is not shown, then follow the steps from Windows 10/11 Home
+     - Restart computer
+4. **Repeat this step every time when you restart windows and/or WSL2:** Bridge the network inside to WSL2
+     - Open Hyper-V Manager as administrator
+     - On the right hand under "Actions" choose "Manager for virtual switches" (see picture below) ![](assets/hyper-v.png)
+     - Select the `wsl` adapter and choose "External network" and choose the network adapter you want to use e.g. your wifi adapter. Hit apply. A error can appear, often this can be fixed by clicking abort and retrying the whole operation or ignoring it because it was applied successfully anyways ![](assets/hyper-v_virtual_switches.png)
+     - Run following commands inside WSL2:
+       ```Bash
+       sudo ip addr flush dev eth0
+       sudo dhclient eth0
+       ```
+5. Configure network inside WSL2:
+    - Run `sudo nano /etc/wsl.conf` and change the file so it looks like the following:
+       ```Bash
+       [boot]
+       systemd=true
 
-    [network]
-    generateResolvConf=false
-    ```
-5. You have to repeat this step everytime you reboot your system or restart WSL2: Bridge the network inside to WSL2
-  - Open Hyper-V Manager as administrator
-  - On the right hand under "Actions" choose "Manager for virtual switches"
-  - Select the `wsl` adapter
-  - Choose "External network" and choose the network adapter you want to use e.g. your WIFI adapter. Hit apply. A error can appear, often this can be fixed by clicking abort and retrying the whole operation
-  - Inside of WSL2: Run following commands inside of it:
-    ```Bash
-    sudo ip addr flush dev eth0
-    sudo dhclient eth0
-    ```
-6. Run the steps from [the baremetal installation](#linux-run-directly-on-host-deprecated). Make sure that you do everything inside of WSL2
+       [network]
+       generateResolvConf=false
+       ```
+     - Run `sudo nano /etc/resolv.conf` and change it so it does look like that (it changes the DNS server to the one from the University Stuttgart because others are blocked by the firewall): 
+        ```Bash
+        # This file was automatically generated by WSL. To stop automatic generation of this file, add the following entry to /etc/wsl.conf:
+        # [network]
+        # generateResolvConf = false
+        nameserver 129.69.252.252
+        ```
+6. Run the steps from [the baremetal installation](#linux-run-directly-on-host-deprecated). Only apply following changes:
+     - Run every command inside of WSL2
+     - Open the workspace in Visual Studio Code via opening a folder inside of WSL2
+7. If you want to reopen the workspace in the future, enter `code` inside your WSL2 terminal or open Visual Studio Code, press `CTRL+SHIFT+P` and  type `> WSL: Open Folder in WSL` (there select your workspace which should be located inside your WSL2 instance)
 
