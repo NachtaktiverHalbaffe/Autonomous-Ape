@@ -53,7 +53,9 @@ namespace sopias4_fleetbroker
         /**
          * Pointer to all veloctiy subscription so they dont get disallocated and can be referenced. Each pointer is mapped to its namespace as a key
          */
-        std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr> vel_subscribers_;
+        std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr> vel_subscribers_manual;
+        std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr> vel_subscribers_nav;
+        std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr> vel_subscribers_teleop;
         /**
          * The ROS2 logger of this node
         */

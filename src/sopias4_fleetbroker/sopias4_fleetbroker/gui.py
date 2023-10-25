@@ -373,7 +373,7 @@ class GUI(GUINode):
             self.ui.tableWidget_registered_robots.setItem(
                 row_position,
                 3,
-                QTableWidgetItem(str(is_navigating.data)),
+                QTableWidgetItem(str(is_navigating)),
             )
             # is navigating
             velocity: Twist = robot.velocity

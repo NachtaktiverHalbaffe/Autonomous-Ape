@@ -119,11 +119,11 @@ namespace sopias4_fleetbroker
 		topic_name = request->name_space + std::string("/is_navigating");
 		nav_state_subscribers_[request->name_space] = this->create_subscription<std_msgs::msg::Bool>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_nav_state);
 		topic_name = request->name_space + std::string("/cmd_vel");
-		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
+		vel_subscribers_manual[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
 		topic_name = request->name_space + std::string("/cmd_vel_nav");
-		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
+		vel_subscribers_nav[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
 		topic_name = request->name_space + std::string("/cmd_vel_teleop");
-		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
+		vel_subscribers_teleop[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
 
 		RCLCPP_DEBUG(logger, "Added subscriptions for namespace %s", request->name_space.c_str());
 
@@ -173,7 +173,9 @@ namespace sopias4_fleetbroker
 		pose_amcl_subscribers_.erase(request->name_space);
 		pose_slam_subscribers_.erase(request->name_space);
 		plan_subscribers_.erase(request->name_space);
-		vel_subscribers_.erase(request->name_space);
+		vel_subscribers_manual.erase(request->name_space);
+		vel_subscribers_nav.erase(request->name_space);
+		vel_subscribers_teleop.erase(request->name_space);
 
 		RCLCPP_DEBUG(logger, "Unallocated subscribers with namespace %s", request->name_space.c_str());
 
