@@ -127,31 +127,35 @@ class RobotLayer(LayerPyPlugin):
                         )
                         < self.ROBOT_RADIUS
                     ):
-                        # Update costs in all 4 quadrants if pixel is within robot radius
-                        # Upper right quadrant
-                        costmap.setCost(
-                            central_point[0] + x_offset,
-                            central_point[1] + y_offset,
-                            self.COST_LETHAL_OBSTACLE,
-                        )
-                        # Upper left quadrant
-                        costmap.setCost(
-                            central_point[0] - x_offset,
-                            central_point[1] + y_offset,
-                            self.COST_LETHAL_OBSTACLE,
-                        )
-                        #  Lower right quadrant
-                        costmap.setCost(
-                            central_point[0] + x_offset,
-                            central_point[1] - y_offset,
-                            self.COST_LETHAL_OBSTACLE,
-                        )
-                        # Lower left quadrant
-                        costmap.setCost(
-                            central_point[0] - x_offset,
-                            central_point[1] - y_offset,
-                            self.COST_LETHAL_OBSTACLE,
-                        )
+                        try:
+                            # Update costs in all 4 quadrants if pixel is within robot radius
+                            # Upper right quadrant
+                            costmap.setCost(
+                                central_point[0] + x_offset,
+                                central_point[1] + y_offset,
+                                self.COST_LETHAL_OBSTACLE,
+                            )
+                            # Upper left quadrant
+                            costmap.setCost(
+                                central_point[0] - x_offset,
+                                central_point[1] + y_offset,
+                                self.COST_LETHAL_OBSTACLE,
+                            )
+                            #  Lower right quadrant
+                            costmap.setCost(
+                                central_point[0] + x_offset,
+                                central_point[1] - y_offset,
+                                self.COST_LETHAL_OBSTACLE,
+                            )
+                            # Lower left quadrant
+                            costmap.setCost(
+                                central_point[0] - x_offset,
+                                central_point[1] - y_offset,
+                                self.COST_LETHAL_OBSTACLE,
+                            )
+                        except IndexError as e:
+                            # TO avoid exceptions because index is out of bounds which only results in cost not being set
+                            continue
 
         return costmap
 

@@ -49,7 +49,7 @@ class PathLayer(LayerPyPlugin):
                 plugin_name="path_layer",
                 namespace=namespace,
             )
-        self.COST_PATH: np.uint8 = np.uint8(142)
+        self.COST_PATH: np.uint8 = np.uint8(163)
         self.ROBOT_RADIUS: float = 0.15
 
         self.robot_paths: list[Path] = list()
@@ -86,7 +86,7 @@ class PathLayer(LayerPyPlugin):
         """
         # Set cost of all pixels in costmap to zero, because only the costs calculated by this layer should be included in the map.
         # In the plugin bridge, all layers get combined so the cleared data doesn't get lost if it is up to date
-        costmap.costmap.fill(np.uint8(0))
+        costmap.costmap.fill(self.COST_FREE_SPACE)
 
         self.get_logger().debug(
             "Path layer is inserting planned paths of other robots as moderate costs",
@@ -105,16 +105,7 @@ class PathLayer(LayerPyPlugin):
             if len(path.poses) == 0:
                 continue
             try:
-                last_node: Tuple[int, int] = self.pose_to_costmap_framesafe(path.poses[0], costmap)  # type: ignore
-                # Check if central point is in the costmap itselfs
-                x_out_of_bounds: bool = (
-                    last_node[0] >= costmap.getSizeInCellsX() or last_node[0] < 0
-                )
-                y_out_of_bounds: bool = (
-                    last_node[1] >= costmap.getSizeInCellsY() or last_node[1] < 0
-                )
-                if y_out_of_bounds or x_out_of_bounds:
-                    continue
+                last_node: Tuple[int, int] = self.pose_stamped_to_costmap_framesafe(path.poses[0], costmap)  # type: ignore
             except Exception as e:
                 continue
 
@@ -130,8 +121,10 @@ class PathLayer(LayerPyPlugin):
                 for x in rr:
                     for y in cc:
                         # Set cost of path
-                        if costmap.getIndex(x, y) < len(costmap.costmap):
+                        try:
                             costmap.setCost(x, y, self.COST_PATH)
+                        except IndexError as e:
+                            continue
 
                         # Inflate this pixel so path is as thick as the robot
                         for y_infl in range(
@@ -148,10 +141,10 @@ class PathLayer(LayerPyPlugin):
                                     int(x) + inflation_distance_pxl,
                                 ),
                             ):
-                                if costmap.getIndex(x_infl, y_infl) < len(
-                                    costmap.costmap
-                                ):
+                                try:
                                     costmap.setCost(x_infl, y_infl, self.COST_PATH)
+                                except IndexError as e:
+                                    continue
 
                 last_node = current_node
 
@@ -167,7 +160,10 @@ class PathLayer(LayerPyPlugin):
         # Add new position of robots to list
         for robot in msg.robot_states:
             # Check if robotstate is the robot itself or if robot isn't navigating => ignore these paths
-            if robot.name_space == self.get_namespace() or not robot.is_navigating:
+            if robot.name_space == self.get_namespace():
+                continue
+
+            if not robot.is_navigating:
                 continue
 
             if len(robot.nav_path.poses) == 0:
