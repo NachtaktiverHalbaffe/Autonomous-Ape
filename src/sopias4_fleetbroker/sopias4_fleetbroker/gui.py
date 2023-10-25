@@ -6,7 +6,7 @@ from threading import Thread
 
 import rclpy
 from ament_index_python import get_package_share_directory
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Twist
 from nav2_msgs.srv import LoadMap, SaveMap
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QTableWidgetItem
@@ -15,6 +15,7 @@ from sopias4_fleetbroker.ui_object import Ui_MainWindow
 from sopias4_framework.nodes.gui_node import GUINode
 from sopias4_framework.tools.gui.gui_logger import GuiLogger
 from sopias4_framework.tools.ros2 import node_tools
+from std_msgs.msg import Bool
 
 from sopias4_msgs.msg import Robot, RobotStates
 from sopias4_msgs.srv import RegistryService, ShowDialog
@@ -367,6 +368,18 @@ class GUI(GUINode):
                     2,
                     QTableWidgetItem("None"),
                 )
+            # is navigating
+            is_navigating: Bool = robot.is_navigating
+            self.ui.tableWidget_registered_robots.setItem(
+                row_position,
+                3,
+                QTableWidgetItem(str(is_navigating.data)),
+            )
+            # is navigating
+            velocity: Twist = robot.velocity
+            self.ui.tableWidget_registered_robots.setItem(
+                row_position, 4, QTableWidgetItem(f"{round(velocity.linear.x, 2)}")
+            )
 
     def __callback_robot_states(self, robot_states: RobotStates):
         self.robot_states_signal.emit(robot_states)

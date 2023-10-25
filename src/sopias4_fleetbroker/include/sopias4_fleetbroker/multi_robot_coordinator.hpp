@@ -51,6 +51,10 @@ namespace sopias4_fleetbroker
          */
         std::map<std::string, rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr> nav_state_subscribers_;
         /**
+         * Pointer to all veloctiy subscription so they dont get disallocated and can be referenced. Each pointer is mapped to its namespace as a key
+         */
+        std::map<std::string, rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr> vel_subscribers_;
+        /**
          * The ROS2 logger of this node
         */
         rclcpp::Logger logger = this->get_logger();
@@ -147,6 +151,15 @@ namespace sopias4_fleetbroker
          * 
         */
         void pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pose, const std::string name_space);
+
+        /**
+         * @brief Subscriber callback function to which the MultiRobotCoordinator subscribes when a namespace is registered to track the velocity of the robot.
+         * 
+         * @param vel The velocity from the robot
+         * @param name_space The namespace of the robot to which this positions belongs
+         * 
+        */
+        void velocity_callback(const geometry_msgs::msg::Twist::SharedPtr vel, const std::string name_space);
 
         /**
          * @brief Subscriber callback function to which the MultiRobotCoordinator subscribes when a namespace is registered to track the navigation state of the robot.

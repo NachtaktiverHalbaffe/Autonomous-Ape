@@ -242,6 +242,16 @@
               <string>Current navigation goal</string>
              </property>
             </column>
+            <column>
+             <property name="text">
+              <string>Is navigating</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Current velocity</string>
+             </property>
+            </column>
            </widget>
           </item>
          </layout>

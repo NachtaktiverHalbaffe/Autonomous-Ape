@@ -45,6 +45,18 @@ int main(int argc, char **argv)
 	domain_bridge.bridge_topic("/turtle1/map","nav_msgs/msg/OccupancyGrid",1,0);
 	domain_bridge.bridge_topic("/turtle2/map","nav_msgs/msg/OccupancyGrid",2,0);
 	domain_bridge.bridge_topic("/turtle3/map","nav_msgs/msg/OccupancyGrid",3,0);
+	// velocity from manual steering
+	domain_bridge.bridge_topic("/turtle1/cmd_vel","geometry_msgs/msg/Twist",1,0);
+	domain_bridge.bridge_topic("/turtle2/cmd_vel","geometry_msgs/msg/Twist",2,0);
+	domain_bridge.bridge_topic("/turtle3/cmd_vel","geometry_msgs/msg/Twist",3,0);
+	// velocity from nav2
+	domain_bridge.bridge_topic("/turtle1/cmd_vel_nav","geometry_msgs/msg/Twist",1,0);
+	domain_bridge.bridge_topic("/turtle2/cmd_vel_nav","geometry_msgs/msg/Twist",2,0);
+	domain_bridge.bridge_topic("/turtle3/cmd_vel_nav","geometry_msgs/msg/Twist",3,0);
+	// velocity from nav2
+	domain_bridge.bridge_topic("/turtle1/cmd_vel_teleop","geometry_msgs/msg/Twist",1,0);
+	domain_bridge.bridge_topic("/turtle2/cmd_vel_teleop","geometry_msgs/msg/Twist",2,0);
+	domain_bridge.bridge_topic("/turtle3/cmd_vel_teleop","geometry_msgs/msg/Twist",3,0);
 	// --- Bridge services ---
     RCLCPP_INFO(rclcpp::get_logger("sopias4_domain_bridge_logger"),"Adding services which should be bridged");
     // Register namespace service

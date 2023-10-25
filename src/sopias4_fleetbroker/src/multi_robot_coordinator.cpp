@@ -105,18 +105,25 @@ namespace sopias4_fleetbroker
 		response->statuscode = sopias4_msgs::srv::RegistryService::Response::SUCCESS;
 
 		// Use a callback factory to pass a second argument to callback function (known bug in ros2, so this workaround is needed)
-		std::function<void(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)> callback_fcn = std::bind(&MultiRobotCoordinator::pose_callback, this, std::placeholders::_1, request->name_space);
+		std::function<void(geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)> callback_fcn_pose = std::bind(&MultiRobotCoordinator::pose_callback, this, std::placeholders::_1, request->name_space);
 		std::function<void(nav_msgs::msg::Path::SharedPtr msg)> callback_fcn_path = std::bind(&MultiRobotCoordinator::path_sub_callback, this, std::placeholders::_1, request->name_space);
 		std::function<void(std_msgs::msg::Bool::SharedPtr msg)> callback_fcn_nav_state = std::bind(&MultiRobotCoordinator::nav_state_sub_callback, this, std::placeholders::_1, request->name_space);
+		std::function<void(geometry_msgs::msg::Twist::SharedPtr msg)> callback_fcn_vel= std::bind(&MultiRobotCoordinator::velocity_callback, this, std::placeholders::_1, request->name_space);
 
 		std::string topic_name = request->name_space + std::string("/amcl_pose");
-		pose_amcl_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn);
+		pose_amcl_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_pose);
 		topic_name = request->name_space + std::string("/pose");
-		pose_slam_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn);
+		pose_slam_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_pose);
 		topic_name = request->name_space + std::string("/plan");
 		plan_subscribers_[request->name_space] = this->create_subscription<nav_msgs::msg::Path>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_path);
 		topic_name = request->name_space + std::string("/is_navigating");
 		nav_state_subscribers_[request->name_space] = this->create_subscription<std_msgs::msg::Bool>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_nav_state);
+		topic_name = request->name_space + std::string("/cmd_vel");
+		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
+		topic_name = request->name_space + std::string("/cmd_vel_nav");
+		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
+		topic_name = request->name_space + std::string("/cmd_vel_teleop");
+		vel_subscribers_[request->name_space] = this->create_subscription<geometry_msgs::msg::Twist>(topic_name, rclcpp::SensorDataQoS(), callback_fcn_vel);
 
 		RCLCPP_DEBUG(logger, "Added subscriptions for namespace %s", request->name_space.c_str());
 
@@ -166,6 +173,7 @@ namespace sopias4_fleetbroker
 		pose_amcl_subscribers_.erase(request->name_space);
 		pose_slam_subscribers_.erase(request->name_space);
 		plan_subscribers_.erase(request->name_space);
+		vel_subscribers_.erase(request->name_space);
 
 		RCLCPP_DEBUG(logger, "Unallocated subscribers with namespace %s", request->name_space.c_str());
 
@@ -196,6 +204,20 @@ namespace sopias4_fleetbroker
 			if (element->name_space == name_space)
 			{
 				element->pose = *pose;
+				// Publish updated state of robots
+				publish_robot_states();
+				return;
+			}
+		}
+	}
+
+	void MultiRobotCoordinator::velocity_callback(const geometry_msgs::msg::Twist::SharedPtr vel, const std::string name_space)
+	{
+		for (auto element = robot_states.begin(); element != robot_states.end(); ++element)
+		{
+			if (element->name_space == name_space)
+			{
+				element->velocity = *vel;
 				// Publish updated state of robots
 				publish_robot_states();
 				return;

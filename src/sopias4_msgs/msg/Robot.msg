@@ -8,3 +8,5 @@ geometry_msgs/PoseWithCovarianceStamped pose
 nav_msgs/Path nav_path
 # If the robot is currently navigatinf
 bool is_navigating
+# The current steering command
+geometry_msgs/Twist velocity
