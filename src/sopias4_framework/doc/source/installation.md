@@ -40,7 +40,14 @@ If you want to use the pre-configured Dev Container, then the configuration is f
         ```bash
         sudo docker run hello-world
         ```
-2. Add your current linux user which is used inside the container to the docker group:
+    - For Windows:
+        - Install WSL2:
+            - Open Powershell (or Terminal) as administrator
+            - Run command `wsl --install`. This installs a Ubuntu-Subsystem
+            - In pure Windows fashion, restart your computer
+            - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesn't matter, but make sure you can remember them as you can need them in the future
+        - Download the [Docker Desktop installer](https://www.docker.com/products/docker-desktop/) and execute it to install docker
+2. Add your current Linux user which is used inside the container to the docker group:
     ```bash
     sudo groupadd docker
     sudo usermod -aG docker $USER

@@ -13,9 +13,9 @@ The Multi-Robot-Coordinator is provided by the multi_robot_coordinator node. The
 
 
 # Running
-The necessary parts can be run utilizing ROS2 launchfiles. Thus, this node can only be launched over the terminal. It can be launchend by running the command `ros2 launch sopias4_map_server <launchfile> <launchfile arguments>` in the terminal. 
+The necessary parts can be run utilizing ROS2 launchfiles. Thus, this node can only be launched over the terminal. It can be launchend by running the command `ros2 launch sopias4_fleetbroker <launchfile> <launchfile arguments>` in the terminal. 
 
-Sopias4-Map-Server only provides the launch file `bringup_server.launch.py` which launches the map_server and multi_robot_coordinator nodes. It has following launch paramters (all optional):
+Sopias4-Fleetbroker only provides the launch file `bringup_fleetbroker.launch.py` which launches the map_server and multi_robot_coordinator nodes. It has following launch parameters (all optional):
 - map (string): Full path to map yaml file to load
 - params_file (string): Full path to the ROS2 parameters file for map-server
 - use_respawn (bool): Whether to respawn if a node crashes

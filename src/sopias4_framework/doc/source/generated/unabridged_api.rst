@@ -81,12 +81,12 @@ Directories
 .. toctree::
    :maxdepth: 1
 
-   dir__home_ros2_sopias4_ws_src_sopias4_framework_include.rst
+   dir__home_ws_src_sopias4_framework_include.rst
 
 .. toctree::
    :maxdepth: 1
 
-   dir__home_ros2_sopias4_ws_src_sopias4_framework_include_sopias4_framework.rst
+   dir__home_ws_src_sopias4_framework_include_sopias4_framework.rst
 
 Files
 *****
@@ -95,19 +95,19 @@ Files
 .. toctree::
    :maxdepth: 1
 
-   file__home_ros2_sopias4_ws_src_sopias4_framework_include_sopias4_framework_msgs_utils.hpp.rst
+   file__home_ws_src_sopias4_framework_include_sopias4_framework_msgs_utils.hpp.rst
 
 .. toctree::
    :maxdepth: 1
 
-   file__home_ros2_sopias4_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_controller.hpp.rst
+   file__home_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_controller.hpp.rst
 
 .. toctree::
    :maxdepth: 1
 
-   file__home_ros2_sopias4_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_layer.hpp.rst
+   file__home_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_layer.hpp.rst
 
 .. toctree::
    :maxdepth: 1
 
-   file__home_ros2_sopias4_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_planner.hpp.rst
+   file__home_ws_src_sopias4_framework_include_sopias4_framework_plugin_bridge_planner.hpp.rst
