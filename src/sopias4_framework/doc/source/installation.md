@@ -8,58 +8,52 @@ Clone this repository. When using Linux, it is recommended to clone it into the 
 sudo apt update && apt install git
 
 cd /home/<your linux user>
-git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right can vary 
+git clone https://github.tik.uni-stuttgart.de/IAS/sopias4_ws # Make sure the URL is right (can vary) 
 ```
 If you use Windows and WSL2, then it is recommended to install WSL2 first and then clone it also under the home path inside your WSL2. This improves performance by a lot. However, you can also clone it directly on Windows first, install then WSL2 and copy it later inside WSL2. Your WSL2 instance is shown as `Linux` inside Windows File Explorer (choose your installed WSL2 distro which is Ubuntu by default).
 
 After you have installed ROS2, you can follow the installation guide depending on your host operating system.
 
 ## Installing ROS2 and necessary applications 
-### Recommended for Linux: Running in Docker using Dev Containers (Visual Studio Code)
+### Recommended: Running in Docker using Dev Containers (Visual Studio Code)
 Using Visual Studio Code and Docker Containers will enable you to run your favorite ROS 2 Distribution without the necessity to change your operating system or use a virtual machine.
 If you want to use the pre-configured Dev Container, then the configuration is found in `.devcontainer/`. This also installs all required packages automatically on setup. However, a few steps are still needed:
 1. Install `docker`   
     - For Ubuntu:
+      - Run:
         ```Bash
-        sudo apt-get update
-        sudo apt-get install ca-certificates curl gnupg
+        # 1. Required dependencies 
+        sudo apt-get update 
+        sudo apt-get -y install apt-transport-https ca-certificates curl gnupg lsb-release 
 
-        sudo install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+        # 2. GPG key 
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg 
 
-        echo \
-        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        # 3. Use stable repository for Docker 
+        echo  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null 
 
-        sudo apt-get update
-        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        # 4. Install Docker 
+        sudo apt-get update 
+        sudo apt-get -y install docker-ce docker-ce-cli containerd.io 
         ```
         You can verify your install by running
         ```bash
         sudo docker run hello-world
         ```
-    - For Windows:
-        - Install WSL2:
-            - Open Powershell (or Terminal) as administrator
-            - Run command `wsl --install`. This installs a Ubuntu-Subsystem
-            - In pure Windows fashion, restart your computer
-            - After the restart, a terminal should open a window and complete installation. You should be prompted to enter credentials for the new user. It doesn't matter, but make sure you can remember them as you can need them in the future
-        - Download the [Docker Desktop installer](https://www.docker.com/products/docker-desktop/) and execute it to install docker
-2. Add your current Linux user which is used inside the container to the docker group:
-    ```bash
-    sudo groupadd docker
-    sudo usermod -aG docker $USER
-    newgrp docker
-    ```
-3. Open the workspace
-4. Download and install Visual Studio Code
-5. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers
-6. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
-7.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
-8.  Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
-9.  If you want to start the dev container in the future, simply open the workspace inside of Visual Studio code and then run the command from step 7
+      - Add your current Linux user which is used inside the container to the docker group:
+        ```bash
+        sudo groupadd docker
+        sudo usermod -aG docker $USER
+        newgrp docker
+        ```
+    - For Windows: Follow the [Windows Docker setup guide](#install-docker-on-windows)
+2. Open the workspace
+3. If not done already: Download and install Visual Studio Code
+4. In Visual Studio Code: Go to the extensions tab and install the extension Dev Containers
+5. Set the `ROS_DOMAIN_ID` inside `devcontainer.json` to the number of the Turtlebot you want to control e.g. set it to 2 if you want to use /turtle2. Use the devcontainer-file which sits in the folder which represents your GPU (note: Nvidia is untested, remember that often the iGPU of the processor is configured to be used in Linux)
+6.  Open Command Palette (either use `View->Command Palette...` or `Ctrl+Shift+P`), then search and/or run command `Dev Containers: (Re-)build and Reopen in Container`. Take the one which suits best for your platform 
+7.  Lean back and take a coffee. The initial start of the environment can take a while (5-10 minutes)
+8.  If you want to start the dev container in the future, simply open the workspace inside of Visual Studio code and then run the command from step 7
 
 ### Linux: Run directly on host (deprecated)
 It is assumed that you use Ubuntu or another Ubuntu-based distribution. If you use another one, you have to adjust the `apt`-commands to the package manager of your distribution. 
@@ -74,10 +68,10 @@ Follow these steps:
   4. Open a new Visual Studio Code instance and/or terminal session so the last changes are applied
 
 
-### Windows
-Its recommend to use Linux instead. If you have the opportunity to install Linux e.g. Dual Booting or inside a VM (don't forget to directly bridge the network directly to the VM), then you will have less pain. 
+### Install Docker on Windows
+<!-- Its recommend to use Linux instead. If you have the opportunity to install Linux e.g. Dual Booting or inside a VM (don't forget to directly bridge the network directly to the VM), then you will have less pain.  -->
 
-If you stay in Windows, then you are basically using a worse version of Linux and run everything inside of that. For following this installation guide, it is often said that you have to run command `xy` inside WSL2. This means that you either:
+<!--If you stay in Windows, then you are basically using a worse version of Linux and run everything inside of that.  -->For following this installation guide, it is often said that you have to run command `xy` inside WSL2. This means that you either:
 - Run inside a terminal which is run from your WSL2:
   - Open Windows search
   - Enter Ubuntu (standard) or how you named your WSL2 instance
@@ -87,7 +81,7 @@ If you stay in Windows, then you are basically using a worse version of Linux an
   - If everything went successful, then on the icon on bottom left should appear "WSL" (or similar)
 
 To setup the environment, follow these steps:
-1. [Download & Install Visual Studio Code](https://code.visualstudio.com/docs/setup/windows) and the WSL extension inside of it 
+1. [Download & Install Visual Studio Code](https://code.visualstudio.com/docs/setup/windows) <!--and the WSL extension inside of it -->
 2. Install WSL2:
       - Open Powershell (or Terminal) as administrator
       - Run command `wsl --install`. This installs a Ubuntu-Subsystem
