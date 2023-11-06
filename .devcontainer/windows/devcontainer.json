@@ -58,7 +58,8 @@
         "--security-opt=seccomp=unconfined" // enable debugging, e.g. gdb
     ],
     "mounts": [
-        "source=\\\\wsl.localhost\\Ubuntu\\mnt\\wslg\\.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached", // Using wsl2 x11 server, change if wsl varys
+        // "source=\\\\wsl.localhost\\Ubuntu\\mnt\\wslg\\.X11-unix,target=/tmp/.X11-unix,type=bind", // Using wsl2 x11 server, change if wsl varys
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
         "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
         "source=/dev/shm,target=/dev/shm,type=bind,consistency=cached"
     ],
