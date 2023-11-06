@@ -117,6 +117,7 @@ To setup the environment, follow these steps:
         # 6. Start docker service:
         sudo service docker start
         ```
+    - Delete the line `"credsStore": "desktop.exe"` inside the file `~/.docker/config.json` (if it exists)
     - Bind your Windows docker commands to WSL2 Docker:
       - Find your Powershell Profile by running `echo $PROFILE` inside powershell/windows terminal
       - Open that file and paste following content into it:
