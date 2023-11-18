@@ -1,25 +1,25 @@
-# Sopias4   <!-- omit in toc -->
-This is a workspace repository for Turtlebot4 implementation of the laboratory course for software engineering on the IAS of the University of Stuttgart.
+# Autonomous Ape  <!-- omit in toc -->
+This was my master thesis where a model process for a autonomous navigation was implemented. The main goal was to provide a model process which can be used in research and teaching. The Turtlebot4 is used. Because this process is used in a lab course where students rebuild this by their own, all names were changed to Autonomous Ape so student cant find this as a solution online easily.
 
 ## Table of Contents   <!-- omit in toc -->
 - [Workspace Overview](#workspace-overview)
-  - [Sopias4 Application](#sopias4-application)
-  - [Sopias4 Framework](#sopias4-framework)
-  - [Sopias4 Fleetbroker](#sopias4-fleetbroker)
-  - [Sopias4 Messages](#sopias4-messages)
+  - [Autonomous Ape Application](#autonomous-ape-applicatio)
+  - [Autonomous Ape Framework](#autonomous-ape-framework)
+  - [Autonomous Ape Fleetbroker](#autonomous-ape-fleetbroker)
+  - [Autonomous Ape Messages](#autonomous-ape-messages)
 - [Documentation and Guides](#documentation-and-guides)
 - [License](#license)
 
 # Workspace Overview
 There are four ROS2 packages within the workspace (the other ones are just dependencies which aren't published in the online repositories of ROS):
--  [Sopias4 Application](#sopias4-application): This is the main  package where you build your application. Here you utilize the Sopias4 Framework to build the necessary parts for navigation
--  [Sopias4 Framework](#sopias4-framework): The Framework which includes all Tools which you need to develop the Sopias4-Application. This package doesn't need to be modified by you
--  [Sopias4 Fleetbroker](#sopias4-fleetbroker): The central map server which also includes the multi robot coordinator. Under normal circumstances, this package doesn't need to be modified and must only be run on one instance
--  [Sopias4 Messages](#sopias4-messages): A package containing all custom ROS2 interface definitions
+-  [Autonomous Ape Application](#autonomous-ape-application): This is the main  package where you build your application. Here you utilize the Autonomous Ape Framework to build the necessary parts for navigation
+-  [Autonomous Ape Framework](#autonomous-ape-framework): The Framework which includes all Tools which you need to develop the Autonomous Ape-Application. This package doesn't need to be modified by you
+-  [Autonomous Ape Fleetbroker](#autonomous-ape-fleetbroker): The central map server which also includes the multi robot coordinator. Under normal circumstances, this package doesn't need to be modified and must only be run on one instance
+-  [Autonomous Ape Messages](#autonomous-ape-messages): A package containing all custom ROS2 interface definitions
 
 In the following subsections the components are introduced in more details.
 
-## Sopias4 Application
+## Autonomous Ape Application
 This is the main application which the user uses to control the system and is the main goal of development. In this package you have to provide 4 elemental parts:
 - Navigation2 plugins for autonomous operation, mainly path planning
 - A GUI which is designed graphically with QT Designer and converted and interacted with PyQT5 (Use GUINode from Sopias4 Framework for this purpose)
@@ -28,7 +28,7 @@ This is the main application which the user uses to control the system and is th
 
 More detailed information can be found in the README.md of the corresponding package
 
-## Sopias4 Framework
+## Autonomous Ape Framework
 This package extends the ROS2 framework with additional tools, definitions and classes specific for this Sopias4 project. 
 
 It provides all necessary parts for the Python bridges for the Navigation2 package because it's plugins can originally be only written in C++, so we have to utilize ROS2 services and actions to enable Python usage for these plugins.
@@ -39,18 +39,18 @@ It also provide various tools provided in a library manner which are loosely org
 
 More detailed information can be found in the README.md of the corresponding package
 
-## Sopias4 Fleetbroker
+## Autonomous Ape Fleetbroker
 This package provides a central map server and a central identity provider. It provides a static map to all connected robots, prohibits namespace conflicts and collects/provides the states of all robots. This package don't need to be modified an can be used as it is. Make sure only one instance is running on the whole network.
 
 More detailed information can be found in the README.md of the corresponding package
 
-## Sopias4 Messages
+## Autonomous Ape Messages
 This package provides all important message, service and action definitions, so that the ROS2 interfaces are standardized. Also, the standard ROS2 message and action definitions are used. A overview for the standard ROS2 interfaces is given in this [Github repository](https://github.com/ros2/common_interfaces). 
 
 More detailed information can be found in the README.md of the corresponding package
 
 # Documentation and Guides
-The documentation and useful guides are provided inside the Sopias4 Framework package as HTML which can be opened locally by any modern browser. It is provided as an ZIP package on the Releases section on Github. It also contains the installation guide. 
+The documentation and useful guides are provided inside the Autonomous Ape Framework package as HTML which can be opened locally by any modern browser. It is provided as an ZIP package on the Releases section on Github. It also contains the installation guide. 
 
 Otherwise it can be generated from source. For this purpose run the `generate_docs.py` script inside of `sopias4_framework.tools.scripts`. Make sure you are running inside the Dev container/WSL to have all necessary dependencies installed.
 
